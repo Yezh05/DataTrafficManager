@@ -125,7 +125,7 @@ public class MyFragment1 extends Fragment {
             TextViewDataUseStatus.setText( String.valueOf(PercentDataUseStatus)+"%\n"+ TextDataUseStatus );
 
         } catch (RemoteException e) {
-            Log.e("bucket", "GetTotalError");
+            Log.e("bucket", "错误：GetTotalError");
             e.printStackTrace();
         }
     }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">流量助手</string>
+
+    <string name="tab_text_1">移动网络</string>
+    <string name="tab_text_2">WLAN</string>
+    <string name="tab_text_3">工具</string>
+</resources>

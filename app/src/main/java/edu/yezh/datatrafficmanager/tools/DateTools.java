@@ -24,7 +24,7 @@ public class DateTools {
 
         Calendar targetCal = Calendar.getInstance();
         //long a = Long.parseLong("1577808000000");
-        Date startDayFullDate = new Date(targetCal.get(Calendar.YEAR)+"/"+(targetCal.get(Calendar.MONTH)+1)+"/"+19);
+        Date startDayFullDate = new Date(targetCal.get(Calendar.YEAR)+"/"+(targetCal.get(Calendar.MONTH)+1)+"/"+startDay);
         targetCal.setTime(startDayFullDate);
         System.out.println(targetCal.getTime().toString());
         System.out.println(targetCal.getTimeInMillis());

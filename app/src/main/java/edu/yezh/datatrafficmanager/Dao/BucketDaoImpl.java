@@ -26,45 +26,47 @@ public class BucketDaoImpl implements BucketDao {
 
 
     @Override
-    public List<Long> getTrafficDataOfThisMonth(Context context, String subscriberID) {
+    public long getTrafficDataOfThisMonth(Context context,String subscriberID) {
         List<SubscriptionInfo> subscriptionInfoList = getSubscriptionInfoList(context);
-        List<Long> rxBytesList = new ArrayList<Long>();
-        for (SubscriptionInfo info : subscriptionInfoList) {
+        //List<Long> rxBytesList = new ArrayList<Long>();
+        //for (SubscriptionInfo info : subscriptionInfoList) {
             try {
                 NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
                 NetworkStats.Bucket bucketThisMonth = null;
                 DateTools dateTools = new DateTools();
                 bucketThisMonth = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE, subscriberID, dateTools.getTimesMonthmorning(), System.currentTimeMillis());
                 long rxBytes = bucketThisMonth.getRxBytes();
-                rxBytesList.add(rxBytes);
-                //return rxBytes;
+                /*rxBytesList.add(rxBytes);*/
+                return rxBytes;
             } catch (Exception e) {
                 Log.e("严重错误", "错误信息:" + e.toString());
-                //return 0;
+                return 0;
             }
-        }
-        return  rxBytesList;
+       // }
+        //return  rxBytesList;
     }
 
     @Override
-    public List<Long> getTrafficDataFromStartDay(Context context, String subscriberID, int dataPlanStartDay) {
+    public long getTrafficDataFromStartDay(Context context,String subscriberID , int dataPlanStartDay) {
         List<SubscriptionInfo> subscriptionInfoList = getSubscriptionInfoList(context);
-        List<Long> rxBytesList = new ArrayList<Long>();
-        for (SubscriptionInfo info : subscriptionInfoList) {
+        //List<Long> rxBytesList = new ArrayList<Long>();
+        //for (SubscriptionInfo info : subscriptionInfoList) {
         try {
             NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
             NetworkStats.Bucket bucketStartDayToToday = null;
             DateTools dateTools = new DateTools();
-            bucketStartDayToToday = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE, subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis());
+            bucketStartDayToToday = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis());
             long rxBytesStartDayToToday = bucketStartDayToToday.getRxBytes();
-            rxBytesList.add(rxBytesStartDayToToday);
-            //return rxBytesStartDayToToday;
+            //rxBytesList.add(rxBytesStartDayToToday);
+
+            Log.e("当前卡流量",String.valueOf(rxBytesStartDayToToday));
+            return rxBytesStartDayToToday;
         } catch (Exception e) {
             Log.e("严重错误", "错误信息:" + e.toString());
-            //return 0;
+            return 0;
         }
-        }
-        return rxBytesList;
+        //}
+        //return rxBytesList;
     }
 
     @Override
@@ -135,6 +137,7 @@ public class BucketDaoImpl implements BucketDao {
     /*
     * 获取Sim信息列表
     */
+    @Override
     public List<SubscriptionInfo> getSubscriptionInfoList(Context context){
         SubscriptionManager sub = (SubscriptionManager) context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
         if (ContextCompat.checkSelfPermission(context,Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
@@ -158,9 +161,11 @@ public class BucketDaoImpl implements BucketDao {
         Log.d("Sim卡信息","Sim卡数量:"+list.size());
         return list;
     }
+
     /*
     * 通过SimId获取IMSI
     */
+    @Override
     public String getSubscriberId(Context context,int subId) {
         TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);// 取得相关系统服务
         Class<?> telephonyManagerClass = null;

@@ -15,12 +15,15 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,16 +48,16 @@ import static android.content.Context.TELEPHONY_SERVICE;
 public class MyFragment1 extends Fragment {
     public MyFragment1() {
     }
-    public String subscriberID;
+    //public String subscriberID;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.t1, container, false);
+        final View view = inflater.inflate(R.layout.t1, container, false);
         //TextView txt_content = (TextView) view.findViewById(R.id.txt_content);
         //txt_content.setText("第一个Fragment");
         Log.e("HEHE", "1日狗");
 
-
         Context context = this.getContext();
+        BucketDao bucketDao = new BucketDaoImpl();
 
         /*NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);*/
         /*NetworkStats.Bucket bucket = null;*/
@@ -69,37 +72,63 @@ public class MyFragment1 extends Fragment {
             // for Activity#requestPermissions for more details.
             ActivityCompat.requestPermissions(this.getActivity(), new String[]{"android.permission.READ_PHONE_STATE"}, 1);
         }
-        subscriberID = tm.getSubscriberId();
-        FloatingActionButton fab = view.findViewById(R.id.fab);
+        //subscriberID = tm.getSubscriberId();
+
+        final List<SubscriptionInfo> subscriptionInfoList = bucketDao.getSubscriptionInfoList(context);
+
+        /*FloatingActionButton fab = view.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();*/
+                *//*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();*//*
                 openEditViewAlert();
             }
-        });
+        });*/
 
-        float dataPlan = setTextViewDataPlan(view);
-        setTrafficDataView( view, subscriberID,dataPlan);
+        Button button_SIM1 = (Button) view.findViewById(R.id.Button_SIM1);
+        Button button_SIM2 = (Button) view.findViewById(R.id.Button_SIM2);
+        button_SIM1.setText("SIM卡1:"+subscriptionInfoList.get(0).getCarrierName());
+        button_SIM1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setTrafficDataView( view, subscriptionInfoList.get(0).getSubscriptionId());
+            }
+        });
+        if (subscriptionInfoList.size()==2) {
+            button_SIM2.setText("SIM卡1:"+subscriptionInfoList.get(1).getCarrierName());
+            button_SIM2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    setTrafficDataView(view, subscriptionInfoList.get(1).getSubscriptionId());
+                }
+            });
+        }else {
+            button_SIM2.setVisibility(View.GONE);
+        }
+        button_SIM1.performClick();
+
+
+
 
 
         return view;
     }
     /*获取并显示流量使用情况*/
-    public void setTrafficDataView(View view,String subscriberID,float dataPlan){
+    public void setTrafficDataView(View view,int simID){
         try {
-
-            TextView TextViewSubscriberID = (TextView)view.findViewById(R.id.TextViewSubscriberID);
-            TextViewSubscriberID.setText(subscriberID);
-
             SharedPreferences sp = getActivity().getSharedPreferences("TrafficManager",MODE_PRIVATE);
             Context context = this.getContext();
             BucketDao bucketDao = new BucketDaoImpl();
             BytesFormatter bytesFormatter = new BytesFormatter();
 
+            final String subscriberID = bucketDao.getSubscriberId(context,simID);
 
-            bucketDao.t1(context);
+            TextView TextViewSubscriberID = (TextView)view.findViewById(R.id.TextViewSubscriberID);
+            TextViewSubscriberID.setText(subscriberID);
+
+            float dataPlan = setTextViewDataPlan(view,subscriberID);
+            //bucketDao.t1(context);
 
             /*NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
             NetworkStats.Bucket bucketThisMonth = null;
@@ -110,23 +139,23 @@ public class MyFragment1 extends Fragment {
 
             long rxBytes = bucketThisMonth.getRxBytes();*/
 
-            List<Long> rxBytes =bucketDao.getTrafficDataOfThisMonth(context,subscriberID);
+            long rxBytes =bucketDao.getTrafficDataOfThisMonth(context,subscriberID);
 
 
-            String readableData = bytesFormatter.getPrintSize(rxBytes.get(0));
+            String readableData = bytesFormatter.getPrintSize(rxBytes);
             TextView TextViewData4GThisMonth = (TextView) view.findViewById(R.id.TextViewData4GThisMonth);
             TextViewData4GThisMonth.setText(readableData);
 
             int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,1);
             /*bucketStartDayToToday = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE, subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis());
             long rxBytesStartDayToToday = bucketStartDayToToday.getRxBytes();*/
-            List<Long> rxBytesStartDayToToday = bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay);
+            long rxBytesStartDayToToday = bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay);
 
-            String readableDataStartDayToToday = bytesFormatter.getPrintSize(rxBytesStartDayToToday.get(0));
+            String readableDataStartDayToToday = bytesFormatter.getPrintSize(rxBytesStartDayToToday);
             TextView TextViewData4GStartDayToToday = (TextView)view.findViewById(R.id.TextViewData4GStartDayToToday);
             TextViewData4GStartDayToToday.setText(readableDataStartDayToToday);
 
-            float DataUseStatus =  (rxBytesStartDayToToday.get(0)/( dataPlan * 1024 * 1024 * 1024  ))*100;
+            float DataUseStatus =  (rxBytesStartDayToToday/( dataPlan * 1024 * 1024 * 1024  ))*100;
             int PercentDataUseStatus= Math.round(DataUseStatus);
             String TextDataUseStatus = "";
             if (PercentDataUseStatus<0) {TextDataUseStatus = "请设置流量限额";}
@@ -139,13 +168,24 @@ public class MyFragment1 extends Fragment {
             TextView TextViewDataUseStatus = (TextView)view.findViewById(R.id.TextViewDataUseStatus);
             TextViewDataUseStatus.setText( String.valueOf(PercentDataUseStatus)+"%\n"+ TextDataUseStatus );
 
+            FloatingActionButton fab = view.findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();*/
+                    openEditViewAlert(subscriberID);
+                }
+            });
+
+
         } catch (Exception e) {
             Log.e("出现错误", "错误："+e.toString());
             e.printStackTrace();
         }
     }
     /*流量套餐限额设置框*/
-    public void openEditViewAlert(){
+    public void openEditViewAlert(final String subscriberID){
         final Context context = this.getContext();
 
         final EditText inputDataPlanStartDay = new EditText(context);
@@ -169,7 +209,7 @@ public class MyFragment1 extends Fragment {
                         editor.putFloat("dataPlan_" + subscriberID, Float.valueOf(inputData));
                         editor.putInt("dataPlanStartDay_" + subscriberID, Integer.valueOf(inputDataPlanStartDay.getText().toString()));
                         editor.commit();
-                        setTextViewDataPlan(getView());
+                        setTextViewDataPlan(getView(),subscriberID);
                     }
                 });
                 builderDataPlan.show();
@@ -179,7 +219,7 @@ public class MyFragment1 extends Fragment {
         builderDataPlanStartDay.show();
     }
     /*获取并显示流量套餐限额*/
-    public Float setTextViewDataPlan(View view){
+    public Float setTextViewDataPlan(View view,String subscriberID){
         SharedPreferences sp = getActivity().getSharedPreferences("TrafficManager",MODE_PRIVATE);
         Float dataPlan = sp.getFloat("dataPlan_"+subscriberID,-1);
         int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,1);

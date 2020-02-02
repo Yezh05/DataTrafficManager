@@ -1,11 +1,14 @@
 package edu.yezh.datatrafficmanager.Dao;
 
 import android.content.Context;
+import android.telephony.SubscriptionInfo;
 
 import java.util.List;
 
 public interface BucketDao {
-    public List<Long> getTrafficDataOfThisMonth(Context context, String subscriberID);
-    public List<Long> getTrafficDataFromStartDay(Context context,String subscriberID,int dataPlanStartDay);
+    public long getTrafficDataOfThisMonth(Context context, String subscriberID);
+    public long getTrafficDataFromStartDay(Context context,String subscriberID,int dataPlanStartDay);
+    public List<SubscriptionInfo> getSubscriptionInfoList(Context context);
+    public String getSubscriberId(Context context,int subId);
     public void t1(Context context);
 }

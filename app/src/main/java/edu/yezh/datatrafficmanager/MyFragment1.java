@@ -31,6 +31,10 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.List;
+
+import edu.yezh.datatrafficmanager.Dao.BucketDao;
+import edu.yezh.datatrafficmanager.Dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
 
@@ -91,27 +95,38 @@ public class MyFragment1 extends Fragment {
 
             SharedPreferences sp = getActivity().getSharedPreferences("TrafficManager",MODE_PRIVATE);
             Context context = this.getContext();
-            NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
+            BucketDao bucketDao = new BucketDaoImpl();
+            BytesFormatter bytesFormatter = new BytesFormatter();
+
+
+            bucketDao.t1(context);
+
+            /*NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
             NetworkStats.Bucket bucketThisMonth = null;
             NetworkStats.Bucket bucketStartDayToToday = null;
             DateTools dateTools = new DateTools();
             bucketThisMonth = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE, subscriberID, dateTools.getTimesMonthmorning(), System.currentTimeMillis());
             //Log.w("Info", "Total: " + (bucket.getRxBytes() + bucket.getTxBytes()));
 
-            long rxBytes = bucketThisMonth.getRxBytes();
-            BytesFormatter bytesFormatter = new BytesFormatter();
-            String readableData = bytesFormatter.getPrintSize(rxBytes);
+            long rxBytes = bucketThisMonth.getRxBytes();*/
+
+            List<Long> rxBytes =bucketDao.getTrafficDataOfThisMonth(context,subscriberID);
+
+
+            String readableData = bytesFormatter.getPrintSize(rxBytes.get(0));
             TextView TextViewData4GThisMonth = (TextView) view.findViewById(R.id.TextViewData4GThisMonth);
             TextViewData4GThisMonth.setText(readableData);
 
             int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,1);
-            bucketStartDayToToday = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE, subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis());
-            long rxBytesStartDayToToday = bucketStartDayToToday.getRxBytes();
-            String readableDataStartDayToToday = bytesFormatter.getPrintSize(rxBytesStartDayToToday);
+            /*bucketStartDayToToday = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE, subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis());
+            long rxBytesStartDayToToday = bucketStartDayToToday.getRxBytes();*/
+            List<Long> rxBytesStartDayToToday = bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay);
+
+            String readableDataStartDayToToday = bytesFormatter.getPrintSize(rxBytesStartDayToToday.get(0));
             TextView TextViewData4GStartDayToToday = (TextView)view.findViewById(R.id.TextViewData4GStartDayToToday);
             TextViewData4GStartDayToToday.setText(readableDataStartDayToToday);
 
-            float DataUseStatus =  (rxBytesStartDayToToday/( dataPlan * 1024 * 1024 * 1024  ))*100;
+            float DataUseStatus =  (rxBytesStartDayToToday.get(0)/( dataPlan * 1024 * 1024 * 1024  ))*100;
             int PercentDataUseStatus= Math.round(DataUseStatus);
             String TextDataUseStatus = "";
             if (PercentDataUseStatus<0) {TextDataUseStatus = "请设置流量限额";}
@@ -124,8 +139,8 @@ public class MyFragment1 extends Fragment {
             TextView TextViewDataUseStatus = (TextView)view.findViewById(R.id.TextViewDataUseStatus);
             TextViewDataUseStatus.setText( String.valueOf(PercentDataUseStatus)+"%\n"+ TextDataUseStatus );
 
-        } catch (RemoteException e) {
-            Log.e("bucket", "错误：GetTotalError");
+        } catch (Exception e) {
+            Log.e("出现错误", "错误："+e.toString());
             e.printStackTrace();
         }
     }

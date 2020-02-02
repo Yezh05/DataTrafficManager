@@ -58,8 +58,7 @@ public class BucketDaoImpl implements BucketDao {
             bucketStartDayToToday = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis());
             long rxBytesStartDayToToday = bucketStartDayToToday.getRxBytes();
             //rxBytesList.add(rxBytesStartDayToToday);
-
-            Log.e("当前卡流量",String.valueOf(rxBytesStartDayToToday));
+            //Log.e("当前卡流量",String.valueOf(rxBytesStartDayToToday));
             return rxBytesStartDayToToday;
         } catch (Exception e) {
             Log.e("严重错误", "错误信息:" + e.toString());

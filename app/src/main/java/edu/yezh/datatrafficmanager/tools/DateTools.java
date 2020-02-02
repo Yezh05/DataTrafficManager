@@ -32,9 +32,7 @@ public class DateTools {
         int today= todayCal.get(Calendar.DATE);
         int thisMonth= todayCal.get(Calendar.MONTH)+1;
         int thisyear = todayCal.get(Calendar.YEAR);
-        System.out.println("today:"+today);
-        System.out.println("thisMonth:"+thisMonth);
-        System.out.println("thisYear:"+thisyear);
+        System.out.println("计算前时间:"+today+"/"+thisMonth+"/"+thisyear);
 
         if (today<startDay){
             targetCal.add(Calendar.MONTH, -1);
@@ -44,10 +42,7 @@ public class DateTools {
         int  targetday= targetCal.get(Calendar.DATE);
         int  targetMonth= targetCal.get(Calendar.MONTH)+1;
         int targetyear = targetCal.get(Calendar.YEAR);
-        System.out.println("targetday:"+targetday);
-        System.out.println("targetMonth:"+targetMonth);
-        System.out.println("targetyear:"+targetyear);
-        System.out.println(targetCal.getTimeInMillis());
+        System.out.println("计算后时间:"+targetday+"/"+targetMonth+"/"+targetyear+" 毫秒表示:"+targetCal.getTimeInMillis());
         return targetCal.getTimeInMillis();
     }
 }

@@ -2,19 +2,13 @@ package edu.yezh.datatrafficmanager;
 
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.usage.NetworkStats;
-import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -23,7 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,18 +24,21 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.yezh.datatrafficmanager.Dao.BucketDao;
 import edu.yezh.datatrafficmanager.Dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
-import edu.yezh.datatrafficmanager.tools.DateTools;
 
 import static android.content.Context.MODE_PRIVATE;
-import static android.content.Context.NETWORK_STATS_SERVICE;
 import static android.content.Context.TELEPHONY_SERVICE;
 
 public class MyFragment1 extends Fragment {
@@ -54,7 +50,7 @@ public class MyFragment1 extends Fragment {
         final View view = inflater.inflate(R.layout.t1, container, false);
         //TextView txt_content = (TextView) view.findViewById(R.id.txt_content);
         //txt_content.setText("第一个Fragment");
-        Log.e("HEHE", "1日狗");
+        Log.e("标签页", "移动网络页面");
 
         Context context = this.getContext();
         BucketDao bucketDao = new BucketDaoImpl();
@@ -86,12 +82,14 @@ public class MyFragment1 extends Fragment {
             }
         });*/
 
-        Button button_SIM1 = (Button) view.findViewById(R.id.Button_SIM1);
-        Button button_SIM2 = (Button) view.findViewById(R.id.Button_SIM2);
+        final Button button_SIM1 = (Button) view.findViewById(R.id.Button_SIM1);
+        final Button button_SIM2 = (Button) view.findViewById(R.id.Button_SIM2);
         button_SIM1.setText("SIM卡1:"+subscriptionInfoList.get(0).getCarrierName());
         button_SIM1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                button_SIM1.setTextColor(Color.parseColor("#009688"));
+                button_SIM2.setTextColor(Color.BLACK);
                 setTrafficDataView( view, subscriptionInfoList.get(0).getSubscriptionId());
             }
         });
@@ -100,6 +98,8 @@ public class MyFragment1 extends Fragment {
             button_SIM2.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    button_SIM2.setTextColor(Color.parseColor("#009688"));
+                    button_SIM1.setTextColor(Color.BLACK);
                     setTrafficDataView(view, subscriptionInfoList.get(1).getSubscriptionId());
                 }
             });
@@ -168,6 +168,26 @@ public class MyFragment1 extends Fragment {
             TextView TextViewDataUseStatus = (TextView)view.findViewById(R.id.TextViewDataUseStatus);
             TextViewDataUseStatus.setText( String.valueOf(PercentDataUseStatus)+"%\n"+ TextDataUseStatus );
 
+            PieChart pieChart = (PieChart)view.findViewById(R.id.Chart1);
+            List yVals = new ArrayList<>();
+            yVals.add(new PieEntry(100-PercentDataUseStatus, "未使用"));
+            yVals.add(new PieEntry(PercentDataUseStatus, "已使用"));
+
+            List colors = new ArrayList<>();
+            colors.add(Color.parseColor("#4A92FC"));
+            colors.add(Color.parseColor("#ee6e55"));
+
+            PieDataSet pieDataSet = new PieDataSet(yVals, "已使用流量");
+            pieDataSet.setColors(colors);
+            pieDataSet.setValueTextSize(15f);
+            pieDataSet.setValueTextColor(Color.parseColor("#FFFFFF"));
+            PieData pieData = new PieData(pieDataSet);
+            Description description = new Description();
+            description.setText("");
+            pieChart.setDescription(description);
+            pieChart.setData(pieData);
+            pieChart.invalidate();
+
             FloatingActionButton fab = view.findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -205,7 +225,7 @@ public class MyFragment1 extends Fragment {
                         String inputData = inputDataPlan.getText().toString();
                         Toast.makeText(getActivity(), inputData, Toast.LENGTH_LONG).show();
                         SharedPreferences.Editor editor = context.getSharedPreferences("TrafficManager", Context.MODE_PRIVATE).edit();
-                        Log.w("设置流量套餐信息", "dataPlan_" + subscriberID + " : " + Float.valueOf(inputData).toString());
+                        //Log.w("设置流量套餐信息", "dataPlan_" + subscriberID + " : " + Float.valueOf(inputData).toString());
                         editor.putFloat("dataPlan_" + subscriberID, Float.valueOf(inputData));
                         editor.putInt("dataPlanStartDay_" + subscriberID, Integer.valueOf(inputDataPlanStartDay.getText().toString()));
                         editor.commit();

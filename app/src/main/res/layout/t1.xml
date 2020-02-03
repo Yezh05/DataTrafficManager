@@ -130,7 +130,7 @@
         <com.github.mikephil.charting.charts.PieChart
             android:id="@+id/Chart1"
             android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="120dp"
             android:layout_weight="1"
             android:background="#CCC"
             />
@@ -147,7 +147,9 @@
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/LineChartLastSevenDaysTrafficData"
         android:layout_width="match_parent"
-        android:layout_height="300dp" />
+        android:layout_height="200dp"
+        android:layout_marginBottom="30dp"
+        />
 
 </LinearLayout></ScrollView>
     <com.google.android.material.floatingactionbutton.FloatingActionButton

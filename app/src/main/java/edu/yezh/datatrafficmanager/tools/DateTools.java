@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -80,6 +81,21 @@ public class DateTools {
             lastSevenDaysEndTimeInMillis.add(dayCal.getTimeInMillis());
         }
         return lastSevenDaysEndTimeInMillis;
+    }
+    public List<Integer> getLastSevenDays(){
+        List<Integer> lastSevenDays = new ArrayList<>();
+        Calendar dayCal = Calendar.getInstance();
+        dayCal.set(Calendar.HOUR_OF_DAY, 00);
+        dayCal.set(Calendar.MINUTE, 0);
+        dayCal.set(Calendar.SECOND, 0);
+        dayCal.set(Calendar.MILLISECOND, 0);
+        lastSevenDays.add(dayCal.get(Calendar.DATE));
+        for (int i = 0; i < 6; i++) {
+            dayCal.add(Calendar.DATE, -(1));
+            lastSevenDays.add(dayCal.get(Calendar.DATE));
+        }
+        Collections.reverse(lastSevenDays);
+        return lastSevenDays;
     }
 
 }

@@ -26,23 +26,30 @@ import androidx.fragment.app.Fragment;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.yezh.datatrafficmanager.Dao.BucketDao;
 import edu.yezh.datatrafficmanager.Dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
+import edu.yezh.datatrafficmanager.tools.DateTools;
+import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 
 import static android.content.Context.MODE_PRIVATE;
 import static android.content.Context.TELEPHONY_SERVICE;
@@ -127,7 +134,7 @@ public class MyFragment1 extends Fragment {
             Context context = this.getContext();
             BucketDao bucketDao = new BucketDaoImpl();
             BytesFormatter bytesFormatter = new BytesFormatter();
-
+            DateTools dateTools = new DateTools();
             final String subscriberID = bucketDao.getSubscriberId(context,simID);
 
             TextView TextViewSubscriberID = (TextView)view.findViewById(R.id.TextViewSubscriberID);
@@ -185,7 +192,7 @@ public class MyFragment1 extends Fragment {
                 System.out.println("传出7日流量数据"+i+":"+lastSevenDaysTrafficData.get(i));
             }*/
 
-            setChart(view,PercentDataUseStatus,lastSevenDaysTrafficData);
+            setChart(view,PercentDataUseStatus,lastSevenDaysTrafficData,dateTools.getLastSevenDays());
 
 
             FloatingActionButton fab = view.findViewById(R.id.fab);
@@ -250,7 +257,8 @@ public class MyFragment1 extends Fragment {
         return dataPlan;
     }
 
-    public void setChart(View view,int PercentDataUseStatus,List<Long> lastSevenDaysTrafficData){
+    public void setChart(View view,int PercentDataUseStatus,List<Long> lastSevenDaysTrafficData,List<Integer> lastSevenDays){
+        BytesFormatter bytesFormatter = new BytesFormatter();
         PieChart pieChart = (PieChart)view.findViewById(R.id.Chart1);
         List yVals = new ArrayList<>();
         yVals.add(new PieEntry(100-PercentDataUseStatus, 100-PercentDataUseStatus+"%未使用"));
@@ -278,8 +286,8 @@ public class MyFragment1 extends Fragment {
 
         LineChart lineChart = (LineChart) view.findViewById(R.id.LineChartLastSevenDaysTrafficData);
 
-        ArrayList<Entry> values = new ArrayList<Entry>();
-        values.add(new Entry(5, 50));
+        final ArrayList<Entry> values = new ArrayList<Entry>();
+        /*values.add(new Entry(5, 50));
         values.add(new Entry(10, 66));
         values.add(new Entry(15, 120));
         values.add(new Entry(20, 30));
@@ -287,15 +295,53 @@ public class MyFragment1 extends Fragment {
         values.add(new Entry(40, 110));
         values.add(new Entry(45, 30));
         values.add(new Entry(50, 160));
-        values.add(new Entry(100, 30));
+        values.add(new Entry(100, 30));*/
+
+
+
+        final String[] Xvalues = new String[lastSevenDays.size()];
+        for (int i=0;i<lastSevenDays.size();i++){
+            values.add(new Entry(i,lastSevenDaysTrafficData.get(i)));
+            Xvalues[i]= lastSevenDays.get(i) + "日" ;
+        }
+
+
+        IAxisValueFormatter formatter = new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float xvalue, AxisBase axis) {
+                return Xvalues[(int) xvalue];
+            }
+
+        };
+
 
         LineDataSet lineDataSet = new LineDataSet(values,"数据xxxx");
         //lineDataSet.setValues(values);
         ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
+        lineDataSet.setMode(LineDataSet.Mode.LINEAR);
+        lineDataSet.setDrawFilled(true);
+        lineDataSet.setColor(Color.parseColor("#008080"));
+        lineDataSet.setFillColor(Color.parseColor("#20B2AA"));
+        lineDataSet.setValueFormatter(new MyLineValueFormatter());
+        lineDataSet.setValueTextSize(13);
+        lineDataSet.setLineWidth(2);
+        lineDataSet.setCircleColor(Color.parseColor("#2F4F4F"));
+        lineDataSet.setDrawCircleHole(false);
         dataSets.add(lineDataSet);
         LineData data1 = new LineData(dataSets);
         lineChart.setData(data1);
         lineChart.getLegend().setEnabled(false);
+
+        lineChart.getXAxis().setGranularity(1);
+        lineChart.getXAxis().setValueFormatter(formatter);
+        lineChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+
+        lineChart.getAxisRight().setEnabled(false);
+        lineChart.getAxisLeft().setEnabled(false);
+
+        lineChart.animateXY(1500,1500);
+
+        lineChart.getDescription().setEnabled(false);
         lineChart.invalidate();
     }
 

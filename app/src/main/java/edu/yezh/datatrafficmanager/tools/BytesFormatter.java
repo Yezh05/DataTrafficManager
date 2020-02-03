@@ -35,8 +35,14 @@ public class BytesFormatter {
     public Map<String,String> getPrintSizeWithoutString(long size){
         Map<String,String> data = new HashMap<String,String>();
         //如果字节数少于1024，则直接以B为单位，否则先除于1024，后3位因太少无意义
+
+        if (size == 0) {
+            data.put("type","");
+            data.put("values",String.valueOf(size));
+            return  data;
+        }else
         if (size < 1024) {
-            data.put("type","字节");
+            data.put("type","Bytes");
             data.put("values",String.valueOf(size));
             return  data;
         } else {

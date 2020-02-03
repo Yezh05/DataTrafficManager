@@ -335,11 +335,14 @@ public class MyFragment1 extends Fragment {
         lineChart.getXAxis().setGranularity(1);
         lineChart.getXAxis().setValueFormatter(formatter);
         lineChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        lineChart.getXAxis().setDrawGridLines(false);
 
         lineChart.getAxisRight().setEnabled(false);
-        lineChart.getAxisLeft().setEnabled(false);
-
-        lineChart.animateXY(1500,1500);
+        //lineChart.getAxisLeft().setEnabled(false);
+        lineChart.getAxisLeft().setDrawGridLines(true);
+        lineChart.getAxisLeft().setDrawLabels(false);
+        lineChart.getAxisLeft().setDrawAxisLine(false);
+        lineChart.animateXY(000,1500);
 
         lineChart.getDescription().setEnabled(false);
         lineChart.invalidate();

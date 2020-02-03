@@ -27,7 +27,7 @@ public class BucketDaoImpl implements BucketDao {
 
     @Override
     public long getTrafficDataOfThisMonth(Context context,String subscriberID) {
-        List<SubscriptionInfo> subscriptionInfoList = getSubscriptionInfoList(context);
+        //List<SubscriptionInfo> subscriptionInfoList = getSubscriptionInfoList(context);
         //List<Long> rxBytesList = new ArrayList<Long>();
         //for (SubscriptionInfo info : subscriptionInfoList) {
             try {
@@ -35,9 +35,9 @@ public class BucketDaoImpl implements BucketDao {
                 NetworkStats.Bucket bucketThisMonth = null;
                 DateTools dateTools = new DateTools();
                 bucketThisMonth = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE, subscriberID, dateTools.getTimesMonthmorning(), System.currentTimeMillis());
-                long rxBytes = bucketThisMonth.getRxBytes();
+                long useBytes = bucketThisMonth.getRxBytes()+bucketThisMonth.getTxBytes();
                 /*rxBytesList.add(rxBytes);*/
-                return rxBytes;
+                return useBytes;
             } catch (Exception e) {
                 Log.e("严重错误", "错误信息:" + e.toString());
                 return 0;
@@ -48,7 +48,7 @@ public class BucketDaoImpl implements BucketDao {
 
     @Override
     public long getTrafficDataFromStartDay(Context context,String subscriberID , int dataPlanStartDay) {
-        List<SubscriptionInfo> subscriptionInfoList = getSubscriptionInfoList(context);
+        //List<SubscriptionInfo> subscriptionInfoList = getSubscriptionInfoList(context);
         //List<Long> rxBytesList = new ArrayList<Long>();
         //for (SubscriptionInfo info : subscriptionInfoList) {
         try {
@@ -56,10 +56,10 @@ public class BucketDaoImpl implements BucketDao {
             NetworkStats.Bucket bucketStartDayToToday = null;
             DateTools dateTools = new DateTools();
             bucketStartDayToToday = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis());
-            long rxBytesStartDayToToday = bucketStartDayToToday.getRxBytes();
+            long useBytesStartDayToToday = bucketStartDayToToday.getRxBytes()+bucketStartDayToToday.getTxBytes();
             //rxBytesList.add(rxBytesStartDayToToday);
             //Log.e("当前卡流量",String.valueOf(rxBytesStartDayToToday));
-            return rxBytesStartDayToToday;
+            return useBytesStartDayToToday;
         } catch (Exception e) {
             Log.e("严重错误", "错误信息:" + e.toString());
             return 0;
@@ -67,8 +67,41 @@ public class BucketDaoImpl implements BucketDao {
         //}
         //return rxBytesList;
     }
-
     @Override
+    public List<Long> getLastSevenDaysTrafficData(Context context, String subscriberID) {
+        List<Long> lastSevenDaysTrafficData = new ArrayList<>();
+        try {
+            NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
+            NetworkStats.Bucket bucket = null;
+            DateTools dateTools = new DateTools();
+            List<Long> lastSevenDaysStartTimeInMillis = dateTools.getLastSevenDaysStartTimeInMillis();
+            List<Long> lastSevenDaysEndTimeInMillis = dateTools.getLastSevenDaysEndTimeInMillis();
+            //System.out.println("起始时间长度："+lastSevenDaysStartTimeInMillis.size());
+            //System.out.println("结束时间长度："+lastSevenDaysEndTimeInMillis.size());
+
+            for (int i=6;i>=0;i--){
+                bucket = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,subscriberID, lastSevenDaysStartTimeInMillis.get(i), lastSevenDaysEndTimeInMillis.get(i));
+                long useBytes = bucket.getRxBytes()+bucket.getTxBytes();
+
+                //System.out.println("第"+i+"次添加数据："+useBytes);
+                lastSevenDaysTrafficData.add(useBytes);
+            }
+            //System.out.println("lastSevenDaysTrafficData长度："+lastSevenDaysTrafficData.size());
+            /*for (int i=0;i<7;i++)
+            {
+                System.out.println("一周使用量每天："+lastSevenDaysTrafficData.get(i));
+            }*/
+            return lastSevenDaysTrafficData;
+        }catch (Exception e){
+            Log.e("严重错误", "错误信息:" + e.toString());
+            return lastSevenDaysTrafficData;
+        }
+
+    }
+
+
+
+    /*@Override
     public void t1(Context context) {
         SubscriptionManager sub = (SubscriptionManager) context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
         if (ContextCompat.checkSelfPermission(context,Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
@@ -81,22 +114,22 @@ public class BucketDaoImpl implements BucketDao {
             // for Activity#requestPermissions for more details.
             return;
         }
-        /*List<SubscriptionInfo> info = sub.getActiveSubscriptionInfoList();
-        String icc1=""; String icc2 = "";*/
+        *//*List<SubscriptionInfo> info = sub.getActiveSubscriptionInfoList();
+        String icc1=""; String icc2 = "";*//*
 
 
 
             List<SubscriptionInfo> list = SubscriptionManager.from( context).getActiveSubscriptionInfoList();
-            /*for (SubscriptionInfo info : list) {
+            *//*for (SubscriptionInfo info : list) {
                 Log.d("Q_M", "ICCID-->" + info.getIccId());
                 Log.d("Q_M", "subId-->" + info.getSubscriptionId());
                 Log.d("Q_M", "DisplayName-->" + info.getDisplayName());
                 Log.d("Q_M", "CarrierName-->" + info.getCarrierName());
                 Log.d("Q_M", "---------------------------------");
-            }*/
+            }*//*
 
 
-        /*int count = sub.getActiveSubscriptionInfoCount();
+        *//*int count = sub.getActiveSubscriptionInfoCount();
         if (count > 0) {
             if (count > 1) {
                  icc1 = info.get(0).getIccId();
@@ -110,7 +143,7 @@ public class BucketDaoImpl implements BucketDao {
             }
         } else {
             Log.e("PhoneUtil", "无SIM卡");
-        }*/
+        }*//*
         List<SubscriptionInfo> subscriptionInfoList = getSubscriptionInfoList(context);
 
         for (SubscriptionInfo info : subscriptionInfoList) {
@@ -130,7 +163,7 @@ public class BucketDaoImpl implements BucketDao {
         }
 
 
-    }
+    }*/
 
 
     /*
@@ -185,5 +218,7 @@ public class BucketDaoImpl implements BucketDao {
         Log.e("Q_M", "IMSI--" + imsi);
         return imsi;
     }
+
+
 
 }

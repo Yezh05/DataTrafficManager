@@ -24,11 +24,17 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -94,7 +100,7 @@ public class MyFragment1 extends Fragment {
             }
         });
         if (subscriptionInfoList.size()==2) {
-            button_SIM2.setText("SIM卡1:"+subscriptionInfoList.get(1).getCarrierName());
+            button_SIM2.setText("SIM卡2:"+subscriptionInfoList.get(1).getCarrierName());
             button_SIM2.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -168,25 +174,19 @@ public class MyFragment1 extends Fragment {
             TextView TextViewDataUseStatus = (TextView)view.findViewById(R.id.TextViewDataUseStatus);
             TextViewDataUseStatus.setText( String.valueOf(PercentDataUseStatus)+"%\n"+ TextDataUseStatus );
 
-            PieChart pieChart = (PieChart)view.findViewById(R.id.Chart1);
-            List yVals = new ArrayList<>();
-            yVals.add(new PieEntry(100-PercentDataUseStatus, "未使用"));
-            yVals.add(new PieEntry(PercentDataUseStatus, "已使用"));
 
-            List colors = new ArrayList<>();
-            colors.add(Color.parseColor("#4A92FC"));
-            colors.add(Color.parseColor("#ee6e55"));
 
-            PieDataSet pieDataSet = new PieDataSet(yVals, "已使用流量");
-            pieDataSet.setColors(colors);
-            pieDataSet.setValueTextSize(15f);
-            pieDataSet.setValueTextColor(Color.parseColor("#FFFFFF"));
-            PieData pieData = new PieData(pieDataSet);
-            Description description = new Description();
-            description.setText("");
-            pieChart.setDescription(description);
-            pieChart.setData(pieData);
-            pieChart.invalidate();
+
+            List<Long> lastSevenDaysTrafficData = bucketDao.getLastSevenDaysTrafficData(context,subscriberID);
+            //System.out.println("传出7日流量数据长度："+lastSevenDaysTrafficData.size());
+            /*System.out.println("传出7日流量数据0："+lastSevenDaysTrafficData.get(0));
+            System.out.println("传出7日流量数据6："+lastSevenDaysTrafficData.get(6));*/
+            /*for (int i=0;i<lastSevenDaysTrafficData.size();i++){
+                System.out.println("传出7日流量数据"+i+":"+lastSevenDaysTrafficData.get(i));
+            }*/
+
+            setChart(view,PercentDataUseStatus,lastSevenDaysTrafficData);
+
 
             FloatingActionButton fab = view.findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {
@@ -249,4 +249,54 @@ public class MyFragment1 extends Fragment {
         TextViewDataPlan.setText(dataPlan.toString()+"GB");
         return dataPlan;
     }
+
+    public void setChart(View view,int PercentDataUseStatus,List<Long> lastSevenDaysTrafficData){
+        PieChart pieChart = (PieChart)view.findViewById(R.id.Chart1);
+        List yVals = new ArrayList<>();
+        yVals.add(new PieEntry(100-PercentDataUseStatus, 100-PercentDataUseStatus+"%未使用"));
+        yVals.add(new PieEntry(PercentDataUseStatus, PercentDataUseStatus+"%已使用"));
+
+        List colors = new ArrayList<>();
+        colors.add(Color.parseColor("#4A92FC"));
+        colors.add(Color.parseColor("#ee6e55"));
+
+        PieDataSet pieDataSet = new PieDataSet(yVals, "已使用流量");
+        pieDataSet.setColors(colors);
+        //pieDataSet.setValueFormatter(new PercentFormatter());
+        pieDataSet.setDrawValues(false);
+        pieDataSet.setValueTextSize(12f);
+        pieDataSet.setValueTextColor(Color.parseColor("#FFFFFF"));
+        PieData pieData = new PieData(pieDataSet);
+        Description description = new Description();
+        description.setText("");
+        pieChart.setDescription(description);
+        pieChart.setData(pieData);
+        pieChart.getLegend().setEnabled(false);
+        pieChart.invalidate();
+        pieChart.animateXY(2000,2000);
+
+
+        LineChart lineChart = (LineChart) view.findViewById(R.id.LineChartLastSevenDaysTrafficData);
+
+        ArrayList<Entry> values = new ArrayList<Entry>();
+        values.add(new Entry(5, 50));
+        values.add(new Entry(10, 66));
+        values.add(new Entry(15, 120));
+        values.add(new Entry(20, 30));
+        values.add(new Entry(35, 10));
+        values.add(new Entry(40, 110));
+        values.add(new Entry(45, 30));
+        values.add(new Entry(50, 160));
+        values.add(new Entry(100, 30));
+
+        LineDataSet lineDataSet = new LineDataSet(values,"数据xxxx");
+        //lineDataSet.setValues(values);
+        ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
+        dataSets.add(lineDataSet);
+        LineData data1 = new LineData(dataSets);
+        lineChart.setData(data1);
+        lineChart.getLegend().setEnabled(false);
+        lineChart.invalidate();
+    }
+
 }

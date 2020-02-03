@@ -2,8 +2,10 @@ package edu.yezh.datatrafficmanager.tools;
 
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class DateTools {
 
@@ -21,7 +23,6 @@ public class DateTools {
     public  long getTimesStartDayMorning(int startDay){
 
         Calendar todayCal = Calendar.getInstance();
-
         Calendar targetCal = Calendar.getInstance();
         //long a = Long.parseLong("1577808000000");
         Date startDayFullDate = new Date(targetCal.get(Calendar.YEAR)+"/"+(targetCal.get(Calendar.MONTH)+1)+"/"+startDay);
@@ -45,4 +46,40 @@ public class DateTools {
         System.out.println("计算后时间:"+targetday+"/"+targetMonth+"/"+targetyear+" 毫秒表示:"+targetCal.getTimeInMillis());
         return targetCal.getTimeInMillis();
     }
+
+    public List<Long> getLastSevenDaysStartTimeInMillis(){
+        List<Long> lastSevenDaysStartTimeInMillis=new ArrayList<>();
+        Calendar dayCal = Calendar.getInstance();
+        dayCal.set(Calendar.HOUR_OF_DAY, 00);
+        dayCal.set(Calendar.MINUTE, 0);
+        dayCal.set(Calendar.SECOND, 0);
+        dayCal.set(Calendar.MILLISECOND, 0);
+
+        //System.out.println(dayCal.getTime());
+        lastSevenDaysStartTimeInMillis.add(dayCal.getTimeInMillis());
+        for (int i = 0; i < 6; i++) {
+            dayCal.add(Calendar.DATE, -(1));
+            //System.out.println(dayCal.getTime());
+            lastSevenDaysStartTimeInMillis.add(dayCal.getTimeInMillis());
+        }
+        return lastSevenDaysStartTimeInMillis;
+    }
+    public List<Long> getLastSevenDaysEndTimeInMillis(){
+        List<Long> lastSevenDaysEndTimeInMillis=new ArrayList<>();
+        Calendar dayCal = Calendar.getInstance();
+        dayCal.set(Calendar.HOUR_OF_DAY, 23);
+        dayCal.set(Calendar.MINUTE, 59);
+        dayCal.set(Calendar.SECOND, 59);
+        dayCal.set(Calendar.MILLISECOND, 999);
+
+        //System.out.println(dayCal.getTime());
+        lastSevenDaysEndTimeInMillis.add(dayCal.getTimeInMillis());
+        for (int i = 0; i < 6; i++) {
+            dayCal.add(Calendar.DATE, -(1));
+            //System.out.println(dayCal.getTime());
+            lastSevenDaysEndTimeInMillis.add(dayCal.getTimeInMillis());
+        }
+        return lastSevenDaysEndTimeInMillis;
+    }
+
 }

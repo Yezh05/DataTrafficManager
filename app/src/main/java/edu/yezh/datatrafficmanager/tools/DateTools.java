@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DateTools {
 
@@ -97,5 +99,54 @@ public class DateTools {
         Collections.reverse(lastSevenDays);
         return lastSevenDays;
     }
+    public Map<String,List<String>> getLastSixMonthsMap(int startDay){
+        //Integer startDay=1;
+        Map<String,List<String>> lastSixMonthsMap = new HashMap<>();
+        Calendar dayCal = Calendar.getInstance();
+        List<String> lastSixMonthsStartTimeInMillisList = new ArrayList<>();
+        List<String> lastSixMonthsEndTimeInMillisList = new ArrayList<>();
+        List<String> lastSixMonthsStartMonthAndEndMonth = new ArrayList<>();
+        int today= dayCal.get(Calendar.DATE);
+        //int today= 19;
+        if(today>=startDay){
+            dayCal.add(Calendar.MONTH, 1);
+        }
+        dayCal.set(Calendar.HOUR_OF_DAY, 00);
+        dayCal.set(Calendar.MINUTE, 00);
+        dayCal.set(Calendar.SECOND, 00);
+        dayCal.set(Calendar.MILLISECOND, 000);
+        dayCal.set(Calendar.DATE, startDay);
+        dayCal.add(Calendar.MONTH, -1);
+        for (int i = 0; i < 6; i++) {
+            //System.out.println(dayCal.getTime());
+            lastSixMonthsStartTimeInMillisList.add( String.valueOf(dayCal.getTimeInMillis() ));
+            lastSixMonthsStartMonthAndEndMonth.add(dayCal.get(Calendar.YEAR)+"/"+( dayCal.get(Calendar.MONTH)+1+"" ));
+            dayCal.add(Calendar.MONTH, -1);
+        }
+        //System.out.println("--------------------------------");
+        dayCal = Calendar.getInstance();
+        if(today>=startDay){
+            dayCal.add(Calendar.MONTH, 1);
+        }
+        for (int i = 0; i < 6; i++) {
+            dayCal.set(Calendar.HOUR_OF_DAY, 00);
+            dayCal.set(Calendar.MINUTE, 00);
+            dayCal.set(Calendar.SECOND, 00);
+            dayCal.set(Calendar.MILLISECOND, 000);
+            dayCal.set(Calendar.DATE, startDay);
+            dayCal.set(Calendar.MILLISECOND, -1);
+            lastSixMonthsEndTimeInMillisList.add(String.valueOf(dayCal.getTimeInMillis()));
+            //System.out.println(dayCal.getTime());
+            if (startDay!=1) {
+                lastSixMonthsStartMonthAndEndMonth.set(i, lastSixMonthsStartMonthAndEndMonth.get(i)+"~"+dayCal.get(Calendar.YEAR)+"/"+(dayCal.get(Calendar.MONTH)+1)+"");
+                dayCal.add(Calendar.MONTH, -1);
+            }
 
+        }
+        lastSixMonthsMap.put("StartTimeList", lastSixMonthsStartTimeInMillisList);
+        lastSixMonthsMap.put("EndTimeList", lastSixMonthsEndTimeInMillisList);
+        lastSixMonthsMap.put("MonthString", lastSixMonthsStartMonthAndEndMonth);
+        //System.out.println( lastSixMonthsMap.toString());
+        return lastSixMonthsMap;
+    }
 }

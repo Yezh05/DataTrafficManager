@@ -15,7 +15,9 @@ import androidx.core.content.ContextCompat;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.yezh.datatrafficmanager.tools.DateTools;
 
@@ -96,6 +98,35 @@ public class BucketDaoImpl implements BucketDao {
             Log.e("严重错误", "错误信息:" + e.toString());
             return lastSevenDaysTrafficData;
         }
+
+    }
+
+    @Override
+    public Map<String,List<String>> getLastSixMonthsTrafficData(Context context, String subscriberID, int dataPlanStartDay) {
+        Map<String,List<String>> lastSixMonthsTrafficDataMap=new HashMap<>();
+        List<String> lastSixMonthsTrafficDataList = new ArrayList<>();
+        try {
+            NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
+            NetworkStats.Bucket bucket = null;
+            DateTools dateTools = new DateTools();
+            Map<String,List<String>> lastSixMonthsMap = dateTools.getLastSixMonthsMap(dataPlanStartDay);
+            List<String> lastSixMonthsStartTimeInMillisList = lastSixMonthsMap.get("StartTimeList");
+            List<String> lastSixMonthsEndTimeInMillisList = lastSixMonthsMap.get("EndTimeList");
+            List<String> lastSixMonthsStartMonthAndEndMonth = lastSixMonthsMap.get("MonthString");
+
+            for (int i=0;i<6;i++){
+                bucket = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,subscriberID, Long.valueOf(lastSixMonthsStartTimeInMillisList.get(i)),Long.valueOf(lastSixMonthsEndTimeInMillisList.get(i)));
+                long useBytes = bucket.getRxBytes()+bucket.getTxBytes();
+                lastSixMonthsTrafficDataList.add(String.valueOf(useBytes));
+            }
+            lastSixMonthsTrafficDataMap.put("LastSixMonthsTrafficDataList",lastSixMonthsTrafficDataList);
+            lastSixMonthsTrafficDataMap.put("MonthString",lastSixMonthsStartMonthAndEndMonth);
+            return lastSixMonthsTrafficDataMap;
+        }catch (Exception e){
+            Log.e("严重错误", "错误信息:" + e.toString());
+            return lastSixMonthsTrafficDataMap;
+        }
+
 
     }
 

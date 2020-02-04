@@ -5,6 +5,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -131,7 +132,7 @@ public class MyFragment1 extends Fragment {
     public void setTrafficDataView(View view,int simID){
         try {
             SharedPreferences sp = getActivity().getSharedPreferences("TrafficManager",MODE_PRIVATE);
-            Context context = this.getContext();
+            final Context context = this.getContext();
             BucketDao bucketDao = new BucketDaoImpl();
             BytesFormatter bytesFormatter = new BytesFormatter();
             DateTools dateTools = new DateTools();
@@ -159,7 +160,7 @@ public class MyFragment1 extends Fragment {
             TextView TextViewData4GThisMonth = (TextView) view.findViewById(R.id.TextViewData4GThisMonth);
             TextViewData4GThisMonth.setText(readableData);
 
-            int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,1);
+            final int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,1);
             /*bucketStartDayToToday = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE, subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis());
             long rxBytesStartDayToToday = bucketStartDayToToday.getRxBytes();*/
             long rxBytesStartDayToToday = bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay);
@@ -204,7 +205,18 @@ public class MyFragment1 extends Fragment {
                     openEditViewAlert(subscriberID);
                 }
             });
-
+            Button buttonShowLastSixMonthTrafficData = view.findViewById(R.id.ButtonShowLastSixMonthTrafficData);
+            buttonShowLastSixMonthTrafficData.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(context,ShowDataListActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("subscriberID",subscriberID);
+                    bundle.putInt("dataPlanStartDay",dataPlanStartDay);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                }
+            });
 
         } catch (Exception e) {
             Log.e("出现错误", "错误："+e.toString());
@@ -342,7 +354,7 @@ public class MyFragment1 extends Fragment {
         lineChart.getAxisLeft().setDrawGridLines(true);
         lineChart.getAxisLeft().setDrawLabels(false);
         lineChart.getAxisLeft().setDrawAxisLine(false);
-        lineChart.animateXY(000,1500);
+        lineChart.animateXY(000,1200);
 
         lineChart.getDescription().setEnabled(false);
         lineChart.invalidate();

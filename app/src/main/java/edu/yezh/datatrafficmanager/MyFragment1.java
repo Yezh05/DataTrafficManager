@@ -9,7 +9,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.TrafficStats;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -66,7 +70,7 @@ public class MyFragment1 extends Fragment {
         //txt_content.setText("第一个Fragment");
         Log.e("标签页", "移动网络页面");
 
-        Context context = this.getContext();
+        final Context context = this.getContext();
         BucketDao bucketDao = new BucketDaoImpl();
 
         /*NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);*/
@@ -96,6 +100,8 @@ public class MyFragment1 extends Fragment {
             }
         });*/
 
+        showRealTimeNetSpeed(view);
+
         final Button button_SIM1 = (Button) view.findViewById(R.id.Button_SIM1);
         final Button button_SIM2 = (Button) view.findViewById(R.id.Button_SIM2);
         button_SIM1.setText("SIM卡1:"+subscriptionInfoList.get(0).getCarrierName());
@@ -124,8 +130,6 @@ public class MyFragment1 extends Fragment {
 
 
 
-
-
         return view;
     }
     /*获取并显示流量使用情况*/
@@ -138,8 +142,8 @@ public class MyFragment1 extends Fragment {
             DateTools dateTools = new DateTools();
             final String subscriberID = bucketDao.getSubscriberId(context,simID);
 
-            TextView TextViewSubscriberID = (TextView)view.findViewById(R.id.TextViewSubscriberID);
-            TextViewSubscriberID.setText(subscriberID);
+            /*TextView TextViewSubscriberID = (TextView)view.findViewById(R.id.TextViewSubscriberID);
+            TextViewSubscriberID.setText(subscriberID);*/
 
             float dataPlan = setTextViewDataPlan(view,subscriberID);
             //bucketDao.t1(context);
@@ -153,7 +157,7 @@ public class MyFragment1 extends Fragment {
 
             long rxBytes = bucketThisMonth.getRxBytes();*/
 
-            long rxBytes =bucketDao.getTrafficDataOfThisMonth(context,subscriberID);
+            long rxBytes =bucketDao.getTrafficDataOfThisMonth(context,subscriberID, ConnectivityManager.TYPE_MOBILE);
 
 
             String readableData = bytesFormatter.getPrintSize(rxBytes);
@@ -163,7 +167,7 @@ public class MyFragment1 extends Fragment {
             final int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,1);
             /*bucketStartDayToToday = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE, subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis());
             long rxBytesStartDayToToday = bucketStartDayToToday.getRxBytes();*/
-            long rxBytesStartDayToToday = bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay);
+            long rxBytesStartDayToToday = bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay,ConnectivityManager.TYPE_MOBILE);
 
             String readableDataStartDayToToday = bytesFormatter.getPrintSize(rxBytesStartDayToToday);
             TextView TextViewData4GStartDayToToday = (TextView)view.findViewById(R.id.TextViewData4GStartDayToToday);
@@ -185,7 +189,7 @@ public class MyFragment1 extends Fragment {
 
 
 
-            List<Long> lastSevenDaysTrafficData = bucketDao.getLastSevenDaysTrafficData(context,subscriberID);
+            List<Long> lastSevenDaysTrafficData = bucketDao.getLastSevenDaysTrafficData(context,subscriberID,ConnectivityManager.TYPE_MOBILE);
             //System.out.println("传出7日流量数据长度："+lastSevenDaysTrafficData.size());
             /*System.out.println("传出7日流量数据0："+lastSevenDaysTrafficData.get(0));
             System.out.println("传出7日流量数据6："+lastSevenDaysTrafficData.get(6));*/
@@ -359,5 +363,42 @@ public class MyFragment1 extends Fragment {
         lineChart.getDescription().setEnabled(false);
         lineChart.invalidate();
     }
-
+    /*
+     * 显示实时下载速度
+     * */
+    public void showRealTimeNetSpeed(View view){
+        final BytesFormatter bytesFormatter = new BytesFormatter();
+        final long [] RXOld = new long [2];
+        final Handler handler = new Handler();
+        final TextView textViewRealTimeTxSpeed = (TextView)view.findViewById(R.id.TextViewRealTimeTxSpeed);
+        final TextView textViewRealTimeRxSpeed = (TextView)view.findViewById(R.id.TextViewRealTimeRxSpeed);
+        handler.postDelayed(new Runnable() {
+            int firstTimeShow =0;
+            @Override
+            public void run() {
+                if (firstTimeShow!=0){
+                    long overTxTraffic = TrafficStats.getTotalTxBytes();
+                    long overRxTraffic = TrafficStats.getTotalRxBytes();
+                    long currentTxDataRate = overTxTraffic - RXOld [0];
+                    long currentRxDataRate = overRxTraffic - RXOld [1];
+                    //TextView view1 = null;
+                    //view1 = (TextView) view.findViewById(R.id.view1);
+                    //view1.setText("Current Data Rate per second= " + currentDataRate);
+                    // System.out.println("Current Data Rate per second= " + bytesFormatter.getPrintSize(currentDataRate));
+                    textViewRealTimeTxSpeed.setText("上传:"+ bytesFormatter.getPrintSize(currentTxDataRate)+"/s");
+                    textViewRealTimeRxSpeed.setText("下载:"+ bytesFormatter.getPrintSize(currentRxDataRate)+"/s");
+                    RXOld [0] = overTxTraffic;
+                    RXOld[1]=overRxTraffic;
+                }
+                else {
+                    long overTxTraffic = TrafficStats.getTotalTxBytes();
+                    long overRxTraffic = TrafficStats.getTotalRxBytes();
+                    RXOld [0] = overTxTraffic;
+                    RXOld[1]=overRxTraffic;
+                    firstTimeShow = 1;
+                }
+                handler.postDelayed(this, 1000);
+            }
+        }, 1000 );
+    }
 }

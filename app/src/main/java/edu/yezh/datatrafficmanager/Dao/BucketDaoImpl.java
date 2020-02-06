@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.yezh.datatrafficmanager.tools.DateTools;
+import edu.yezh.datatrafficmanager.tools.InstalledAppsInfoTools;
 
 import static android.content.Context.NETWORK_STATS_SERVICE;
 import static android.content.Context.TELEPHONY_SERVICE;
@@ -128,6 +129,50 @@ public class BucketDaoImpl implements BucketDao {
         }
 
 
+    }
+
+    @Override
+    public List<Map<String, String>> getInstalledAppsTrafficData(Context context, int dataPlanStartDay, int networkType) {
+        NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
+        NetworkStats networkStats = null;
+        List<Map<String, String>> allInstalledAppsTrafficData = new ArrayList<>();
+        DateTools dateTools = new DateTools();
+        InstalledAppsInfoTools installedAppsInfoTools = new InstalledAppsInfoTools();
+        List<Map<String,String>> allInstalledAppsInfo = installedAppsInfoTools.getAllInstalledAppsInfo(context);
+        System.out.println("安装应用信息列表长度:"+allInstalledAppsInfo.size());
+        for (int i=0;i<allInstalledAppsInfo.size();i++) {
+            Map<String,String> singleInstalledAppsInfo = allInstalledAppsInfo.get(i);
+            System.out.println(singleInstalledAppsInfo.toString());
+            try {
+                //networkStats = networkStatsManager.queryDetailsForUid(ConnectivityManager.TYPE_WIFI, "", dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis(), Integer.valueOf(singleInstalledAppsInfo.get("uid")));
+                long m = dateTools.getTimesStartDayMorning(19);
+                System.out.println("开始时间:"+m);
+                networkStats = networkStatsManager.queryDetailsForUid(ConnectivityManager.TYPE_WIFI, "",m , System.currentTimeMillis(), Integer.valueOf(singleInstalledAppsInfo.get("uid")));
+            } catch (Exception e) {
+                Log.e("严重错误", "错误信息:" + e.toString());
+            }
+            NetworkStats.Bucket bucket = new NetworkStats.Bucket();
+            long rxBytes = bucket.getRxBytes();
+            long txBytes = bucket.getTxBytes();
+
+            while(networkStats.hasNextBucket()) {
+
+                networkStats.getNextBucket(bucket);
+
+                rxBytes += bucket.getRxBytes();
+                txBytes += bucket.getTxBytes();
+
+            }
+
+            Map<String, String> singleInstalledAppsTrafficData = new HashMap<>();
+            singleInstalledAppsTrafficData.put("name",singleInstalledAppsInfo.get("name"));
+            singleInstalledAppsTrafficData.put("rxBytes",String.valueOf(rxBytes));
+            singleInstalledAppsTrafficData.put("txBytes",String.valueOf(txBytes));
+            //System.out.println(singleInstalledAppsTrafficData.toString());
+            allInstalledAppsTrafficData.add(singleInstalledAppsTrafficData);
+        }
+        System.out.println(allInstalledAppsTrafficData.toString());
+        return allInstalledAppsTrafficData;
     }
 
 

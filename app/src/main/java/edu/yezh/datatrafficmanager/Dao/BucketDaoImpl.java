@@ -132,7 +132,7 @@ public class BucketDaoImpl implements BucketDao {
     }
 
     @Override
-    public List<Map<String, String>> getInstalledAppsTrafficData(Context context, int dataPlanStartDay, int networkType) {
+    public List<Map<String, String>> getInstalledAppsTrafficData(Context context, String subscriberID ,int dataPlanStartDay, int networkType) {
         NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
         NetworkStats networkStats = null;
         List<Map<String, String>> allInstalledAppsTrafficData = new ArrayList<>();
@@ -145,9 +145,9 @@ public class BucketDaoImpl implements BucketDao {
             System.out.println(singleInstalledAppsInfo.toString());
             try {
                 //networkStats = networkStatsManager.queryDetailsForUid(ConnectivityManager.TYPE_WIFI, "", dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis(), Integer.valueOf(singleInstalledAppsInfo.get("uid")));
-                long m = dateTools.getTimesStartDayMorning(19);
-                System.out.println("开始时间:"+m);
-                networkStats = networkStatsManager.queryDetailsForUid(ConnectivityManager.TYPE_WIFI, "",m , System.currentTimeMillis(), Integer.valueOf(singleInstalledAppsInfo.get("uid")));
+                long startDayMorning = dateTools.getTimesStartDayMorning(dataPlanStartDay);
+                //System.out.println("开始时间:"+m);
+                networkStats = networkStatsManager.queryDetailsForUid(networkType, subscriberID,startDayMorning, System.currentTimeMillis(), Integer.valueOf(singleInstalledAppsInfo.get("uid")));
             } catch (Exception e) {
                 Log.e("严重错误", "错误信息:" + e.toString());
             }
@@ -156,14 +156,13 @@ public class BucketDaoImpl implements BucketDao {
             long txBytes = bucket.getTxBytes();
 
             while(networkStats.hasNextBucket()) {
-
                 networkStats.getNextBucket(bucket);
-
                 rxBytes += bucket.getRxBytes();
                 txBytes += bucket.getTxBytes();
-
             }
-
+            if (rxBytes == 0L&&txBytes==0L){
+                continue;
+            }
             Map<String, String> singleInstalledAppsTrafficData = new HashMap<>();
             singleInstalledAppsTrafficData.put("name",singleInstalledAppsInfo.get("name"));
             singleInstalledAppsTrafficData.put("rxBytes",String.valueOf(rxBytes));

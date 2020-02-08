@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -56,7 +57,7 @@ public class MyFragment3 extends Fragment {
         buttonSHowAppsTrafficData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bucketDao.getInstalledAppsTrafficData(context,19,0);
+                bucketDao.getInstalledAppsTrafficData(context,"",1, ConnectivityManager.TYPE_WIFI);
             }
         });
 

@@ -28,6 +28,8 @@ import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
@@ -52,6 +54,7 @@ import java.util.Map;
 
 import edu.yezh.datatrafficmanager.Dao.BucketDao;
 import edu.yezh.datatrafficmanager.Dao.BucketDaoImpl;
+import edu.yezh.datatrafficmanager.adapter.RecyclerViewAppsTrafficDataAdapter;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
@@ -198,7 +201,12 @@ public class MyFragment1 extends Fragment {
             }*/
 
             setChart(view,PercentDataUseStatus,lastSevenDaysTrafficData,dateTools.getLastSevenDays());
-
+            RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getInstalledAppsTrafficData(context,subscriberID,dataPlanStartDay,ConnectivityManager.TYPE_MOBILE),context);
+            RecyclerView RecyclerViewAppsTrafficData = (RecyclerView) view.findViewById(R.id.RecyclerViewAppsTrafficData);
+            RecyclerViewAppsTrafficData.setAdapter(recyclerViewAppsTrafficDataAdapter);
+            LinearLayoutManager layoutManager = new LinearLayoutManager(context);
+            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+            RecyclerViewAppsTrafficData.setLayoutManager(layoutManager);
 
             FloatingActionButton fab = view.findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {

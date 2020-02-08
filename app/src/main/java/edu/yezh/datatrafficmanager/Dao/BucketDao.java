@@ -13,6 +13,6 @@ public interface BucketDao {
     public String getSubscriberId(Context context,int subId);
     public List<Long> getLastSevenDaysTrafficData(Context context,String subscriberID,int networkType);
     public Map<String,List<String>> getLastSixMonthsTrafficData(Context context, String subscriberID, int dataPlanStartDay,int networkType);
-    public List<Map<String,String>> getInstalledAppsTrafficData(Context context, int dataPlanStartDay,int networkType);
+    public List<Map<String,String>> getInstalledAppsTrafficData(Context context,String subscriberID ,int dataPlanStartDay,int networkType);
     //public void t1(Context context);
 }

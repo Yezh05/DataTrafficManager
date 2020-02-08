@@ -142,10 +142,10 @@ public class BucketDaoImpl implements BucketDao {
         System.out.println("安装应用信息列表长度:"+allInstalledAppsInfo.size());
         for (int i=0;i<allInstalledAppsInfo.size();i++) {
             Map<String,String> singleInstalledAppsInfo = allInstalledAppsInfo.get(i);
-            System.out.println(singleInstalledAppsInfo.toString());
+            //System.out.println(singleInstalledAppsInfo.toString());
+            long startDayMorning = dateTools.getTimesStartDayMorning(dataPlanStartDay);
             try {
                 //networkStats = networkStatsManager.queryDetailsForUid(ConnectivityManager.TYPE_WIFI, "", dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis(), Integer.valueOf(singleInstalledAppsInfo.get("uid")));
-                long startDayMorning = dateTools.getTimesStartDayMorning(dataPlanStartDay);
                 //System.out.println("开始时间:"+m);
                 networkStats = networkStatsManager.queryDetailsForUid(networkType, subscriberID,startDayMorning, System.currentTimeMillis(), Integer.valueOf(singleInstalledAppsInfo.get("uid")));
             } catch (Exception e) {
@@ -155,11 +155,16 @@ public class BucketDaoImpl implements BucketDao {
             long rxBytes = bucket.getRxBytes();
             long txBytes = bucket.getTxBytes();
 
+            /*networkStats.getNextBucket(bucket);
+            rxBytes += bucket.getRxBytes();
+            txBytes += bucket.getTxBytes();*/
+
             while(networkStats.hasNextBucket()) {
                 networkStats.getNextBucket(bucket);
                 rxBytes += bucket.getRxBytes();
                 txBytes += bucket.getTxBytes();
             }
+
             if (rxBytes == 0L&&txBytes==0L){
                 continue;
             }

@@ -57,7 +57,7 @@ public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<Rec
     @Override
     public int getItemCount() {
         //return this.InstalledAppsTrafficData.size()+1;
-        return this.InstalledAppsTrafficData.size();
+        return this.InstalledAppsTrafficData.size()+1;
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder{

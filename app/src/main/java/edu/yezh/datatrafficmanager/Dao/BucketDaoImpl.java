@@ -165,6 +165,7 @@ public class BucketDaoImpl implements BucketDao {
             }
             Map<String, String> singleInstalledAppsTrafficData = new HashMap<>();
             singleInstalledAppsTrafficData.put("name",singleInstalledAppsInfo.get("name"));
+            singleInstalledAppsTrafficData.put("pkgname",singleInstalledAppsInfo.get("pkgname"));
             singleInstalledAppsTrafficData.put("rxBytes",String.valueOf(rxBytes));
             singleInstalledAppsTrafficData.put("txBytes",String.valueOf(txBytes));
             //System.out.println(singleInstalledAppsTrafficData.toString());

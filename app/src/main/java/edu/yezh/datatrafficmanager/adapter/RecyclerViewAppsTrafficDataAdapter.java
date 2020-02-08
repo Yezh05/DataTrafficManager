@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,6 +15,7 @@ import java.util.Map;
 
 import edu.yezh.datatrafficmanager.R;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
+import edu.yezh.datatrafficmanager.tools.InstalledAppsInfoTools;
 
 public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<RecyclerViewAppsTrafficDataAdapter.ViewHolder> {
     List<Map<String, String>> InstalledAppsTrafficData;
@@ -34,20 +36,22 @@ public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<Rec
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        /*if (position==0){
+        if (position==0){
             holder.TextViewColAppName.setText("应用名称");
             holder.TextViewColAppRX.setText("下载流量");
             holder.TextViewColAppTX.setText("上传流量");
         }else
-        {*/
+        {
             BytesFormatter bytesFormatter = new BytesFormatter();
-            //int nowposition = position-1;
-            //Map<String, String> OneInstalledAppsTrafficData = InstalledAppsTrafficData.get(nowposition);
-            Map<String, String> OneInstalledAppsTrafficData = InstalledAppsTrafficData.get(position);
+            int nowposition = position-1;
+            Map<String, String> OneInstalledAppsTrafficData = InstalledAppsTrafficData.get(nowposition);
+            //Map<String, String> OneInstalledAppsTrafficData = InstalledAppsTrafficData.get(position);
             holder.TextViewColAppName.setText(OneInstalledAppsTrafficData.get("name"));
             holder.TextViewColAppRX.setText(bytesFormatter.getPrintSize(Long.valueOf(OneInstalledAppsTrafficData.get("rxBytes"))));
             holder.TextViewColAppTX.setText(bytesFormatter.getPrintSize(Long.valueOf(OneInstalledAppsTrafficData.get("txBytes"))));
-        //}
+            InstalledAppsInfoTools installedAppsInfoTools = new InstalledAppsInfoTools();
+            holder.ImageViewColAppIcon.setImageDrawable(installedAppsInfoTools.getAppIconByPackageName(context,OneInstalledAppsTrafficData.get("pkgname")));
+        }
     }
 
     @Override
@@ -58,8 +62,10 @@ public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<Rec
 
     static class ViewHolder extends RecyclerView.ViewHolder{
         TextView TextViewColAppName,TextViewColAppTX,TextViewColAppRX;
+        ImageView ImageViewColAppIcon;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            ImageViewColAppIcon = itemView.findViewById(R.id.ImageViewColAppIcon);
             TextViewColAppName = itemView.findViewById(R.id.TextViewColAppName);
             TextViewColAppTX = itemView.findViewById(R.id.TextViewColAppTX);
             TextViewColAppRX = itemView.findViewById(R.id.TextViewColAppRX);

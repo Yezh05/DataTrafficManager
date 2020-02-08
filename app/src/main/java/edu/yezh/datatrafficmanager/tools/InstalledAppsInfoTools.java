@@ -4,11 +4,19 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
+
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import edu.yezh.datatrafficmanager.R;
 
 public class InstalledAppsInfoTools {
     public List<Map<String,String>> getAllInstalledAppsInfo(Context context) {
@@ -51,4 +59,18 @@ public class InstalledAppsInfoTools {
         //System.out.println(allInstalledAppsInfo);
         return allInstalledAppsInfo;
     }
+
+    public Drawable getAppIconByPackageName(Context context,String ApkTempPackageName){
+        Drawable drawable;
+        try{
+            drawable = context.getPackageManager().getApplicationIcon(ApkTempPackageName);
+        }
+        catch (PackageManager.NameNotFoundException e){
+            Log.e("错误", "getAppIconByPackageName: 无法获取图标" );
+            e.printStackTrace();
+            drawable = ContextCompat.getDrawable(context, R.mipmap.ic_launcher);
+        }
+        return drawable;
+    }
+
 }

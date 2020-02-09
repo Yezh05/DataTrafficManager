@@ -11,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.TrafficStats;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.telephony.SubscriptionInfo;
@@ -43,12 +42,10 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
-import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -148,7 +145,7 @@ public class MyFragment1 extends Fragment {
             /*TextView TextViewSubscriberID = (TextView)view.findViewById(R.id.TextViewSubscriberID);
             TextViewSubscriberID.setText(subscriberID);*/
 
-            float dataPlan = setTextViewDataPlan(view,subscriberID);
+            float dataPlan = showTextViewDataPlan(view,subscriberID);
             //bucketDao.t1(context);
 
             /*NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
@@ -200,13 +197,16 @@ public class MyFragment1 extends Fragment {
                 System.out.println("传出7日流量数据"+i+":"+lastSevenDaysTrafficData.get(i));
             }*/
 
-            setChart(view,PercentDataUseStatus,lastSevenDaysTrafficData,dateTools.getLastSevenDays());
+            showChart(view,PercentDataUseStatus,lastSevenDaysTrafficData,dateTools.getLastSevenDays());
+
             RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getInstalledAppsTrafficData(context,subscriberID,dataPlanStartDay,ConnectivityManager.TYPE_MOBILE),context);
             RecyclerView RecyclerViewAppsTrafficData = (RecyclerView) view.findViewById(R.id.RecyclerViewAppsTrafficData);
             RecyclerViewAppsTrafficData.setAdapter(recyclerViewAppsTrafficDataAdapter);
             LinearLayoutManager layoutManager = new LinearLayoutManager(context);
             layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
             RecyclerViewAppsTrafficData.setLayoutManager(layoutManager);
+
+            showAppTrafficDataWarning(context,view,subscriberID);
 
             FloatingActionButton fab = view.findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {
@@ -238,7 +238,6 @@ public class MyFragment1 extends Fragment {
     /*流量套餐限额设置框*/
     public void openEditViewAlert(final String subscriberID){
         final Context context = this.getContext();
-
         final EditText inputDataPlanStartDay = new EditText(context);
         inputDataPlanStartDay.setHint("请输入套餐起始日");
         AlertDialog.Builder builderDataPlanStartDay = new AlertDialog.Builder(context);
@@ -260,17 +259,16 @@ public class MyFragment1 extends Fragment {
                         editor.putFloat("dataPlan_" + subscriberID, Float.valueOf(inputData));
                         editor.putInt("dataPlanStartDay_" + subscriberID, Integer.valueOf(inputDataPlanStartDay.getText().toString()));
                         editor.commit();
-                        setTextViewDataPlan(getView(),subscriberID);
+                        showTextViewDataPlan(getView(),subscriberID);
                     }
                 });
                 builderDataPlan.show();
-
             }
         });
         builderDataPlanStartDay.show();
     }
     /*获取并显示流量套餐限额*/
-    public Float setTextViewDataPlan(View view,String subscriberID){
+    public Float showTextViewDataPlan(View view,String subscriberID){
         SharedPreferences sp = getActivity().getSharedPreferences("TrafficManager",MODE_PRIVATE);
         Float dataPlan = sp.getFloat("dataPlan_"+subscriberID,-1);
         int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,1);
@@ -281,7 +279,7 @@ public class MyFragment1 extends Fragment {
         return dataPlan;
     }
 
-    public void setChart(View view,int PercentDataUseStatus,List<Long> lastSevenDaysTrafficData,List<Integer> lastSevenDays){
+    public void showChart(View view,int PercentDataUseStatus,List<Long> lastSevenDaysTrafficData,List<Integer> lastSevenDays){
         BytesFormatter bytesFormatter = new BytesFormatter();
         PieChart pieChart = (PieChart)view.findViewById(R.id.Chart1);
         List yVals = new ArrayList<>();
@@ -339,7 +337,7 @@ public class MyFragment1 extends Fragment {
         };
 
 
-        LineDataSet lineDataSet = new LineDataSet(values,"数据xxxx");
+        LineDataSet lineDataSet = new LineDataSet(values,"数据");
         //lineDataSet.setValues(values);
         ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
         lineDataSet.setMode(LineDataSet.Mode.LINEAR);
@@ -408,5 +406,36 @@ public class MyFragment1 extends Fragment {
                 handler.postDelayed(this, 1000);
             }
         }, 1000 );
+    }
+    public void showAppTrafficDataWarning(Context context,View view,String subscriberID){
+        int appsMAXTraffic = -1;
+        SharedPreferences sp = context.getSharedPreferences("TrafficManager",MODE_PRIVATE);
+        appsMAXTraffic = sp.getInt("AppsMAXTraffic",-1);
+        System.out.println("每日应用流量限额："+appsMAXTraffic+"MB");
+        TextView TextViewAppTrafficDataWarning = (TextView) view.findViewById(R.id.TextViewAppTrafficDataWarning);
+        String textViewString = "你还没设置APP每日使用限额";
+        if (appsMAXTraffic!=-1){
+            textViewString = "";
+            final BytesFormatter bytesFormatter = new BytesFormatter();
+            BucketDao bucketDao = new BucketDaoImpl();
+            List<Map<String,String>> installedAppsTodayTrafficDataList = bucketDao.getInstalledAppsTodayTrafficData(context,subscriberID,ConnectivityManager.TYPE_MOBILE);
+            int flag=0;
+            for (Map<String,String> i:installedAppsTodayTrafficDataList){
+                String name = i.get("name");
+                long rxBytes = Long.valueOf(i.get("rxBytes"));
+                long txBytes = Long.valueOf(i.get("txBytes"));
+                long allBytes = rxBytes+txBytes;
+                if(allBytes>=(appsMAXTraffic*1024*1024)){
+                    flag++;
+                    textViewString+=name+" 使用了"+bytesFormatter.getPrintSize(allBytes)+" 超过了设置阀值\n";
+                }
+            }
+            if (flag==0){
+                textViewString = "今日没有程序流量超过阀值";
+            }
+            TextViewAppTrafficDataWarning.setText(textViewString);
+        }else {
+            TextViewAppTrafficDataWarning.setText(textViewString);
+        }
     }
 }

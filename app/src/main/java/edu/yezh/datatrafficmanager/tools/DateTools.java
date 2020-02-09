@@ -11,8 +11,14 @@ import java.util.List;
 import java.util.Map;
 
 public class DateTools {
-
-
+    public long getTimesTodayMorning(){
+        Calendar dayCal = Calendar.getInstance();
+        dayCal.set(Calendar.HOUR_OF_DAY, 00);
+        dayCal.set(Calendar.MINUTE, 0);
+        dayCal.set(Calendar.SECOND, 0);
+        dayCal.set(Calendar.MILLISECOND, 0);
+        return dayCal.getTimeInMillis();
+    }
 
     public Long getTimesMonthmorning() {
         Calendar cal = Calendar.getInstance();
@@ -30,23 +36,23 @@ public class DateTools {
         //long a = Long.parseLong("1577808000000");
         Date startDayFullDate = new Date(targetCal.get(Calendar.YEAR)+"/"+(targetCal.get(Calendar.MONTH)+1)+"/"+startDay);
         targetCal.setTime(startDayFullDate);
-        System.out.println(targetCal.getTime().toString());
-        System.out.println(targetCal.getTimeInMillis());
+        //System.out.println(targetCal.getTime().toString());
+        //System.out.println(targetCal.getTimeInMillis());
 
         int today= todayCal.get(Calendar.DATE);
         int thisMonth= todayCal.get(Calendar.MONTH)+1;
         int thisyear = todayCal.get(Calendar.YEAR);
-        System.out.println("计算前时间:"+today+"/"+thisMonth+"/"+thisyear);
+        //System.out.println("计算前时间:"+today+"/"+thisMonth+"/"+thisyear);
 
         if (today<startDay){
             targetCal.add(Calendar.MONTH, -1);
-            System.out.println("需要前推1个月");
+            //System.out.println("需要前推1个月");
         }
 
         int  targetday= targetCal.get(Calendar.DATE);
         int  targetMonth= targetCal.get(Calendar.MONTH)+1;
         int targetyear = targetCal.get(Calendar.YEAR);
-        System.out.println("计算后时间:"+targetday+"/"+targetMonth+"/"+targetyear+" 毫秒表示:"+targetCal.getTimeInMillis());
+        //System.out.println("计算后时间:"+targetday+"/"+targetMonth+"/"+targetyear+" 毫秒表示:"+targetCal.getTimeInMillis());
         return targetCal.getTimeInMillis();
     }
 

@@ -23,6 +23,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -135,7 +137,8 @@ public class MyFragment3 extends Fragment {
                 byte[] bytes = "diu1".getBytes();
                 try {
                     Files.write(path,bytes);
-                    //Toast.makeText(context,)
+                    Snackbar.make(view, "导出成功", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
                 } catch (Exception e) {
                     Log.e("严重错误",e.toString());
                 }

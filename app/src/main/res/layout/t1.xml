@@ -77,6 +77,10 @@
                 android:text=""
                 android:textSize="20dp" />
         </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="#009688" />
         <!--<com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsing_layout"
             android:layout_width="match_parent"
@@ -118,12 +122,12 @@
             android:orientation="vertical"
             app:layout_scrollFlags="scroll|enterAlways|snap"
             >
-            <View
+            <!--<View
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:background="#009688" />
+                android:background="#009688" />-->
 
             <TextView
                 android:layout_width="fill_parent"

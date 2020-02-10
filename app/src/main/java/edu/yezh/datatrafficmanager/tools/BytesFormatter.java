@@ -32,10 +32,10 @@ public class BytesFormatter {
                     + String.valueOf((size % 100)) + "GB";
         }
     }
-    public Map<String,String> getPrintSizeWithoutString(long size){
+    public Map<String,String> getPrintSizeWithoutString(long originSize){
         Map<String,String> data = new HashMap<String,String>();
         //如果字节数少于1024，则直接以B为单位，否则先除于1024，后3位因太少无意义
-
+        double size = Double.valueOf(String.valueOf(originSize));
         if (size == 0) {
             data.put("type","");
             data.put("values",String.valueOf(size));

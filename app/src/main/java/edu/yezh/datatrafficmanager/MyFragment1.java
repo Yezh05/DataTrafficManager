@@ -60,6 +60,8 @@ import static android.content.Context.MODE_PRIVATE;
 import static android.content.Context.TELEPHONY_SERVICE;
 
 public class MyFragment1 extends Fragment {
+    Handler handler;
+    Runnable runnable;
     public MyFragment1() {
     }
     //public String subscriberID;
@@ -225,6 +227,7 @@ public class MyFragment1 extends Fragment {
                     Bundle bundle = new Bundle();
                     bundle.putString("subscriberID",subscriberID);
                     bundle.putInt("dataPlanStartDay",dataPlanStartDay);
+                    bundle.putInt("networkType",ConnectivityManager.TYPE_MOBILE);
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }
@@ -375,10 +378,10 @@ public class MyFragment1 extends Fragment {
     public void showRealTimeNetSpeed(View view){
         final BytesFormatter bytesFormatter = new BytesFormatter();
         final long [] RXOld = new long [2];
-        final Handler handler = new Handler();
+        handler = new Handler();
         final TextView textViewRealTimeTxSpeed = (TextView)view.findViewById(R.id.TextViewRealTimeTxSpeed);
         final TextView textViewRealTimeRxSpeed = (TextView)view.findViewById(R.id.TextViewRealTimeRxSpeed);
-        handler.postDelayed(new Runnable() {
+        runnable = new Runnable() {
             int firstTimeShow =0;
             @Override
             public void run() {
@@ -403,9 +406,11 @@ public class MyFragment1 extends Fragment {
                     RXOld[1]=overRxTraffic;
                     firstTimeShow = 1;
                 }
+                //System.out.println("Run");
                 handler.postDelayed(this, 1000);
             }
-        }, 1000 );
+        };
+        handler.postDelayed(runnable , 1000 );
     }
     public void showAppTrafficDataWarning(Context context,View view,String subscriberID){
         int appsMAXTraffic = -1;

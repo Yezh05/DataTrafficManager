@@ -9,6 +9,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,7 +23,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import edu.yezh.datatrafficmanager.Dao.BucketDao;
@@ -65,11 +71,19 @@ public class MyFragment3 extends Fragment {
                 bucketDao.getInstalledAppsTrafficData(context,"",1, ConnectivityManager.TYPE_WIFI);
             }
         });
-        Button ButtonSetAppsUnusualTrafficDataAmount = (Button) view.findViewById(R.id.ButtonSetAppsUnusualTrafficDataAmount);
-        ButtonSetAppsUnusualTrafficDataAmount.setOnClickListener(new View.OnClickListener() {
+        Button buttonSetAppsUnusualTrafficDataAmount = (Button) view.findViewById(R.id.ButtonSetAppsUnusualTrafficDataAmount);
+        buttonSetAppsUnusualTrafficDataAmount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openEditViewAlert(view);
+            }
+        });
+
+        Button buttonOutputDataToFile = (Button) view.findViewById(R.id.ButtonOutputDataToFile);
+        buttonOutputDataToFile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                outputDataToFile(view,context);
             }
         });
 
@@ -93,6 +107,42 @@ public class MyFragment3 extends Fragment {
             }
         });
         builderAppsUnusualTrafficDataAmount.show();
+    }
+
+    public void outputDataToFile(View view,Context context){
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                Calendar dayCal = Calendar.getInstance();
+                String nowtime = ""+dayCal.get(Calendar.YEAR)+(dayCal.get(Calendar.MONTH)+1)+dayCal.get(Calendar.DATE)+dayCal.get(Calendar.HOUR_OF_DAY)+dayCal.get(Calendar.MINUTE)+dayCal.get(Calendar.SECOND);
+                Path path = Paths.get(context.getExternalFilesDir("").getAbsolutePath()+"/a"+nowtime+".txt");
+                //创建文件
+                if(!Files.exists(path)) {
+                    try {
+                        Files.createFile(path);
+                    } catch (Exception e) {
+                        Log.e("严重错误",e.toString());
+                    }
+                }
+                //创建BufferedWriter
+                /*try {
+                    BufferedWriter bfw=Files.newBufferedWriter(fpath);
+                    bfw.write("Files类的API:newBufferedWriter");
+                    bfw.flush();
+                    bfw.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }*/
+                byte[] bytes = "diu1".getBytes();
+                try {
+                    Files.write(path,bytes);
+                    //Toast.makeText(context,)
+                } catch (Exception e) {
+                    Log.e("严重错误",e.toString());
+                }
+            }
+
+
+
     }
     /*public static String getUid(Context context) {
         String uid = "";

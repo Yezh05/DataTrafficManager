@@ -14,7 +14,7 @@ public class MyLineValueFormatter implements IValueFormatter {
         BytesFormatter bytesFormatter = new BytesFormatter();
 
         Map<String,String> data = bytesFormatter.getPrintSizeWithoutString(Math.round(value));
-        System.out.println((Double.valueOf(data.get("values"))));
+        //System.out.println((Double.valueOf(data.get("values"))));
         String afterformat = Math.round( (Double.valueOf(data.get("values")))*100D )/100D+data.get("type");
         return afterformat;
     }

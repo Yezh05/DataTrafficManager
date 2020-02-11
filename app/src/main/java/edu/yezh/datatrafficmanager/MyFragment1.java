@@ -13,8 +13,6 @@ import android.net.ConnectivityManager;
 import android.net.TrafficStats;
 import android.os.Bundle;
 import android.os.Handler;
-import android.telephony.SubscriptionInfo;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,21 +45,21 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import edu.yezh.datatrafficmanager.Dao.BucketDao;
-import edu.yezh.datatrafficmanager.Dao.BucketDaoImpl;
+import edu.yezh.datatrafficmanager.dao.BucketDao;
+import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.adapter.RecyclerViewAppsTrafficDataAdapter;
+import edu.yezh.datatrafficmanager.model.AppsInfo;
+import edu.yezh.datatrafficmanager.model.SimInfo;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
+import edu.yezh.datatrafficmanager.tools.SimTools;
 import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 
 import static android.content.Context.MODE_PRIVATE;
-import static android.content.Context.TELEPHONY_SERVICE;
 
 public class MyFragment1 extends Fragment {
-    Handler handler;
-    Runnable runnable;
+    private Handler handler;
     public MyFragment1() {
     }
     //public String subscriberID;
@@ -73,11 +71,11 @@ public class MyFragment1 extends Fragment {
         Log.e("标签页", "移动网络页面");
 
         final Context context = this.getContext();
-        BucketDao bucketDao = new BucketDaoImpl();
-
+        //BucketDao bucketDao = new BucketDaoImpl();
+        SimTools simTools = new SimTools();
         /*NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);*/
         /*NetworkStats.Bucket bucket = null;*/
-        TelephonyManager tm = (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
+        //TelephonyManager tm = (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    Activity#requestPermissions
@@ -90,7 +88,7 @@ public class MyFragment1 extends Fragment {
         }
         //subscriberID = tm.getSubscriberId();
 
-        final List<SubscriptionInfo> subscriptionInfoList = bucketDao.getSubscriptionInfoList(context);
+        final List<SimInfo> simInfoList = simTools.getSubscriptionInfoList(context);
 
         /*FloatingActionButton fab = view.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -104,25 +102,25 @@ public class MyFragment1 extends Fragment {
 
         showRealTimeNetSpeed(view);
 
-        final Button button_SIM1 = (Button) view.findViewById(R.id.Button_SIM1);
-        final Button button_SIM2 = (Button) view.findViewById(R.id.Button_SIM2);
-        button_SIM1.setText("SIM卡1:"+subscriptionInfoList.get(0).getCarrierName());
+        final Button button_SIM1 = view.findViewById(R.id.Button_SIM1);
+        final Button button_SIM2 = view.findViewById(R.id.Button_SIM2);
+        button_SIM1.setText("SIM卡1:"+simInfoList.get(0).getSubscriptionInfo().getCarrierName());
         button_SIM1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 button_SIM1.setTextColor(Color.parseColor("#009688"));
                 button_SIM2.setTextColor(Color.BLACK);
-                setTrafficDataView( view, subscriptionInfoList.get(0).getSubscriptionId());
+                setTrafficDataView( view, simInfoList.get(0).getSubscriberId());
             }
         });
-        if (subscriptionInfoList.size()==2) {
-            button_SIM2.setText("SIM卡2:"+subscriptionInfoList.get(1).getCarrierName());
+        if (simInfoList.size()==2) {
+            button_SIM2.setText("SIM卡2:"+simInfoList.get(1).getSubscriptionInfo().getCarrierName());
             button_SIM2.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     button_SIM2.setTextColor(Color.parseColor("#009688"));
                     button_SIM1.setTextColor(Color.BLACK);
-                    setTrafficDataView(view, subscriptionInfoList.get(1).getSubscriptionId());
+                    setTrafficDataView(view, simInfoList.get(1).getSubscriberId());
                 }
             });
         }else {
@@ -135,14 +133,14 @@ public class MyFragment1 extends Fragment {
         return view;
     }
     /*获取并显示流量使用情况*/
-    public void setTrafficDataView(View view,int simID){
+    public void setTrafficDataView(View view, final String subscriberID){
         try {
             SharedPreferences sp = getActivity().getSharedPreferences("TrafficManager",MODE_PRIVATE);
             final Context context = this.getContext();
             BucketDao bucketDao = new BucketDaoImpl();
             BytesFormatter bytesFormatter = new BytesFormatter();
             DateTools dateTools = new DateTools();
-            final String subscriberID = bucketDao.getSubscriberId(context,simID);
+
 
             /*TextView TextViewSubscriberID = (TextView)view.findViewById(R.id.TextViewSubscriberID);
             TextViewSubscriberID.setText(subscriberID);*/
@@ -163,7 +161,7 @@ public class MyFragment1 extends Fragment {
 
 
             String readableData = bytesFormatter.getPrintSize(rxBytes);
-            TextView TextViewData4GThisMonth = (TextView) view.findViewById(R.id.TextViewData4GThisMonth);
+            TextView TextViewData4GThisMonth = view.findViewById(R.id.TextViewData4GThisMonth);
             TextViewData4GThisMonth.setText(readableData);
 
             final int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,1);
@@ -172,19 +170,19 @@ public class MyFragment1 extends Fragment {
             long rxBytesStartDayToToday = bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay,ConnectivityManager.TYPE_MOBILE);
 
             String readableDataStartDayToToday = bytesFormatter.getPrintSize(rxBytesStartDayToToday);
-            TextView TextViewData4GStartDayToToday = (TextView)view.findViewById(R.id.TextViewData4GStartDayToToday);
+            TextView TextViewData4GStartDayToToday = view.findViewById(R.id.TextViewData4GStartDayToToday);
             TextViewData4GStartDayToToday.setText(readableDataStartDayToToday);
 
             float DataUseStatus =  (rxBytesStartDayToToday/( dataPlan * 1024 * 1024 * 1024  ))*100;
             int PercentDataUseStatus= Math.round(DataUseStatus);
             String TextDataUseStatus = "";
-            if (PercentDataUseStatus<0) {TextDataUseStatus = "请设置流量限额";}
-            if (PercentDataUseStatus>=0&&PercentDataUseStatus<30) {TextDataUseStatus = "流量充足，放心使用";}
-                else if (PercentDataUseStatus>=30&&PercentDataUseStatus<50) {TextDataUseStatus = "流量较多，正常使用";}
-                else if (PercentDataUseStatus>=50&&PercentDataUseStatus<80) {TextDataUseStatus = "流量过半，注意使用";}
-                else if (PercentDataUseStatus>=80&&PercentDataUseStatus<90) {TextDataUseStatus = "流量较少，谨慎使用";}
-                else if (PercentDataUseStatus>=90&&PercentDataUseStatus<100) {TextDataUseStatus = "流量告急，谨慎使用";}
-                else if (PercentDataUseStatus>=100) {TextDataUseStatus = "流量使用量已超过套餐限额，敬请留意";}
+            if (PercentDataUseStatus<0) {TextDataUseStatus = "请设置\n流量限额";}
+            if (PercentDataUseStatus>=0&&PercentDataUseStatus<30) {TextDataUseStatus = "流量充足\n放心使用";}
+                else if (PercentDataUseStatus>=30&&PercentDataUseStatus<50) {TextDataUseStatus = "流量较多\n正常使用";}
+                else if (PercentDataUseStatus>=50&&PercentDataUseStatus<80) {TextDataUseStatus = "流量过半\n注意使用";}
+                else if (PercentDataUseStatus>=80&&PercentDataUseStatus<90) {TextDataUseStatus = "流量较少\n谨慎使用";}
+                else if (PercentDataUseStatus>=90&&PercentDataUseStatus<100) {TextDataUseStatus = "流量告急\n谨慎使用";}
+                else if (PercentDataUseStatus>=100) {TextDataUseStatus = "流量使用量\n已超过套餐限额\n敬请留意";}
             TextView TextViewDataUseStatus = (TextView)view.findViewById(R.id.TextViewDataUseStatus);
             TextViewDataUseStatus.setText( String.valueOf(PercentDataUseStatus)+"%\n"+ TextDataUseStatus );
 
@@ -202,7 +200,7 @@ public class MyFragment1 extends Fragment {
             showChart(view,PercentDataUseStatus,lastSevenDaysTrafficData,dateTools.getLastSevenDays());
 
             RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getInstalledAppsTrafficData(context,subscriberID,dataPlanStartDay,ConnectivityManager.TYPE_MOBILE),context);
-            RecyclerView RecyclerViewAppsTrafficData = (RecyclerView) view.findViewById(R.id.RecyclerViewAppsTrafficData);
+            RecyclerView RecyclerViewAppsTrafficData = view.findViewById(R.id.RecyclerViewAppsTrafficData);
             RecyclerViewAppsTrafficData.setAdapter(recyclerViewAppsTrafficDataAdapter);
             LinearLayoutManager layoutManager = new LinearLayoutManager(context);
             layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -214,8 +212,6 @@ public class MyFragment1 extends Fragment {
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();*/
                     openEditViewAlert(subscriberID);
                 }
             });
@@ -239,7 +235,7 @@ public class MyFragment1 extends Fragment {
         }
     }
     /*流量套餐限额设置框*/
-    public void openEditViewAlert(final String subscriberID){
+    private void openEditViewAlert(final String subscriberID){
         final Context context = this.getContext();
         final EditText inputDataPlanStartDay = new EditText(context);
         inputDataPlanStartDay.setHint("请输入套餐起始日");
@@ -261,7 +257,7 @@ public class MyFragment1 extends Fragment {
                         //Log.w("设置流量套餐信息", "dataPlan_" + subscriberID + " : " + Float.valueOf(inputData).toString());
                         editor.putFloat("dataPlan_" + subscriberID, Float.valueOf(inputData));
                         editor.putInt("dataPlanStartDay_" + subscriberID, Integer.valueOf(inputDataPlanStartDay.getText().toString()));
-                        editor.commit();
+                        editor.apply();
                         showTextViewDataPlan(getView(),subscriberID);
                     }
                 });
@@ -271,7 +267,7 @@ public class MyFragment1 extends Fragment {
         builderDataPlanStartDay.show();
     }
     /*获取并显示流量套餐限额*/
-    public Float showTextViewDataPlan(View view,String subscriberID){
+    private Float showTextViewDataPlan(View view, String subscriberID){
         SharedPreferences sp = getActivity().getSharedPreferences("TrafficManager",MODE_PRIVATE);
         Float dataPlan = sp.getFloat("dataPlan_"+subscriberID,-1);
         int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,1);
@@ -282,7 +278,7 @@ public class MyFragment1 extends Fragment {
         return dataPlan;
     }
 
-    public void showChart(View view,int PercentDataUseStatus,List<Long> lastSevenDaysTrafficData,List<Integer> lastSevenDays){
+    private void showChart(View view, int PercentDataUseStatus, List<Long> lastSevenDaysTrafficData, List<Integer> lastSevenDays){
         BytesFormatter bytesFormatter = new BytesFormatter();
         PieChart pieChart = (PieChart)view.findViewById(R.id.Chart1);
         List yVals = new ArrayList<>();
@@ -309,9 +305,9 @@ public class MyFragment1 extends Fragment {
         pieChart.animateXY(2000,2000);
 
 
-        LineChart lineChart = (LineChart) view.findViewById(R.id.LineChartLastSevenDaysTrafficData);
+        LineChart lineChart = view.findViewById(R.id.LineChartLastSevenDaysTrafficData);
 
-        final ArrayList<Entry> values = new ArrayList<Entry>();
+        final ArrayList<Entry> values = new ArrayList<>();
         /*values.add(new Entry(5, 50));
         values.add(new Entry(10, 66));
         values.add(new Entry(15, 120));
@@ -342,7 +338,7 @@ public class MyFragment1 extends Fragment {
 
         LineDataSet lineDataSet = new LineDataSet(values,"数据");
         //lineDataSet.setValues(values);
-        ArrayList<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
+        ArrayList<ILineDataSet> dataSets = new ArrayList<>();
         lineDataSet.setMode(LineDataSet.Mode.LINEAR);
         lineDataSet.setDrawFilled(true);
         lineDataSet.setColor(Color.parseColor("#008080"));
@@ -367,7 +363,7 @@ public class MyFragment1 extends Fragment {
         lineChart.getAxisLeft().setDrawGridLines(true);
         lineChart.getAxisLeft().setDrawLabels(false);
         lineChart.getAxisLeft().setDrawAxisLine(false);
-        lineChart.animateXY(000,1200);
+        lineChart.animateXY(0,1200);
 
         lineChart.getDescription().setEnabled(false);
         lineChart.invalidate();
@@ -375,44 +371,49 @@ public class MyFragment1 extends Fragment {
     /*
      * 显示实时下载速度
      * */
-    public void showRealTimeNetSpeed(View view){
+    void showRealTimeNetSpeed(View view){
         final BytesFormatter bytesFormatter = new BytesFormatter();
         final long [] RXOld = new long [2];
         handler = new Handler();
-        final TextView textViewRealTimeTxSpeed = (TextView)view.findViewById(R.id.TextViewRealTimeTxSpeed);
-        final TextView textViewRealTimeRxSpeed = (TextView)view.findViewById(R.id.TextViewRealTimeRxSpeed);
-        runnable = new Runnable() {
-            int firstTimeShow =0;
+        final TextView textViewRealTimeTxSpeed = view.findViewById(R.id.TextViewRealTimeTxSpeed);
+        final TextView textViewRealTimeRxSpeed = view.findViewById(R.id.TextViewRealTimeRxSpeed);
+        //TextView view1 = null;
+        //view1 = (TextView) view.findViewById(R.id.view1);
+        //view1.setText("Current Data Rate per second= " + currentDataRate);
+        // System.out.println("Current Data Rate per second= " + bytesFormatter.getPrintSize(currentDataRate));
+        //System.out.println("Run");
+        Runnable runnable = new Runnable() {
+            int firstTimeShow = 0;
+
             @Override
             public void run() {
-                if (firstTimeShow!=0){
+                if (firstTimeShow != 0) {
                     long overTxTraffic = TrafficStats.getTotalTxBytes();
                     long overRxTraffic = TrafficStats.getTotalRxBytes();
-                    long currentTxDataRate = overTxTraffic - RXOld [0];
-                    long currentRxDataRate = overRxTraffic - RXOld [1];
+                    long currentTxDataRate = overTxTraffic - RXOld[0];
+                    long currentRxDataRate = overRxTraffic - RXOld[1];
                     //TextView view1 = null;
                     //view1 = (TextView) view.findViewById(R.id.view1);
                     //view1.setText("Current Data Rate per second= " + currentDataRate);
                     // System.out.println("Current Data Rate per second= " + bytesFormatter.getPrintSize(currentDataRate));
-                    textViewRealTimeTxSpeed.setText("上传:"+ bytesFormatter.getPrintSize(currentTxDataRate)+"/s");
-                    textViewRealTimeRxSpeed.setText("下载:"+ bytesFormatter.getPrintSize(currentRxDataRate)+"/s");
-                    RXOld [0] = overTxTraffic;
-                    RXOld[1]=overRxTraffic;
-                }
-                else {
+                    textViewRealTimeTxSpeed.setText("上传:" + bytesFormatter.getPrintSize(currentTxDataRate) + "/s");
+                    textViewRealTimeRxSpeed.setText("下载:" + bytesFormatter.getPrintSize(currentRxDataRate) + "/s");
+                    RXOld[0] = overTxTraffic;
+                    RXOld[1] = overRxTraffic;
+                } else {
                     long overTxTraffic = TrafficStats.getTotalTxBytes();
                     long overRxTraffic = TrafficStats.getTotalRxBytes();
-                    RXOld [0] = overTxTraffic;
-                    RXOld[1]=overRxTraffic;
+                    RXOld[0] = overTxTraffic;
+                    RXOld[1] = overRxTraffic;
                     firstTimeShow = 1;
                 }
                 //System.out.println("Run");
                 handler.postDelayed(this, 1000);
             }
         };
-        handler.postDelayed(runnable , 1000 );
+        handler.postDelayed(runnable, 1000 );
     }
-    public void showAppTrafficDataWarning(Context context,View view,String subscriberID){
+    private void showAppTrafficDataWarning(Context context, View view, String subscriberID){
         int appsMAXTraffic = -1;
         SharedPreferences sp = context.getSharedPreferences("TrafficManager",MODE_PRIVATE);
         appsMAXTraffic = sp.getInt("AppsMAXTraffic",-1);
@@ -423,12 +424,12 @@ public class MyFragment1 extends Fragment {
             textViewString = "";
             final BytesFormatter bytesFormatter = new BytesFormatter();
             BucketDao bucketDao = new BucketDaoImpl();
-            List<Map<String,String>> installedAppsTodayTrafficDataList = bucketDao.getInstalledAppsTodayTrafficData(context,subscriberID,ConnectivityManager.TYPE_MOBILE);
+            List<AppsInfo> installedAppsTodayTrafficDataList = bucketDao.getInstalledAppsTodayTrafficData(context,subscriberID,ConnectivityManager.TYPE_MOBILE);
             int flag=0;
-            for (Map<String,String> i:installedAppsTodayTrafficDataList){
-                String name = i.get("name");
-                long rxBytes = Long.valueOf(i.get("rxBytes"));
-                long txBytes = Long.valueOf(i.get("txBytes"));
+            for (AppsInfo i:installedAppsTodayTrafficDataList){
+                String name = i.getName();
+                long rxBytes = i.getRxBytes();
+                long txBytes = i.getTxBytes();
                 long allBytes = rxBytes+txBytes;
                 if(allBytes>=(appsMAXTraffic*1024*1024)){
                     flag++;

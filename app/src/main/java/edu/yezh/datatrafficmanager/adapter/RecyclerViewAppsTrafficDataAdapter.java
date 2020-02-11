@@ -14,14 +14,16 @@ import java.util.List;
 import java.util.Map;
 
 import edu.yezh.datatrafficmanager.R;
+import edu.yezh.datatrafficmanager.model.AppsInfo;
+import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.InstalledAppsInfoTools;
 
 public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<RecyclerViewAppsTrafficDataAdapter.ViewHolder> {
-    List<Map<String, String>> InstalledAppsTrafficData;
+    List<AppsInfo> InstalledAppsTrafficData;
     Context context;
 
-    public RecyclerViewAppsTrafficDataAdapter(List<Map<String, String>> allInstalledAppsTrafficData, Context context) {
+    public RecyclerViewAppsTrafficDataAdapter(List<AppsInfo> allInstalledAppsTrafficData, Context context) {
         this.InstalledAppsTrafficData = allInstalledAppsTrafficData;
         this.context = context;
     }
@@ -44,13 +46,11 @@ public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<Rec
         {
             BytesFormatter bytesFormatter = new BytesFormatter();
             int nowposition = position-1;
-            Map<String, String> OneInstalledAppsTrafficData = InstalledAppsTrafficData.get(nowposition);
-            //Map<String, String> OneInstalledAppsTrafficData = InstalledAppsTrafficData.get(position);
-            holder.TextViewColAppName.setText(OneInstalledAppsTrafficData.get("name"));
-            holder.TextViewColAppRX.setText(bytesFormatter.getPrintSize(Long.valueOf(OneInstalledAppsTrafficData.get("rxBytes"))));
-            holder.TextViewColAppTX.setText(bytesFormatter.getPrintSize(Long.valueOf(OneInstalledAppsTrafficData.get("txBytes"))));
-            InstalledAppsInfoTools installedAppsInfoTools = new InstalledAppsInfoTools();
-            holder.ImageViewColAppIcon.setImageDrawable(installedAppsInfoTools.getAppIconByPackageName(context,OneInstalledAppsTrafficData.get("pkgname")));
+            AppsInfo OneInstalledAppsTrafficData = InstalledAppsTrafficData.get(nowposition);
+            holder.TextViewColAppName.setText(OneInstalledAppsTrafficData.getName());
+            holder.TextViewColAppRX.setText(bytesFormatter.getPrintSize(OneInstalledAppsTrafficData.getRxBytes()));
+            holder.TextViewColAppTX.setText(bytesFormatter.getPrintSize(OneInstalledAppsTrafficData.getTxBytes()));
+            holder.ImageViewColAppIcon.setImageDrawable(OneInstalledAppsTrafficData.getAppIcon());
         }
     }
 

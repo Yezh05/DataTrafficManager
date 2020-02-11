@@ -5,11 +5,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,16 +22,16 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
-import edu.yezh.datatrafficmanager.Dao.BucketDao;
-import edu.yezh.datatrafficmanager.Dao.BucketDaoImpl;
+import edu.yezh.datatrafficmanager.dao.BucketDao;
+import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 
 
 public class MyFragment3 extends Fragment {
@@ -43,13 +40,8 @@ public class MyFragment3 extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-
-
         final View view = inflater.inflate(R.layout.t3, container, false);
-//        TextView txt_content = (TextView) view.findViewById(R.id.txt_content);
-        //      txt_content.setText("第一个Fragment");
-        Log.e("HEHE", "3日狗");
+        Log.e("Fragment", "工具页");
 
         final BucketDao bucketDao = new BucketDaoImpl();
         final Context context = view.getContext();
@@ -66,14 +58,14 @@ public class MyFragment3 extends Fragment {
         }
 
 
-        Button buttonSHowAppsTrafficData = (Button) view.findViewById(R.id.ButtonSHowAppsTrafficData);
+        /*Button buttonSHowAppsTrafficData = view.findViewById(R.id.ButtonSHowAppsTrafficData);
         buttonSHowAppsTrafficData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 bucketDao.getInstalledAppsTrafficData(context,"",1, ConnectivityManager.TYPE_WIFI);
             }
-        });
-        Button buttonSetAppsUnusualTrafficDataAmount = (Button) view.findViewById(R.id.ButtonSetAppsUnusualTrafficDataAmount);
+        });*/
+        Button buttonSetAppsUnusualTrafficDataAmount = view.findViewById(R.id.ButtonSetAppsUnusualTrafficDataAmount);
         buttonSetAppsUnusualTrafficDataAmount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,7 +73,7 @@ public class MyFragment3 extends Fragment {
             }
         });
 
-        Button buttonOutputDataToFile = (Button) view.findViewById(R.id.ButtonOutputDataToFile);
+        Button buttonOutputDataToFile = view.findViewById(R.id.ButtonOutputDataToFile);
         buttonOutputDataToFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,7 +84,7 @@ public class MyFragment3 extends Fragment {
         return view;
     }
 
-    public void openEditViewAlert(View view){
+    private void openEditViewAlert(View view){
         final Context context = view.getContext();
         final EditText editTextInputAppsUnusualTrafficDataAmount = new EditText(context);
         editTextInputAppsUnusualTrafficDataAmount.setHint("请输入APP每日流量使用提醒阀值(MB)");
@@ -111,12 +103,13 @@ public class MyFragment3 extends Fragment {
         builderAppsUnusualTrafficDataAmount.show();
     }
 
-    public void outputDataToFile(View view,Context context){
+    private void outputDataToFile(View view, Context context){
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 Calendar dayCal = Calendar.getInstance();
                 String nowtime = ""+dayCal.get(Calendar.YEAR)+(dayCal.get(Calendar.MONTH)+1)+dayCal.get(Calendar.DATE)+dayCal.get(Calendar.HOUR_OF_DAY)+dayCal.get(Calendar.MINUTE)+dayCal.get(Calendar.SECOND);
-                Path path = Paths.get(context.getExternalFilesDir("").getAbsolutePath()+"/a"+nowtime+".txt");
+                String pathString = context.getExternalFilesDir("").getAbsolutePath()+"/a"+nowtime+".csv";
+                Path path = Paths.get(pathString);
                 //创建文件
                 if(!Files.exists(path)) {
                     try {
@@ -125,17 +118,12 @@ public class MyFragment3 extends Fragment {
                         Log.e("严重错误",e.toString());
                     }
                 }
-                //创建BufferedWriter
-                /*try {
-                    BufferedWriter bfw=Files.newBufferedWriter(fpath);
-                    bfw.write("Files类的API:newBufferedWriter");
-                    bfw.flush();
-                    bfw.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }*/
-                byte[] bytes = "diu1".getBytes();
                 try {
+                FileOutputStream fos = new FileOutputStream(pathString);
+                OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
+
+
+                    byte bytes[] = "DIU1".getBytes();
                     Files.write(path,bytes);
                     Snackbar.make(view, "导出成功", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
@@ -143,55 +131,5 @@ public class MyFragment3 extends Fragment {
                     Log.e("严重错误",e.toString());
                 }
             }
-
-
-
     }
-    /*public static String getUid(Context context) {
-        String uid = "";
-        try {
-            PackageManager pm = context.getPackageManager();
-            ApplicationInfo ai = pm.getApplicationInfo("tv.danmaku.bili", PackageManager.GET_META_DATA);
-            uid = String.valueOf(ai.uid);
-            System.out.println("biliUID:" + uid);
-            // Log.i("ai.uid: " , ai.uid);
-
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        return uid;
-    }*/
-
-    /*public List getUids(Context context) {
-        List<Integer> uidList = new ArrayList<Integer>();
-        PackageManager pm = context.getPackageManager();
-        List<PackageInfo> packinfos = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_PERMISSIONS);
-        for (PackageInfo info : packinfos) {
-            String[] premissions = info.requestedPermissions;
-            if (premissions != null && premissions.length > 0) {
-                for (String premission : premissions) {
-                    if ("android.permission.INTERNET".equals(premission)) {
-
-                        int uid = info.applicationInfo.uid;
-                        String name = pm.getNameForUid(uid);
-                        if (name.indexOf("system")!=-1||name.indexOf("android")!=-1){
-                            continue;
-                        }
-                        System.out.println("uid = " + uid);
-                        System.out.println("pkgname = " + name);
-                        try {
-                            ApplicationInfo ai = pm.getApplicationInfo(name, PackageManager.GET_META_DATA);
-                            String applicationLabel = (pm.getApplicationLabel(ai)).toString();
-                            System.out.println("name = " + applicationLabel);
-                        } catch (PackageManager.NameNotFoundException e) {
-                            e.printStackTrace();
-                        }
-
-                        uidList.add(uid);
-                    }
-                }
-            }
-        }
-        return uidList;
-    }*/
 }

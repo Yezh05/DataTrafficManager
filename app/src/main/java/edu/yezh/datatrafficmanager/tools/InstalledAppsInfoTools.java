@@ -17,10 +17,11 @@ import java.util.List;
 import java.util.Map;
 
 import edu.yezh.datatrafficmanager.R;
+import edu.yezh.datatrafficmanager.model.AppsInfo;
 
 public class InstalledAppsInfoTools {
-    public List<Map<String,String>> getAllInstalledAppsInfo(Context context) {
-        List<Map<String,String>> allInstalledAppsInfo = new ArrayList<>();
+    public List<AppsInfo> getAllInstalledAppsInfo(Context context) {
+        List<AppsInfo> allInstalledAppsInfo = new ArrayList<>();
 
         //List<String> uidList = new ArrayList<String>();
         PackageManager pm = context.getPackageManager();
@@ -35,19 +36,21 @@ public class InstalledAppsInfoTools {
                         if (packageName.indexOf("system")!=-1||packageName.indexOf("android")!=-1||packageName.indexOf("huawei")!=-1){
                             continue;
                         }
-                        Map<String,String> singleAppInfo = new HashMap<>();
-                        singleAppInfo.put("uid",String.valueOf(uid));
-                        singleAppInfo.put("pkgname",packageName);
+                        AppsInfo singleAppInfo = new AppsInfo();
+
+                        singleAppInfo.setUid(String.valueOf(uid));
+                        singleAppInfo.setPackageName(packageName);
                         //System.out.println("uid = " + uid);
                         //System.out.println("pkgname = " + name);
                         try {
                             ApplicationInfo ai = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
                             String applicationLabel = (pm.getApplicationLabel(ai)).toString();
                             //System.out.println("name = " + applicationLabel);
-                            singleAppInfo.put("name",applicationLabel);
-                        } catch (PackageManager.NameNotFoundException e) {
+                            singleAppInfo.setName(applicationLabel);
+                            singleAppInfo.setAppIcon(getAppIconByPackageName(context,packageName));
+                        } catch (Exception e) {
                             e.printStackTrace();
-                            singleAppInfo.put("name",packageName);
+                            singleAppInfo.setName(packageName);
                         }
                         //uidList.add(String.valueOf(uid));
                         allInstalledAppsInfo.add(singleAppInfo);

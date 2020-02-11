@@ -45,7 +45,7 @@ public class ListViewAdapter extends BaseAdapter {
         BytesFormatter bytesFormatter = new BytesFormatter();
         Long dataBytes= Long.valueOf(lastSixMonthsTrafficDataMap.get("LastSixMonthsTrafficDataList").get(position));
         String col1String = lastSixMonthsTrafficDataMap.get("MonthString").get(position);
-        String col2String = bytesFormatter.getPrintSize(dataBytes) ;
+        String col2String = bytesFormatter.getPrintSize(dataBytes);
         TextView textViewCol1;
         TextView textViewCol2;
         if (convertView == null) {

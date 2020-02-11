@@ -1,21 +1,16 @@
 package edu.yezh.datatrafficmanager;
 
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 
-import edu.yezh.datatrafficmanager.Dao.BucketDao;
-import edu.yezh.datatrafficmanager.Dao.BucketDaoImpl;
+import edu.yezh.datatrafficmanager.dao.BucketDao;
+import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.adapter.ListViewAdapter;
 
 public class ShowDataListActivity extends AppCompatActivity {

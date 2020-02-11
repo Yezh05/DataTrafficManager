@@ -22,6 +22,8 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
@@ -32,6 +34,7 @@ import java.util.Calendar;
 
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
+import edu.yezh.datatrafficmanager.tools.PoiTools;
 
 
 public class MyFragment3 extends Fragment {
@@ -77,14 +80,14 @@ public class MyFragment3 extends Fragment {
         buttonOutputDataToFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                outputDataToFile(view,context);
+                outputDataToFile(view, context);
             }
         });
 
         return view;
     }
 
-    private void openEditViewAlert(View view){
+    private void openEditViewAlert(View view) {
         final Context context = view.getContext();
         final EditText editTextInputAppsUnusualTrafficDataAmount = new EditText(context);
         editTextInputAppsUnusualTrafficDataAmount.setHint("请输入APP每日流量使用提醒阀值(MB)");
@@ -96,40 +99,44 @@ public class MyFragment3 extends Fragment {
                 Toast.makeText(getActivity(), inputData, Toast.LENGTH_LONG).show();
                 SharedPreferences.Editor editor = context.getSharedPreferences("TrafficManager", Context.MODE_PRIVATE).edit();
                 //Log.w("设置流量套餐信息", "dataPlan_" + subscriberID + " : " + Float.valueOf(inputData).toString());
-                editor.putInt( "AppsMAXTraffic",Integer.valueOf(inputData));
+                editor.putInt("AppsMAXTraffic", Integer.valueOf(inputData));
                 editor.commit();
             }
         });
         builderAppsUnusualTrafficDataAmount.show();
     }
 
-    private void outputDataToFile(View view, Context context){
+    private void outputDataToFile(View view, Context context) {
 
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                Calendar dayCal = Calendar.getInstance();
-                String nowtime = ""+dayCal.get(Calendar.YEAR)+(dayCal.get(Calendar.MONTH)+1)+dayCal.get(Calendar.DATE)+dayCal.get(Calendar.HOUR_OF_DAY)+dayCal.get(Calendar.MINUTE)+dayCal.get(Calendar.SECOND);
-                String pathString = context.getExternalFilesDir("").getAbsolutePath()+"/a"+nowtime+".csv";
-                Path path = Paths.get(pathString);
-                //创建文件
-                if(!Files.exists(path)) {
-                    try {
-                        Files.createFile(path);
-                    } catch (Exception e) {
-                        Log.e("严重错误",e.toString());
-                    }
-                }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Calendar dayCal = Calendar.getInstance();
+            String nowtime = "" + dayCal.get(Calendar.YEAR) + (dayCal.get(Calendar.MONTH) + 1) + dayCal.get(Calendar.DATE) + dayCal.get(Calendar.HOUR_OF_DAY) + dayCal.get(Calendar.MINUTE) + dayCal.get(Calendar.SECOND);
+            String pathString = context.getExternalFilesDir("").getAbsolutePath() + "/a" + nowtime + ".xls";
+            Path path = Paths.get(pathString);
+            //创建文件
+            if (!Files.exists(path)) {
                 try {
-                FileOutputStream fos = new FileOutputStream(pathString);
-                OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
-
-
-                    byte bytes[] = "DIU1".getBytes();
-                    Files.write(path,bytes);
-                    Snackbar.make(view, "导出成功", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    Files.createFile(path);
                 } catch (Exception e) {
-                    Log.e("严重错误",e.toString());
+                    Log.e("严重错误", e.toString());
                 }
             }
+            try {
+                FileOutputStream fos = new FileOutputStream(pathString,false);
+                //OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
+                /*byte bytes[] = "DIU1".getBytes();
+                Files.write(path,bytes);*/
+
+                HSSFWorkbook wb = PoiTools.getHSSFWorkbook(null,context);
+                wb.write(fos);
+                fos.flush();
+                fos.close();
+                Snackbar.make(view, "导出成功", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            } catch (Exception e) {
+                Log.e("严重错误", e.toString());
+            }
+        }
     }
+
 }

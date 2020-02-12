@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toolbar;
 
 import edu.yezh.datatrafficmanager.ui.main.SectionsPagerAdapter;
 
@@ -30,11 +31,33 @@ public class MainActivity extends AppCompatActivity {
         Log.e("PermissionNetworkStats", String.valueOf(bool));
 
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        //toolbar.setNavigationIcon(R.drawable.ic_action_menu);
+        //toolbar.inflateMenu(R.menu.main_menu);
+        toolbar.inflateMenu(R.menu.main_menu);
+
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), this);
         ViewPager viewPager = findViewById(R.id.view_pager);
         viewPager.setAdapter(sectionsPagerAdapter);
         TabLayout tabs = findViewById(R.id.tabs);
         tabs.setupWithViewPager(viewPager);
+
+
+
+        /*toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_refresh:
+                        System.out.println("diaidaiwdiasdasujasudaw");
+                        break;
+
+                }
+                return false;
+            }
+        });*/
+
+
         /*FloatingActionButton fab = findViewById(R.id.fab);
 
         fab.setOnClickListener(new View.OnClickListener() {

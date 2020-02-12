@@ -14,6 +14,7 @@ import java.util.List;
 
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
+import edu.yezh.datatrafficmanager.model.AppsInfo;
 import edu.yezh.datatrafficmanager.model.SimInfo;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -25,7 +26,7 @@ public class PoiTools {
             wb = new HSSFWorkbook();
         }
         wb=initialMobileDataWorkbook( wb,  context);
-
+        wb = initialWlanDataWorkbook(wb,context);
         return wb;
     }
     public static HSSFWorkbook initialMobileDataWorkbook(HSSFWorkbook wb, Context context){
@@ -86,26 +87,26 @@ public class PoiTools {
             SharedPreferences sp = context.getSharedPreferences("TrafficManager",MODE_PRIVATE);
             Float dataPlan = sp.getFloat("dataPlan_"+subscriberID,-1);
             int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,1);
+            int networkType=ConnectivityManager.TYPE_MOBILE;
 
-
-            long trafficDataOfThisMonth =   bucketDao.getTrafficDataOfThisMonth(context,subscriberID, ConnectivityManager.TYPE_MOBILE);
+            long trafficDataOfThisMonth =   bucketDao.getTrafficDataOfThisMonth(context,subscriberID, networkType);
             rowLine++;
-            titles = new String[]{"本月已使用(字节)"};
+            titles = new String[]{"本月流量已使用(字节)"};
             row = sheet.createRow(rowLine);
             for (int j = 0;j<titles.length;j++){
                 cell = row.createCell(j);
                 cell.setCellValue(titles[j]);
-                cell.setCellStyle(style);
+                //cell.setCellStyle(style);
             }
             rowLine++;
             row = sheet.createRow(rowLine);
             cell = row.createCell(0);
             cell.setCellValue(trafficDataOfThisMonth);
-            rowLine++;
+            //rowLine++;
 
-            long trafficDataFromStartDay =bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay,ConnectivityManager.TYPE_MOBILE);
+            long trafficDataFromStartDay =bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay,networkType);
             rowLine++;
-            titles = new String[]{"月结日","套餐限额(GB)","从月结日起已使用(字节)"};
+            titles = new String[]{"月结日","套餐限额(GB)","从月结日起流量已使用(字节)"};
             row = sheet.createRow(rowLine);
             for (int j = 0;j<titles.length;j++){
                 cell = row.createCell(j);
@@ -120,10 +121,138 @@ public class PoiTools {
             cell.setCellValue(dataPlan);
             cell = row.createCell(2);
             cell.setCellValue(trafficDataFromStartDay);
+            rowLine++;rowLine++;rowLine++;
+
+            row = sheet.createRow(rowLine);
+            cell = row.createCell(0);
+            cell.setCellValue("应用程序流量使用情况");
             rowLine++;
 
+            titles = new String[]{"序号","应用程序名","应用程序包名","上传流量","下载流量"};
+            row = sheet.createRow(rowLine);
+            for (int j = 0;j<titles.length;j++){
+                cell = row.createCell(j);
+                cell.setCellValue(titles[j]);
+                cell.setCellStyle(style);
+            }
+            rowLine++;
+            List<AppsInfo> installedAppsTrafficData = bucketDao.getInstalledAppsTrafficData(context,subscriberID,dataPlanStartDay,networkType);
+            for (int j=0;j<installedAppsTrafficData.size();j++){
+                row = sheet.createRow(rowLine);
+
+                cell = row.createCell(0);
+                cell.setCellValue(j+1);
+                cell = row.createCell(1);
+                cell.setCellValue(installedAppsTrafficData.get(j).getName());
+                cell = row.createCell(2);
+                cell.setCellValue(installedAppsTrafficData.get(j).getPackageName());
+                cell = row.createCell(3);
+                cell.setCellValue(installedAppsTrafficData.get(j).getTxBytes());
+                cell = row.createCell(4);
+                cell.setCellValue(installedAppsTrafficData.get(j).getRxBytes());
+                rowLine++;
+            }
+            rowLine++;
+            /*//创建标题
+            for (int i = 0; i < title.length; i++) {
+                cell = row.createCell(i);
+                cell.setCellValue(title[i]);
+                cell.setCellStyle(style);
+            }
+
+            //创建内容
+            for (int i = 0; i < values.length; i++) {
+                row = sheet.createRow(i + 1);
+                for (int j = 0; j < values[i].length; j++) {
+                    //将内容按顺序赋给对应的列对象
+                    row.createCell(j).setCellValue(values[i][j]);
+                }
+            }*/
+        }
+        return wb;
+    }
+
+    public static HSSFWorkbook initialWlanDataWorkbook(HSSFWorkbook wb, Context context){
+        if(wb == null){
+            wb = new HSSFWorkbook();
+        }
 
 
+        String[] titles;
+
+
+            int rowLine=0;
+            BucketDao bucketDao = new BucketDaoImpl();
+            BytesFormatter bytesFormatter = new BytesFormatter();
+
+
+            String sheetName = "WLAN流量使用统计表";
+            HSSFSheet sheet = wb.createSheet(sheetName);
+
+            // 第三步，在sheet中添加表头第0行,注意老版本poi对Excel的行数列数有限制
+            HSSFRow row = sheet.createRow(0);
+
+            // 第四步，创建单元格，并设置值表头 设置表头居中
+            HSSFCellStyle style = wb.createCellStyle();
+            style.setAlignment(HSSFCellStyle.ALIGN_CENTER); // 创建一个居中格式
+
+            //声明列对象
+            HSSFCell cell = null;
+
+            cell = row.createCell(0);
+            cell.setCellValue(sheetName);
+            //cell.setCellStyle(style);
+            rowLine++;
+            String subscriberID ="";
+            int networkType=ConnectivityManager.TYPE_WIFI,dataPlanStartDay = 1 ;
+            long trafficDataOfThisMonth =   bucketDao.getTrafficDataOfThisMonth(context,subscriberID, networkType);
+            rowLine++;
+            titles = new String[]{"本月流量已使用(字节)"};
+            row = sheet.createRow(rowLine);
+            for (int j = 0;j<titles.length;j++){
+                cell = row.createCell(j);
+                cell.setCellValue(titles[j]);
+                //cell.setCellStyle(style);
+            }
+            rowLine++;
+            row = sheet.createRow(rowLine);
+            cell = row.createCell(0);
+            cell.setCellValue(trafficDataOfThisMonth);
+            //rowLine++;
+
+            rowLine++;rowLine++;rowLine++;
+
+            row = sheet.createRow(rowLine);
+            cell = row.createCell(0);
+            cell.setCellValue("应用程序流量使用情况");
+            rowLine++;
+
+            titles = new String[]{"序号","应用程序名","应用程序包名","上传流量","下载流量"};
+            row = sheet.createRow(rowLine);
+            for (int j = 0;j<titles.length;j++){
+                cell = row.createCell(j);
+                cell.setCellValue(titles[j]);
+                cell.setCellStyle(style);
+            }
+            rowLine++;
+            List<AppsInfo> installedAppsTrafficData = bucketDao.getInstalledAppsTrafficData(context,subscriberID,dataPlanStartDay,
+                    networkType);
+            for (int j=0;j<installedAppsTrafficData.size();j++){
+                row = sheet.createRow(rowLine);
+
+                cell = row.createCell(0);
+                cell.setCellValue(j+1);
+                cell = row.createCell(1);
+                cell.setCellValue(installedAppsTrafficData.get(j).getName());
+                cell = row.createCell(2);
+                cell.setCellValue(installedAppsTrafficData.get(j).getPackageName());
+                cell = row.createCell(3);
+                cell.setCellValue(installedAppsTrafficData.get(j).getTxBytes());
+                cell = row.createCell(4);
+                cell.setCellValue(installedAppsTrafficData.get(j).getRxBytes());
+                rowLine++;
+            }
+            rowLine++;
             /*//创建标题
             for (int i = 0; i < title.length; i++) {
                 cell = row.createCell(i);
@@ -140,10 +269,6 @@ public class PoiTools {
                 }
             }*/
 
-
-        }
         return wb;
     }
-
-
 }

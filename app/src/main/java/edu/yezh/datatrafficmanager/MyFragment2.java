@@ -11,10 +11,12 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -42,18 +44,40 @@ import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 import static android.content.Context.NETWORK_STATS_SERVICE;
 
 public class MyFragment2 extends Fragment {
-    Handler handler;
     public MyFragment2() {
     }
 
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.t2, container, false);
+        View view = inflater.inflate(R.layout.t2, container, false);
         //TextView txt_content = (TextView) view.findViewById(R.id.txt_content);
         //      txt_content.setText("第一个Fragment");
         Log.e("Fragment", "WLAN页面");
+        Context context = this.getContext();
 
-        final Context context = this.getContext();
+        initialPage(view,context);
+
+        /*Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_refresh:
+                        // Toast.makeText(context,"asdsadsada",Toast.LENGTH_LONG).show();
+                       initialPage(view,context);
+                        break;
+
+                }
+                return false;
+            }
+        });*/
+
+        return view;
+    }
+
+    public void initialPage(View view, final Context context){
         final int dataPlanStartDay = 1;
         final String subscriberID = "";
         NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
@@ -104,7 +128,6 @@ public class MyFragment2 extends Fragment {
             }
         });
         //myFragment1.showChart();
-        return view;
     }
 
     public void showChart(View view,List<Long> lastSevenDaysTrafficData, List<Integer> lastSevenDays){

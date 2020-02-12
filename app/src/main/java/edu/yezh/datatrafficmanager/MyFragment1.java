@@ -15,12 +15,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -128,9 +130,23 @@ public class MyFragment1 extends Fragment {
         }
         button_SIM1.performClick();
 
+        Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_refresh:
+                        button_SIM1.performClick();
 
+                        break;
+
+                }
+                return false;
+            }
+        });
 
         return view;
+
     }
     /*获取并显示流量使用情况*/
     public void setTrafficDataView(View view, final String subscriberID){

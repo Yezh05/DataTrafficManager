@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.yezh.datatrafficmanager.R;
+import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 
 public class ListViewAdapter extends BaseAdapter {
@@ -45,7 +46,8 @@ public class ListViewAdapter extends BaseAdapter {
         BytesFormatter bytesFormatter = new BytesFormatter();
         Long dataBytes= Long.valueOf(lastSixMonthsTrafficDataMap.get("LastSixMonthsTrafficDataList").get(position));
         String col1String = lastSixMonthsTrafficDataMap.get("MonthString").get(position);
-        String col2String = bytesFormatter.getPrintSize(dataBytes);
+        OutputTrafficData DataMonthUsage = bytesFormatter.getPrintSizebyModel(dataBytes);
+        String col2String = Math.round(Double.valueOf(DataMonthUsage.getValue())*100D)/100D + DataMonthUsage.getType();
         TextView textViewCol1;
         TextView textViewCol2;
         if (convertView == null) {

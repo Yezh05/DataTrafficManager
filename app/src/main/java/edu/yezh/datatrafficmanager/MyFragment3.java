@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +27,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -84,6 +86,14 @@ public class MyFragment3 extends Fragment {
             }
         });
 
+        /*Button buttonClose4G = view.findViewById(R.id.ButtonClose4G);
+        buttonClose4G.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setMobileDataState(context,false);
+            }
+        });*/
+
         return view;
     }
 
@@ -138,5 +148,18 @@ public class MyFragment3 extends Fragment {
             }
         }
     }
+
+
+    /*public void setMobileDataState(Context context, boolean enabled) {
+        TelephonyManager telephonyService = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        try {
+            Method setDataEnabled = telephonyService.getClass().getDeclaredMethod("setDataEnabled",boolean.class);
+            if (null != setDataEnabled) {
+                setDataEnabled.invoke(telephonyService, enabled);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }*/
 
 }

@@ -37,6 +37,8 @@ import java.util.List;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.adapter.RecyclerViewAppsTrafficDataAdapter;
+import edu.yezh.datatrafficmanager.model.OutputTrafficData;
+import edu.yezh.datatrafficmanager.model.TransInfo;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
@@ -89,9 +91,9 @@ public class MyFragment2 extends Fragment {
             Log.i("Info", "Total: " + (bucket.getRxBytes() + bucket.getTxBytes()));
             long rxBytes = bucket.getRxBytes();
             BytesFormatter bytesFormatter = new BytesFormatter();
-            String readableData = bytesFormatter.getPrintSize(rxBytes);
-            TextView textView = (TextView) view.findViewById(R.id.DataWLAN);
-            textView.setText("本月已下载: " + readableData);
+            OutputTrafficData todayUseageReadableData = bytesFormatter.getPrintSizebyModel(rxBytes);
+            TextView textView = view.findViewById(R.id.DataWLANThisMonth);
+            textView.setText("本月已下载\n" + Math.round(Double.valueOf(todayUseageReadableData.getValue())*100D)/100D + todayUseageReadableData.getType());
 
         } catch (RemoteException e) {
             Log.e("bucket", "GetTotalError");
@@ -112,7 +114,7 @@ public class MyFragment2 extends Fragment {
         RecyclerViewAppsTrafficData.setLayoutManager(layoutManager);
 
 
-        List<Long> lastSevenDaysTrafficData = bucketDao.getLastSevenDaysTrafficData(context, "", ConnectivityManager.TYPE_WIFI);
+        List<TransInfo> lastSevenDaysTrafficData = bucketDao.getLastSevenDaysTrafficData(context, "", ConnectivityManager.TYPE_WIFI);
         showChart(view, lastSevenDaysTrafficData, dateTools.getLastSevenDays());
         Button buttonShowLastSixMonthTrafficData = (Button) view.findViewById(R.id.ButtonShowLastSixMonthTrafficData);
         buttonShowLastSixMonthTrafficData.setOnClickListener(new View.OnClickListener() {
@@ -130,7 +132,7 @@ public class MyFragment2 extends Fragment {
         //myFragment1.showChart();
     }
 
-    public void showChart(View view,List<Long> lastSevenDaysTrafficData, List<Integer> lastSevenDays){
+    public void showChart(View view,List<TransInfo> lastSevenDaysTrafficData, List<Integer> lastSevenDays){
         BytesFormatter bytesFormatter = new BytesFormatter();
 
         LineChart lineChart = (LineChart) view.findViewById(R.id.LineChartLastSevenDaysTrafficData);
@@ -138,7 +140,7 @@ public class MyFragment2 extends Fragment {
         final ArrayList<Entry> values = new ArrayList<>();
         final String[] Xvalues = new String[lastSevenDays.size()];
         for (int i=0;i<lastSevenDays.size();i++){
-            values.add(new Entry(i,lastSevenDaysTrafficData.get(i)));
+            values.add(new Entry(i,lastSevenDaysTrafficData.get(i).getTotal()));
             Xvalues[i]= lastSevenDays.get(i) + "日" ;
         }
         IAxisValueFormatter formatter = new IAxisValueFormatter() {

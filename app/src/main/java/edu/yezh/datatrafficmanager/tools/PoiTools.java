@@ -16,6 +16,7 @@ import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.model.AppsInfo;
 import edu.yezh.datatrafficmanager.model.SimInfo;
+import edu.yezh.datatrafficmanager.model.TransInfo;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -89,7 +90,7 @@ public class PoiTools {
             int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,1);
             int networkType=ConnectivityManager.TYPE_MOBILE;
 
-            long trafficDataOfThisMonth =   bucketDao.getTrafficDataOfThisMonth(context,subscriberID, networkType);
+            TransInfo trafficDataOfThisMonth =   bucketDao.getTrafficDataOfThisMonth(context,subscriberID, networkType);
             rowLine++;
             titles = new String[]{"本月流量已使用(字节)"};
             row = sheet.createRow(rowLine);
@@ -101,10 +102,10 @@ public class PoiTools {
             rowLine++;
             row = sheet.createRow(rowLine);
             cell = row.createCell(0);
-            cell.setCellValue(trafficDataOfThisMonth);
+            cell.setCellValue(trafficDataOfThisMonth.getTotal());
             //rowLine++;
 
-            long trafficDataFromStartDay =bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay,networkType);
+            TransInfo trafficDataFromStartDay =bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay,networkType);
             rowLine++;
             titles = new String[]{"月结日","套餐限额(GB)","从月结日起流量已使用(字节)"};
             row = sheet.createRow(rowLine);
@@ -120,7 +121,7 @@ public class PoiTools {
             cell = row.createCell(1);
             cell.setCellValue(dataPlan);
             cell = row.createCell(2);
-            cell.setCellValue(trafficDataFromStartDay);
+            cell.setCellValue(trafficDataFromStartDay.getTotal());
             rowLine++;rowLine++;rowLine++;
 
             row = sheet.createRow(rowLine);
@@ -205,7 +206,7 @@ public class PoiTools {
             rowLine++;
             String subscriberID ="";
             int networkType=ConnectivityManager.TYPE_WIFI,dataPlanStartDay = 1 ;
-            long trafficDataOfThisMonth =   bucketDao.getTrafficDataOfThisMonth(context,subscriberID, networkType);
+            TransInfo trafficDataOfThisMonth =   bucketDao.getTrafficDataOfThisMonth(context,subscriberID, networkType);
             rowLine++;
             titles = new String[]{"本月流量已使用(字节)"};
             row = sheet.createRow(rowLine);
@@ -217,7 +218,7 @@ public class PoiTools {
             rowLine++;
             row = sheet.createRow(rowLine);
             cell = row.createCell(0);
-            cell.setCellValue(trafficDataOfThisMonth);
+            cell.setCellValue(trafficDataOfThisMonth.getTotal());
             //rowLine++;
 
             rowLine++;rowLine++;rowLine++;

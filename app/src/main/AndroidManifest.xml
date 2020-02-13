@@ -4,6 +4,8 @@
     package="edu.yezh.datatrafficmanager">
 
     <!-- <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> -->
+    <!--<uses-permission android:name="android.permission.MODIFY_PHONE_STATE"
+        tools:ignore="ProtectedPermissions" />-->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission

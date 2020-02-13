@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
@@ -19,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -43,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         if (!hasPermission()) {
             System.out.println("权限情况:"+hasPermission());
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
@@ -89,16 +90,41 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         }
     }
     public void initial(){
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        //toolbar.setNavigationIcon(R.drawable.ic_action_menu);
-        //toolbar.inflateMenu(R.menu.main_menu);
-        toolbar.inflateMenu(R.menu.main_menu);
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), this);
         ViewPager viewPager = findViewById(R.id.view_pager);
         viewPager.setAdapter(sectionsPagerAdapter);
         TabLayout tabs = findViewById(R.id.tabs);
         tabs.setupWithViewPager(viewPager);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.inflateMenu(R.menu.main_menu);
+        //toolbar.inflateMenu(R.menu.main_menu);
+
+        toolbar.setNavigationIcon(R.drawable.ic_action_menu);
+          final DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.drawerLayout);
+          final NavigationView navigationView = (NavigationView)findViewById(R.id.navigationView);
+          System.out.println("drawerLayout是否为空?"+(drawerLayout==null));
+        System.out.println("navigationView是否为空?"+(navigationView==null));
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (drawerLayout.isDrawerOpen(navigationView)){
+                    drawerLayout.closeDrawer(navigationView);
+
+
+                }else{
+
+                    drawerLayout.openDrawer(navigationView);
+
+                }
+
+                System.out.println("drawerLayout是否为空?"+String.valueOf(drawerLayout==null));
+                System.out.println("navigationView是否为空?"+(navigationView==null));
+            }
+        });
     }
     public void getPermission() {
         /*if (ContextCompat.checkSelfPermission((Context) this, "android.permission.READ_PHONE_STATE") != 0 && !ActivityCompat.shouldShowRequestPermissionRationale((Activity) this, "android.permission.READ_PHONE_STATE"))

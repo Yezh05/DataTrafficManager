@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.yezh.datatrafficmanager.model.AppsInfo;
+import edu.yezh.datatrafficmanager.model.TransInfo;
 import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.InstalledAppsInfoTools;
 
@@ -20,7 +21,7 @@ public class BucketDaoImpl implements BucketDao {
 
 
     @Override
-    public long getTrafficDataOfThisMonth(Context context,String subscriberID,int networkType) {
+    public TransInfo getTrafficDataOfThisMonth(Context context,String subscriberID,int networkType) {
         //List<SubscriptionInfo> subscriptionInfoList = getSubscriptionInfoList(context);
         //List<Long> rxBytesList = new ArrayList<Long>();
         //for (SubscriptionInfo info : subscriptionInfoList) {
@@ -29,19 +30,19 @@ public class BucketDaoImpl implements BucketDao {
                 NetworkStats.Bucket bucketThisMonth = null;
                 DateTools dateTools = new DateTools();
                 bucketThisMonth = networkStatsManager.querySummaryForDevice(networkType, subscriberID, dateTools.getTimesMonthmorning(), System.currentTimeMillis());
-                long useBytes = bucketThisMonth.getRxBytes()+bucketThisMonth.getTxBytes();
+                TransInfo useBytes = new TransInfo( bucketThisMonth.getRxBytes(),bucketThisMonth.getTxBytes());
                 /*rxBytesList.add(rxBytes);*/
                 return useBytes;
             } catch (Exception e) {
                 Log.e("严重错误", "错误信息:" + e.toString());
-                return 0;
+                return null;
             }
        // }
         //return  rxBytesList;
     }
 
     @Override
-    public long getTrafficDataFromStartDay(Context context,String subscriberID , int dataPlanStartDay,int networkType) {
+    public TransInfo getTrafficDataFromStartDay(Context context,String subscriberID , int dataPlanStartDay,int networkType) {
         //List<SubscriptionInfo> subscriptionInfoList = getSubscriptionInfoList(context);
         //List<Long> rxBytesList = new ArrayList<Long>();
         //for (SubscriptionInfo info : subscriptionInfoList) {
@@ -50,23 +51,23 @@ public class BucketDaoImpl implements BucketDao {
             NetworkStats.Bucket bucketStartDayToToday = null;
             DateTools dateTools = new DateTools();
             bucketStartDayToToday = networkStatsManager.querySummaryForDevice(networkType,subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis());
-            long useBytesStartDayToToday = bucketStartDayToToday.getRxBytes()+bucketStartDayToToday.getTxBytes();
+            TransInfo useBytesStartDayToToday = new TransInfo( bucketStartDayToToday.getRxBytes(),bucketStartDayToToday.getTxBytes());
             //rxBytesList.add(rxBytesStartDayToToday);
             //Log.e("当前卡流量",String.valueOf(rxBytesStartDayToToday));
             return useBytesStartDayToToday;
         } catch (Exception e) {
             Log.e("严重错误", "错误信息:" + e.toString());
-            return 0;
+            return null;
         }
         //}
         //return rxBytesList;
     }
     @Override
-    public List<Long> getLastSevenDaysTrafficData(Context context, String subscriberID,int networkType) {
-        List<Long> lastSevenDaysTrafficData = new ArrayList<>();
+    public List<TransInfo> getLastSevenDaysTrafficData(Context context, String subscriberID,int networkType) {
+        List<TransInfo> lastSevenDaysTrafficData = new ArrayList<>();
         try {
             NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
-            NetworkStats.Bucket bucket = null;
+            NetworkStats.Bucket bucket;
             DateTools dateTools = new DateTools();
             List<Long> lastSevenDaysStartTimeInMillis = dateTools.getLastSevenDaysStartTimeInMillis();
             List<Long> lastSevenDaysEndTimeInMillis = dateTools.getLastSevenDaysEndTimeInMillis();
@@ -75,7 +76,7 @@ public class BucketDaoImpl implements BucketDao {
 
             for (int i=6;i>=0;i--){
                 bucket = networkStatsManager.querySummaryForDevice(networkType,subscriberID, lastSevenDaysStartTimeInMillis.get(i), lastSevenDaysEndTimeInMillis.get(i));
-                long useBytes = bucket.getRxBytes()+bucket.getTxBytes();
+                TransInfo useBytes = new TransInfo( bucket.getRxBytes(),bucket.getTxBytes());
 
                 //System.out.println("第"+i+"次添加数据："+useBytes);
                 lastSevenDaysTrafficData.add(useBytes);
@@ -96,17 +97,17 @@ public class BucketDaoImpl implements BucketDao {
     @Override
     public Map<String,List<String>> getLastSixMonthsTrafficData(Context context, String subscriberID, int dataPlanStartDay,int networkType) {
         Map<String,List<String>> lastSixMonthsTrafficDataMap=new HashMap<>();
-        List<String> lastSixMonthsTrafficDataList = new ArrayList<>();
         try {
             NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
-            NetworkStats.Bucket bucket = null;
+            NetworkStats.Bucket bucket;
             DateTools dateTools = new DateTools();
             Map<String,List<String>> lastSixMonthsMap = dateTools.getLastSixMonthsMap(dataPlanStartDay);
             List<String> lastSixMonthsStartTimeInMillisList = lastSixMonthsMap.get("StartTimeList");
             List<String> lastSixMonthsEndTimeInMillisList = lastSixMonthsMap.get("EndTimeList");
             List<String> lastSixMonthsStartMonthAndEndMonth = lastSixMonthsMap.get("MonthString");
 
-            for (int i=0;i<6;i++){
+            List<String> lastSixMonthsTrafficDataList = new ArrayList<>();
+            for (int i = 0; i<6; i++){
                 bucket = networkStatsManager.querySummaryForDevice(networkType,subscriberID, Long.valueOf(lastSixMonthsStartTimeInMillisList.get(i)),Long.valueOf(lastSixMonthsEndTimeInMillisList.get(i)));
                 long useBytes = bucket.getRxBytes()+bucket.getTxBytes();
                 lastSixMonthsTrafficDataList.add(String.valueOf(useBytes));

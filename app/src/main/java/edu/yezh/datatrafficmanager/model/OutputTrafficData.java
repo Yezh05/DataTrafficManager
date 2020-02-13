@@ -1,7 +1,8 @@
 package edu.yezh.datatrafficmanager.model;
 
 public class OutputTrafficData {
-    private String value,type;
+    private String value;
+    private String type;
 
     public OutputTrafficData() {
         super();

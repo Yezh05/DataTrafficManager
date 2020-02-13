@@ -52,7 +52,9 @@ import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.adapter.RecyclerViewAppsTrafficDataAdapter;
 import edu.yezh.datatrafficmanager.model.AppsInfo;
+import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.model.SimInfo;
+import edu.yezh.datatrafficmanager.model.TransInfo;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.SimTools;
@@ -173,21 +175,21 @@ public class MyFragment1 extends Fragment {
 
             long rxBytes = bucketThisMonth.getRxBytes();*/
 
-            long rxBytes =bucketDao.getTrafficDataOfThisMonth(context,subscriberID, ConnectivityManager.TYPE_MOBILE);
+            long ThisMonthData =bucketDao.getTrafficDataOfThisMonth(context,subscriberID, ConnectivityManager.TYPE_MOBILE).getTotal();
 
 
-            String readableData = bytesFormatter.getPrintSize(rxBytes);
+            OutputTrafficData readableThisMonthData = bytesFormatter.getPrintSizebyModel(ThisMonthData);
             TextView TextViewData4GThisMonth = view.findViewById(R.id.TextViewData4GThisMonth);
-            TextViewData4GThisMonth.setText(readableData);
+            TextViewData4GThisMonth.setText(Math.round(Double.valueOf(readableThisMonthData.getValue())*100D)/100D + readableThisMonthData.getType());
 
             final int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,1);
             /*bucketStartDayToToday = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE, subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis());
             long rxBytesStartDayToToday = bucketStartDayToToday.getRxBytes();*/
-            long rxBytesStartDayToToday = bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay,ConnectivityManager.TYPE_MOBILE);
+            long rxBytesStartDayToToday = bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay,ConnectivityManager.TYPE_MOBILE).getTotal();
 
-            String readableDataStartDayToToday = bytesFormatter.getPrintSize(rxBytesStartDayToToday);
+            OutputTrafficData readableDataStartDayToToday = bytesFormatter.getPrintSizebyModel(rxBytesStartDayToToday);
             TextView TextViewData4GStartDayToToday = view.findViewById(R.id.TextViewData4GStartDayToToday);
-            TextViewData4GStartDayToToday.setText(readableDataStartDayToToday);
+            TextViewData4GStartDayToToday.setText(  Math.round(Double.valueOf(readableDataStartDayToToday.getValue())*100D)/100D + readableDataStartDayToToday.getType());
 
             float DataUseStatus =  (rxBytesStartDayToToday/( dataPlan * 1024 * 1024 * 1024  ))*100;
             int PercentDataUseStatus= Math.round(DataUseStatus);
@@ -205,13 +207,17 @@ public class MyFragment1 extends Fragment {
 
 
 
-            List<Long> lastSevenDaysTrafficData = bucketDao.getLastSevenDaysTrafficData(context,subscriberID,ConnectivityManager.TYPE_MOBILE);
+            List<TransInfo> lastSevenDaysTrafficData = bucketDao.getLastSevenDaysTrafficData(context,subscriberID,ConnectivityManager.TYPE_MOBILE);
             //System.out.println("传出7日流量数据长度："+lastSevenDaysTrafficData.size());
             /*System.out.println("传出7日流量数据0："+lastSevenDaysTrafficData.get(0));
             System.out.println("传出7日流量数据6："+lastSevenDaysTrafficData.get(6));*/
             /*for (int i=0;i<lastSevenDaysTrafficData.size();i++){
                 System.out.println("传出7日流量数据"+i+":"+lastSevenDaysTrafficData.get(i));
             }*/
+            OutputTrafficData todayUseage =  bytesFormatter.getPrintSizebyModel(lastSevenDaysTrafficData.get(6).getTotal());
+            //System.out.println("本日已使用："+ Math.round(Double.valueOf(todayUseage.getValue())*100D)/100D +todayUseage.getType() );
+            TextView TextViewData4GToday = view.findViewById(R.id.TextViewData4GToday);
+            TextViewData4GToday.setText(Math.round(Double.valueOf(todayUseage.getValue())*100D)/100D +todayUseage.getType());
 
             showChart(view,PercentDataUseStatus,lastSevenDaysTrafficData,dateTools.getLastSevenDays());
 
@@ -291,10 +297,12 @@ public class MyFragment1 extends Fragment {
         Log.w("流量套餐起始日","dataPlanStartDay_"+subscriberID+" : "+dataPlanStartDay);
         TextView TextViewDataPlan = (TextView) view.findViewById(R.id.TextViewDataPlan);
         TextViewDataPlan.setText(dataPlan.toString()+"GB");
+        TextView TextViewDataPlanStartDay = view.findViewById(R.id.TextViewDataPlanStartDay);
+        TextViewDataPlanStartDay.setText("每月"+dataPlanStartDay+"日");
         return dataPlan;
     }
 
-    private void showChart(View view, int PercentDataUseStatus, List<Long> lastSevenDaysTrafficData, List<Integer> lastSevenDays){
+    private void showChart(View view, int PercentDataUseStatus, List<TransInfo> lastSevenDaysTrafficData, List<Integer> lastSevenDays){
         BytesFormatter bytesFormatter = new BytesFormatter();
         PieChart pieChart = (PieChart)view.findViewById(R.id.Chart1);
         List yVals = new ArrayList<>();
@@ -338,7 +346,7 @@ public class MyFragment1 extends Fragment {
 
         final String[] Xvalues = new String[lastSevenDays.size()];
         for (int i=0;i<lastSevenDays.size();i++){
-            values.add(new Entry(i,lastSevenDaysTrafficData.get(i)));
+            values.add(new Entry(i,lastSevenDaysTrafficData.get(i).getTotal()));
             Xvalues[i]= lastSevenDays.get(i) + "日" ;
         }
 
@@ -387,7 +395,7 @@ public class MyFragment1 extends Fragment {
     /*
      * 显示实时下载速度
      * */
-    void showRealTimeNetSpeed(View view){
+    public void showRealTimeNetSpeed(View view){
         final BytesFormatter bytesFormatter = new BytesFormatter();
         final long [] RXOld = new long [2];
         handler = new Handler();
@@ -412,8 +420,10 @@ public class MyFragment1 extends Fragment {
                     //view1 = (TextView) view.findViewById(R.id.view1);
                     //view1.setText("Current Data Rate per second= " + currentDataRate);
                     // System.out.println("Current Data Rate per second= " + bytesFormatter.getPrintSize(currentDataRate));
-                    textViewRealTimeTxSpeed.setText("上传:" + bytesFormatter.getPrintSize(currentTxDataRate) + "/s");
-                    textViewRealTimeRxSpeed.setText("下载:" + bytesFormatter.getPrintSize(currentRxDataRate) + "/s");
+                    OutputTrafficData dataRealTimeTxSpeed = bytesFormatter.getPrintSizebyModel(currentTxDataRate);
+                    OutputTrafficData dataRealTimeRxSpeed = bytesFormatter.getPrintSizebyModel(currentRxDataRate);
+                    textViewRealTimeTxSpeed.setText( Math.round(Double.valueOf(dataRealTimeTxSpeed.getValue())) + dataRealTimeTxSpeed.getType() + "/s");
+                    textViewRealTimeRxSpeed.setText( Math.round(Double.valueOf(dataRealTimeRxSpeed.getValue())) + dataRealTimeRxSpeed.getType() + "/s");
                     RXOld[0] = overTxTraffic;
                     RXOld[1] = overRxTraffic;
                 } else {
@@ -434,7 +444,7 @@ public class MyFragment1 extends Fragment {
         SharedPreferences sp = context.getSharedPreferences("TrafficManager",MODE_PRIVATE);
         appsMAXTraffic = sp.getInt("AppsMAXTraffic",-1);
         System.out.println("每日应用流量限额："+appsMAXTraffic+"MB");
-        TextView TextViewAppTrafficDataWarning = (TextView) view.findViewById(R.id.TextViewAppTrafficDataWarning);
+        TextView TextViewAppTrafficDataWarning = view.findViewById(R.id.TextViewAppTrafficDataWarning);
         String textViewString = "你还没设置APP每日使用限额";
         if (appsMAXTraffic!=-1){
             textViewString = "";
@@ -442,14 +452,19 @@ public class MyFragment1 extends Fragment {
             BucketDao bucketDao = new BucketDaoImpl();
             List<AppsInfo> installedAppsTodayTrafficDataList = bucketDao.getInstalledAppsTodayTrafficData(context,subscriberID,ConnectivityManager.TYPE_MOBILE);
             int flag=0;
-            for (AppsInfo i:installedAppsTodayTrafficDataList){
+            for (int k=0;k<installedAppsTodayTrafficDataList.size();k++){
+                AppsInfo i=installedAppsTodayTrafficDataList.get(k);
                 String name = i.getName();
                 long rxBytes = i.getRxBytes();
                 long txBytes = i.getTxBytes();
                 long allBytes = rxBytes+txBytes;
                 if(allBytes>=(appsMAXTraffic*1024*1024)){
+                    if (flag!=0){
+                        textViewString+="\n";
+                    }
                     flag++;
-                    textViewString+=name+" 使用了"+bytesFormatter.getPrintSize(allBytes)+" 超过了设置阀值\n";
+                    OutputTrafficData dataAppTodayUseageOutofLimit = bytesFormatter.getPrintSizebyModel(allBytes);
+                    textViewString+=name+" 使用了"+Math.round(Double.valueOf(dataAppTodayUseageOutofLimit.getValue())*100D)/100D + dataAppTodayUseageOutofLimit.getType()+" 超过了设置阀值";
                 }
             }
             if (flag==0){

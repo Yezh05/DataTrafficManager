@@ -258,7 +258,6 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:background="#F8F8FF"
                     android:layout_marginLeft="5dp">
 
                     <TextView
@@ -288,7 +287,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="120dp"
                     android:layout_weight="1"
-                    android:background="#F8F8FF"
                     android:layout_marginRight="5dp"/>
 
             </LinearLayout>

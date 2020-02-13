@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         toolbar.inflateMenu(R.menu.main_menu);
         //toolbar.inflateMenu(R.menu.main_menu);
 
-        toolbar.setNavigationIcon(R.drawable.ic_action_menu);
+        /*toolbar.setNavigationIcon(R.drawable.ic_action_menu);
           final DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.drawerLayout);
           final NavigationView navigationView = (NavigationView)findViewById(R.id.navigationView);
           System.out.println("drawerLayout是否为空?"+(drawerLayout==null));
@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 System.out.println("drawerLayout是否为空?"+String.valueOf(drawerLayout==null));
                 System.out.println("navigationView是否为空?"+(navigationView==null));
             }
-        });
+        });*/
     }
     public void getPermission() {
         /*if (ContextCompat.checkSelfPermission((Context) this, "android.permission.READ_PHONE_STATE") != 0 && !ActivityCompat.shouldShowRequestPermissionRationale((Activity) this, "android.permission.READ_PHONE_STATE"))

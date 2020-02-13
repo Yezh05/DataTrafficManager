@@ -57,6 +57,7 @@ import edu.yezh.datatrafficmanager.model.SimInfo;
 import edu.yezh.datatrafficmanager.model.TransInfo;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
+import edu.yezh.datatrafficmanager.tools.NotificationTools;
 import edu.yezh.datatrafficmanager.tools.SimTools;
 import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 
@@ -204,20 +205,18 @@ public class MyFragment1 extends Fragment {
             TextView TextViewDataUseStatus = (TextView)view.findViewById(R.id.TextViewDataUseStatus);
             TextViewDataUseStatus.setText( String.valueOf(PercentDataUseStatus)+"%\n"+ TextDataUseStatus );
 
-
-
-
             List<TransInfo> lastSevenDaysTrafficData = bucketDao.getLastSevenDaysTrafficData(context,subscriberID,ConnectivityManager.TYPE_MOBILE);
-            //System.out.println("传出7日流量数据长度："+lastSevenDaysTrafficData.size());
-            /*System.out.println("传出7日流量数据0："+lastSevenDaysTrafficData.get(0));
-            System.out.println("传出7日流量数据6："+lastSevenDaysTrafficData.get(6));*/
-            /*for (int i=0;i<lastSevenDaysTrafficData.size();i++){
-                System.out.println("传出7日流量数据"+i+":"+lastSevenDaysTrafficData.get(i));
-            }*/
             OutputTrafficData todayUseage =  bytesFormatter.getPrintSizebyModel(lastSevenDaysTrafficData.get(6).getTotal());
-            //System.out.println("本日已使用："+ Math.round(Double.valueOf(todayUseage.getValue())*100D)/100D +todayUseage.getType() );
+
             TextView TextViewData4GToday = view.findViewById(R.id.TextViewData4GToday);
             TextViewData4GToday.setText(Math.round(Double.valueOf(todayUseage.getValue())*100D)/100D +todayUseage.getType());
+
+            NotificationTools notificationTools = new NotificationTools();
+            notificationTools.setNotification(context,
+                    "今日 "+Math.round(Double.valueOf(todayUseage.getValue())) +todayUseage.getType()+"   "
+                        +"剩余 "+Math.round(dataPlan-Double.valueOf(readableDataStartDayToToday.getValue())) + readableDataStartDayToToday.getType()+"   "
+                        +"总量 "+Math.round(dataPlan)+"GB"
+            ,TextDataUseStatus);
 
             showChart(view,PercentDataUseStatus,lastSevenDaysTrafficData,dateTools.getLastSevenDays());
 
@@ -310,18 +309,23 @@ public class MyFragment1 extends Fragment {
         yVals.add(new PieEntry(PercentDataUseStatus, PercentDataUseStatus+"%已使用"));
 
         List colors = new ArrayList<>();
-        colors.add(Color.parseColor("#4A92FC"));
-        colors.add(Color.parseColor("#ee6e55"));
-
+        /*colors.add(Color.parseColor("#4A92FC"));
+        colors.add(Color.parseColor("#ee6e55"));*/
+        /*colors.add(Color.parseColor("#66CC66"));
+        colors.add(Color.parseColor("#CCFF99"));*/
+        colors.add(Color.parseColor("#009688"));
+        colors.add(Color.parseColor("#20B2AA"));
         PieDataSet pieDataSet = new PieDataSet(yVals, "已使用流量");
         pieDataSet.setColors(colors);
         //pieDataSet.setValueFormatter(new PercentFormatter());
         pieDataSet.setDrawValues(false);
         pieDataSet.setValueTextSize(12f);
         pieDataSet.setValueTextColor(Color.parseColor("#FFFFFF"));
+        //pieDataSet
         PieData pieData = new PieData(pieDataSet);
         Description description = new Description();
         description.setText("");
+        pieChart.setEntryLabelColor(Color.parseColor("#114242"));
         pieChart.setDescription(description);
         pieChart.setData(pieData);
         pieChart.getLegend().setEnabled(false);
@@ -330,26 +334,14 @@ public class MyFragment1 extends Fragment {
 
 
         LineChart lineChart = view.findViewById(R.id.LineChartLastSevenDaysTrafficData);
-
         final ArrayList<Entry> values = new ArrayList<>();
-        /*values.add(new Entry(5, 50));
-        values.add(new Entry(10, 66));
-        values.add(new Entry(15, 120));
-        values.add(new Entry(20, 30));
-        values.add(new Entry(35, 10));
-        values.add(new Entry(40, 110));
-        values.add(new Entry(45, 30));
-        values.add(new Entry(50, 160));
-        values.add(new Entry(100, 30));*/
-
-
+        /*values.add(new Entry(100, 30));*/
 
         final String[] Xvalues = new String[lastSevenDays.size()];
         for (int i=0;i<lastSevenDays.size();i++){
             values.add(new Entry(i,lastSevenDaysTrafficData.get(i).getTotal()));
             Xvalues[i]= lastSevenDays.get(i) + "日" ;
         }
-
 
         IAxisValueFormatter formatter = new IAxisValueFormatter() {
             @Override
@@ -358,7 +350,6 @@ public class MyFragment1 extends Fragment {
             }
 
         };
-
 
         LineDataSet lineDataSet = new LineDataSet(values,"数据");
         //lineDataSet.setValues(values);

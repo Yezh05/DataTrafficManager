@@ -2,12 +2,19 @@ package edu.yezh.datatrafficmanager;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,6 +25,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -38,11 +46,13 @@ import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.tools.PoiTools;
 
+import static android.content.Context.NOTIFICATION_SERVICE;
+
 
 public class MyFragment3 extends Fragment {
     public MyFragment3() {
     }
-
+    int i =0 ;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.t3, container, false);
@@ -91,6 +101,15 @@ public class MyFragment3 extends Fragment {
             @Override
             public void onClick(View v) {
                 setMobileDataState(context,false);
+            }
+        });*/
+
+        /*Button ButtonNotice = view.findViewById(R.id.ButtonNotice);
+        ButtonNotice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setNotification(context,String.valueOf(i),"message");
+                i++;
             }
         });*/
 
@@ -149,17 +168,5 @@ public class MyFragment3 extends Fragment {
         }
     }
 
-
-    /*public void setMobileDataState(Context context, boolean enabled) {
-        TelephonyManager telephonyService = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        try {
-            Method setDataEnabled = telephonyService.getClass().getDeclaredMethod("setDataEnabled",boolean.class);
-            if (null != setDataEnabled) {
-                setDataEnabled.invoke(telephonyService, enabled);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
 
 }

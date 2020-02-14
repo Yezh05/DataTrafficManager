@@ -211,8 +211,8 @@ public class MyFragment1 extends Fragment {
             TextView TextViewData4GToday = view.findViewById(R.id.TextViewData4GToday);
             TextViewData4GToday.setText(Math.round(Double.valueOf(todayUseage.getValue())*100D)/100D +todayUseage.getType());
 
-            System.out.println("dataPlanBytes:"+Math.round(dataPlan* 1024D * 1024D * 1024D));
-            System.out.println("rxBytesStartDayToToday:"+rxBytesStartDayToToday);
+            //System.out.println("dataPlanBytes:"+Math.round(dataPlan* 1024D * 1024D * 1024D));
+            //System.out.println("rxBytesStartDayToToday:"+rxBytesStartDayToToday);
             OutputTrafficData restTrafficDataAmount = bytesFormatter.getPrintSizebyModel(Math.round(dataPlan* 1024D * 1024D * 1024D) - rxBytesStartDayToToday);
 
             NotificationTools.setNotification(context,
@@ -439,7 +439,7 @@ public class MyFragment1 extends Fragment {
         int appsMAXTraffic = -1;
         SharedPreferences sp = context.getSharedPreferences("TrafficManager",MODE_PRIVATE);
         appsMAXTraffic = sp.getInt("AppsMAXTraffic",-1);
-        System.out.println("每日应用流量限额："+appsMAXTraffic+"MB");
+        //System.out.println("每日应用流量限额："+appsMAXTraffic+"MB");
         TextView TextViewAppTrafficDataWarning = view.findViewById(R.id.TextViewAppTrafficDataWarning);
         String textViewString = "你还没设置APP每日使用限额";
         if (appsMAXTraffic!=-1){

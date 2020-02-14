@@ -316,7 +316,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="显示近6个月流量数据"
-                android:gravity="center"/>
+                android:gravity="center"
+
+                android:layout_margin="5dp"
+                android:background="@drawable/btn_shape1"
+                />
             <!--<Button
                 android:id="@+id/diu"
                 android:layout_width="wrap_content"

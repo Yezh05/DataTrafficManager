@@ -39,10 +39,10 @@
         android:text="导出使用数据到文件"
         />
     <Button
-        android:id="@+id/ButtonNotice"
+        android:id="@+id/ButtonOutputDataToFTP"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="通知栏测试"
+        android:text="导出使用数据到服务器"
         />
     </LinearLayout>
 </RelativeLayout>

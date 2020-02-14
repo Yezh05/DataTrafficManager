@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
         String PERMISSION_STORAGE_MSG = "请授予权限，否则影响部分使用功能";
         int PERMISSION_STORAGE_CODE = 10001;
-        String[] PERMS = {Manifest.permission.READ_PHONE_STATE};
+        String[] PERMS = {Manifest.permission.READ_PHONE_STATE,Manifest.permission.INTERNET};
         if (EasyPermissions.hasPermissions(this, PERMS)) {
             // 已经申请过权限，做想做的事
             initial();

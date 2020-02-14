@@ -17,16 +17,16 @@ import edu.yezh.datatrafficmanager.R;
 import static android.content.Context.NOTIFICATION_SERVICE;
 
 public class NotificationTools {
-    public void setNotification(Context context, String title, String message) {
+    public static void setNotification(Context context, String title, String message) {
 
         String id = "my_channel_01";
-        String name="我是渠道名字";
+        String name="流量使用通知";
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         Notification notification = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel mChannel = new NotificationChannel(id, name, NotificationManager.IMPORTANCE_LOW);
-            Toast.makeText(context, mChannel.toString(), Toast.LENGTH_SHORT).show();
-            System.out.println(mChannel.toString());
+            //Toast.makeText(context, mChannel.toString(), Toast.LENGTH_SHORT).show();
+            //System.out.println(mChannel.toString());
             notificationManager.createNotificationChannel(mChannel);
             Intent intent = new Intent(context, MainActivity.class);
             PendingIntent pendingIntent=PendingIntent.getActivity(context,0,intent,0)  ;

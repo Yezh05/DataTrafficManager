@@ -211,10 +211,13 @@ public class MyFragment1 extends Fragment {
             TextView TextViewData4GToday = view.findViewById(R.id.TextViewData4GToday);
             TextViewData4GToday.setText(Math.round(Double.valueOf(todayUseage.getValue())*100D)/100D +todayUseage.getType());
 
-            NotificationTools notificationTools = new NotificationTools();
-            notificationTools.setNotification(context,
+            System.out.println("dataPlanBytes:"+Math.round(dataPlan* 1024D * 1024D * 1024D));
+            System.out.println("rxBytesStartDayToToday:"+rxBytesStartDayToToday);
+            OutputTrafficData restTrafficDataAmount = bytesFormatter.getPrintSizebyModel(Math.round(dataPlan* 1024D * 1024D * 1024D) - rxBytesStartDayToToday);
+
+            NotificationTools.setNotification(context,
                     "今日 "+Math.round(Double.valueOf(todayUseage.getValue())) +todayUseage.getType()+"   "
-                        +"剩余 "+Math.round(dataPlan-Double.valueOf(readableDataStartDayToToday.getValue())) + readableDataStartDayToToday.getType()+"   "
+                        +"剩余 "+Math.round(Double.valueOf(restTrafficDataAmount.getValue())) + restTrafficDataAmount.getType()+"   "
                         +"总量 "+Math.round(dataPlan)+"GB"
             ,TextDataUseStatus);
 
@@ -255,6 +258,8 @@ public class MyFragment1 extends Fragment {
             e.printStackTrace();
         }
     }
+
+
     /*流量套餐限额设置框*/
     private void openEditViewAlert(final String subscriberID){
         final Context context = this.getContext();

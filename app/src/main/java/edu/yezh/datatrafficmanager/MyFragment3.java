@@ -33,20 +33,23 @@ import com.google.android.material.snackbar.Snackbar;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
+import edu.yezh.datatrafficmanager.tools.FtpFileTool;
 import edu.yezh.datatrafficmanager.tools.PoiTools;
-
-import static android.content.Context.NOTIFICATION_SERVICE;
 
 
 public class MyFragment3 extends Fragment {
@@ -96,13 +99,19 @@ public class MyFragment3 extends Fragment {
             }
         });
 
-        /*Button buttonClose4G = view.findViewById(R.id.ButtonClose4G);
+        Button buttonClose4G = view.findViewById(R.id.ButtonOutputDataToFTP);
         buttonClose4G.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setMobileDataState(context,false);
+                //outputDataToFTP(view,context);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        outputDataToFTP(view,context);
+                    }
+                }).start();
             }
-        });*/
+        });
 
         /*Button ButtonNotice = view.findViewById(R.id.ButtonNotice);
         ButtonNotice.setOnClickListener(new View.OnClickListener() {
@@ -138,9 +147,13 @@ public class MyFragment3 extends Fragment {
     private void outputDataToFile(View view, Context context) {
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Calendar dayCal = Calendar.getInstance();
-            String nowtime = "" + dayCal.get(Calendar.YEAR) + (dayCal.get(Calendar.MONTH) + 1) + dayCal.get(Calendar.DATE) + dayCal.get(Calendar.HOUR_OF_DAY) + dayCal.get(Calendar.MINUTE) + dayCal.get(Calendar.SECOND);
-            String pathString = context.getExternalFilesDir("").getAbsolutePath() + "/a" + nowtime + ".xls";
+            //Calendar dayCal = Calendar.getInstance();
+            //String nowtime = "" + dayCal.get(Calendar.YEAR) + (dayCal.get(Calendar.MONTH) + 1) + dayCal.get(Calendar.DATE) + dayCal.get(Calendar.HOUR_OF_DAY) + dayCal.get(Calendar.MINUTE) + dayCal.get(Calendar.SECOND);
+            Date date=new Date();
+            SimpleDateFormat formatter=new SimpleDateFormat("yyyyMMddHHmmss");
+            String nowtime=formatter.format(date);
+
+            String pathString = context.getExternalFilesDir("").getAbsolutePath() + "/TrafficData_" + nowtime + ".xls";
             Path path = Paths.get(pathString);
             //创建文件
             if (!Files.exists(path)) {
@@ -156,10 +169,11 @@ public class MyFragment3 extends Fragment {
                 /*byte bytes[] = "DIU1".getBytes();
                 Files.write(path,bytes);*/
 
-                HSSFWorkbook wb = PoiTools.getHSSFWorkbook(null,context);
+                final HSSFWorkbook wb = PoiTools.getHSSFWorkbook(null,context);
                 wb.write(fos);
                 fos.flush();
                 fos.close();
+
                 Snackbar.make(view, "导出成功", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             } catch (Exception e) {
@@ -167,6 +181,57 @@ public class MyFragment3 extends Fragment {
             }
         }
     }
+    private void outputDataToFTP(View view, Context context) {
+
+        //if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            //Calendar dayCal = Calendar.getInstance();
+            //String nowtime = "" + dayCal.get(Calendar.YEAR) + (dayCal.get(Calendar.MONTH) + 1) + dayCal.get(Calendar.DATE) + dayCal.get(Calendar.HOUR_OF_DAY) + dayCal.get(Calendar.MINUTE) + dayCal.get(Calendar.SECOND);
+            Date date=new Date();
+            SimpleDateFormat formatter=new SimpleDateFormat("yyyyMMddHHmmss");
+            String nowtime=formatter.format(date);
+
+            /*String pathString = context.getExternalFilesDir("").getAbsolutePath() + "/TrafficData_" + nowtime + ".xls";
+            Path path = Paths.get(pathString);
+            //创建文件
+            if (!Files.exists(path)) {
+                try {
+                    Files.createFile(path);
+                } catch (Exception e) {
+                    Log.e("严重错误", e.toString());
+                }
+            }*/
+            try {
+                //FileOutputStream fos = new FileOutputStream(pathString,false);
+                //OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
+                /*byte bytes[] = "DIU1".getBytes();
+                Files.write(path,bytes);*/
+
+                final HSSFWorkbook wb = PoiTools.getHSSFWorkbook(null,context);
+                /*wb.write(fos);
+                fos.flush();
+                fos.close();*/
+
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                wb.write(bos);
+                bos.flush();
+                InputStream inputStream = new ByteArrayInputStream(bos.toByteArray());
+                bos.close();
+
+                boolean flag = FtpFileTool.uploadFile("119.3.181.85",21,"Administrator","Yezhonghan43","/TrafficManagerData/","TD_" + nowtime + ".xls",inputStream);
+
+                System.out.println("FTP上传状态:"+(flag));
+                if (flag==true){
+                Snackbar.make(view, "导出成功", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();}else{
+                    Snackbar.make(view, "导出错误", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+            } catch (Exception e) {
+                Log.e("严重错误", e.toString());
+            }
+        }
+    //}
+
 
 
 }

@@ -46,7 +46,7 @@ public class SimTools {
             SimInfo simInfo = new SimInfo(info,subscriberId);
             list.add(simInfo);
         }
-        Log.d("Sim卡信息","Sim卡数量:"+subscriptionInfolist.size());
+        //Log.d("Sim卡信息","Sim卡数量:"+subscriptionInfolist.size());
         return list;
     }
 
@@ -70,7 +70,7 @@ public class SimTools {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.e("Q_M", "IMSI--" + imsi);
+        //Log.e("Q_M", "IMSI--" + imsi);
         return imsi;
     }
 }

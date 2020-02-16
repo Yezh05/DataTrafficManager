@@ -27,6 +27,7 @@ import android.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -64,6 +65,7 @@ import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 import static android.content.Context.MODE_PRIVATE;
 
 public class MyFragment1 extends Fragment {
+    final int networkType = ConnectivityManager.TYPE_MOBILE;
     private Handler handler;
     public MyFragment1() {
     }
@@ -176,7 +178,7 @@ public class MyFragment1 extends Fragment {
 
             long rxBytes = bucketThisMonth.getRxBytes();*/
 
-            long ThisMonthData =bucketDao.getTrafficDataOfThisMonth(context,subscriberID, ConnectivityManager.TYPE_MOBILE).getTotal();
+            long ThisMonthData =bucketDao.getTrafficDataOfThisMonth(context,subscriberID, networkType).getTotal();
 
 
             OutputTrafficData readableThisMonthData = bytesFormatter.getPrintSizebyModel(ThisMonthData);
@@ -186,7 +188,7 @@ public class MyFragment1 extends Fragment {
             final int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,1);
             /*bucketStartDayToToday = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE, subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis());
             long rxBytesStartDayToToday = bucketStartDayToToday.getRxBytes();*/
-            long rxBytesStartDayToToday = bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay,ConnectivityManager.TYPE_MOBILE).getTotal();
+            long rxBytesStartDayToToday = bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay,networkType).getTotal();
 
             OutputTrafficData readableDataStartDayToToday = bytesFormatter.getPrintSizebyModel(rxBytesStartDayToToday);
             TextView TextViewData4GStartDayToToday = view.findViewById(R.id.TextViewData4GStartDayToToday);
@@ -205,7 +207,7 @@ public class MyFragment1 extends Fragment {
             TextView TextViewDataUseStatus = (TextView)view.findViewById(R.id.TextViewDataUseStatus);
             TextViewDataUseStatus.setText( String.valueOf(PercentDataUseStatus)+"%\n"+ TextDataUseStatus );
 
-            List<TransInfo> lastSevenDaysTrafficData = bucketDao.getLastSevenDaysTrafficData(context,subscriberID,ConnectivityManager.TYPE_MOBILE);
+            List<TransInfo> lastSevenDaysTrafficData = bucketDao.getLastSevenDaysTrafficData(context,subscriberID,networkType);
             OutputTrafficData todayUseage =  bytesFormatter.getPrintSizebyModel(lastSevenDaysTrafficData.get(6).getTotal());
 
             TextView TextViewData4GToday = view.findViewById(R.id.TextViewData4GToday);
@@ -223,11 +225,12 @@ public class MyFragment1 extends Fragment {
 
             showChart(view,PercentDataUseStatus,lastSevenDaysTrafficData,dateTools.getLastSevenDays());
 
-            RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getInstalledAppsTrafficData(context,subscriberID,dataPlanStartDay,ConnectivityManager.TYPE_MOBILE),context);
+            RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getInstalledAppsTrafficData(context,subscriberID,dataPlanStartDay,networkType),context,subscriberID,networkType);
             RecyclerView RecyclerViewAppsTrafficData = view.findViewById(R.id.RecyclerViewAppsTrafficData);
             RecyclerViewAppsTrafficData.setAdapter(recyclerViewAppsTrafficDataAdapter);
             LinearLayoutManager layoutManager = new LinearLayoutManager(context);
             layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+            RecyclerViewAppsTrafficData.addItemDecoration(new DividerItemDecoration(context,DividerItemDecoration.VERTICAL));
             RecyclerViewAppsTrafficData.setLayoutManager(layoutManager);
 
             showAppTrafficDataWarning(context,view,subscriberID);
@@ -247,7 +250,7 @@ public class MyFragment1 extends Fragment {
                     Bundle bundle = new Bundle();
                     bundle.putString("subscriberID",subscriberID);
                     bundle.putInt("dataPlanStartDay",dataPlanStartDay);
-                    bundle.putInt("networkType",ConnectivityManager.TYPE_MOBILE);
+                    bundle.putInt("networkType",networkType);
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }
@@ -446,7 +449,7 @@ public class MyFragment1 extends Fragment {
             textViewString = "";
             final BytesFormatter bytesFormatter = new BytesFormatter();
             BucketDao bucketDao = new BucketDaoImpl();
-            List<AppsInfo> installedAppsTodayTrafficDataList = bucketDao.getInstalledAppsTodayTrafficData(context,subscriberID,ConnectivityManager.TYPE_MOBILE);
+            List<AppsInfo> installedAppsTodayTrafficDataList = bucketDao.getInstalledAppsTodayTrafficData(context,subscriberID,networkType);
             int flag=0;
             for (int k=0;k<installedAppsTodayTrafficDataList.size();k++){
                 AppsInfo i=installedAppsTodayTrafficDataList.get(k);

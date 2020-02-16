@@ -46,6 +46,7 @@ import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 import static android.content.Context.NETWORK_STATS_SERVICE;
 
 public class MyFragment2 extends Fragment {
+    final int networkType = ConnectivityManager.TYPE_WIFI;
     public MyFragment2() {
     }
 
@@ -87,8 +88,8 @@ public class MyFragment2 extends Fragment {
 
 
         DateTools dateTools = new DateTools();
-        try {bucket = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_WIFI, "", dateTools.getTimesMonthmorning(), System.currentTimeMillis());
-            Log.i("Info", "Total: " + (bucket.getRxBytes() + bucket.getTxBytes()));
+        try {bucket = networkStatsManager.querySummaryForDevice(networkType, "", dateTools.getTimesMonthmorning(), System.currentTimeMillis());
+            //Log.i("Info", "Total: " + (bucket.getRxBytes() + bucket.getTxBytes()));
             long rxBytes = bucket.getRxBytes();
             BytesFormatter bytesFormatter = new BytesFormatter();
             OutputTrafficData todayUseageReadableData = bytesFormatter.getPrintSizebyModel(rxBytes);
@@ -106,7 +107,7 @@ public class MyFragment2 extends Fragment {
         myFragment1.showRealTimeNetSpeed(view);
 
 
-        RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getInstalledAppsTrafficData(context,subscriberID,dataPlanStartDay,ConnectivityManager.TYPE_WIFI),context);
+        RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getInstalledAppsTrafficData(context,subscriberID,dataPlanStartDay,networkType),context,subscriberID,networkType);
         RecyclerView RecyclerViewAppsTrafficData = (RecyclerView) view.findViewById(R.id.RecyclerViewAppsTrafficData);
         RecyclerViewAppsTrafficData.setAdapter(recyclerViewAppsTrafficDataAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
@@ -114,7 +115,7 @@ public class MyFragment2 extends Fragment {
         RecyclerViewAppsTrafficData.setLayoutManager(layoutManager);
 
 
-        List<TransInfo> lastSevenDaysTrafficData = bucketDao.getLastSevenDaysTrafficData(context, "", ConnectivityManager.TYPE_WIFI);
+        List<TransInfo> lastSevenDaysTrafficData = bucketDao.getLastSevenDaysTrafficData(context, subscriberID, networkType);
         showChart(view, lastSevenDaysTrafficData, dateTools.getLastSevenDays());
         Button buttonShowLastSixMonthTrafficData = (Button) view.findViewById(R.id.ButtonShowLastSixMonthTrafficData);
         buttonShowLastSixMonthTrafficData.setOnClickListener(new View.OnClickListener() {
@@ -124,7 +125,7 @@ public class MyFragment2 extends Fragment {
                 Bundle bundle = new Bundle();
                 bundle.putString("subscriberID",subscriberID);
                 bundle.putInt("dataPlanStartDay",dataPlanStartDay);
-                bundle.putInt("networkType",ConnectivityManager.TYPE_WIFI);
+                bundle.putInt("networkType",networkType);
                 intent.putExtras(bundle);
                 startActivity(intent);
             }

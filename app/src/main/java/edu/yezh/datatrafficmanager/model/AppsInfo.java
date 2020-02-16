@@ -2,7 +2,9 @@ package edu.yezh.datatrafficmanager.model;
 
 import android.graphics.drawable.Drawable;
 
-public class AppsInfo {
+import java.io.Serializable;
+
+public class AppsInfo implements Serializable {
     private String uid;
     private String packageName;
     private String name;

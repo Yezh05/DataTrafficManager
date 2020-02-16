@@ -18,5 +18,6 @@ public interface BucketDao {
     public Map<String,List<String>> getLastSixMonthsTrafficData(Context context, String subscriberID, int dataPlanStartDay,int networkType);
     public List<AppsInfo> getInstalledAppsTrafficData(Context context, String subscriberID , int dataPlanStartDay, int networkType);
     public List<AppsInfo> getInstalledAppsTodayTrafficData(Context context,String subscriberID ,int networkType);
-
+    public TransInfo getTrafficDataOfApp(Context context, String subscriberID, int networkType,long startTime,long endTime,int uid);
+    public List<TransInfo> getAppTrafficDataForPeriod(Context context, String subscriberID, int networkType,Map<String,List<Long>> timeMap,int uid);
 }

@@ -24,7 +24,7 @@ public class DateTools {
         Calendar cal = Calendar.getInstance();
         cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
-        Log.d("thismounthtime",cal.getTime().toString());
+        //Log.d("thismounthtime",cal.getTime().toString());
         Long time = cal.getTimeInMillis();
         return time;
     }
@@ -155,4 +155,81 @@ public class DateTools {
         //System.out.println( lastSixMonthsMap.toString());
         return lastSixMonthsMap;
     }
+    public Map<String,List<Long>> getLastThirtyDaysMap(){
+        List<Long> lastThirtyDaysStartTimeInMillis=new ArrayList<>();
+        List<Long> lastThirtyDaysNo = new ArrayList<>();
+        Calendar dayCal = Calendar.getInstance();
+        dayCal.set(Calendar.HOUR_OF_DAY, 00);
+        dayCal.set(Calendar.MINUTE, 0);
+        dayCal.set(Calendar.SECOND, 0);
+        dayCal.set(Calendar.MILLISECOND, 0);
+        lastThirtyDaysStartTimeInMillis.add(dayCal.getTimeInMillis());
+        lastThirtyDaysNo.add(new Long(dayCal.get(Calendar.DATE)));
+        for (int i = 0; i < 29; i++) {
+            dayCal.add(Calendar.DATE, -(1));
+            lastThirtyDaysNo.add(new Long(dayCal.get(Calendar.DATE)));
+            lastThirtyDaysStartTimeInMillis.add(dayCal.getTimeInMillis());
+        }
+
+        List<Long> lastThirtyDaysEndTimeInMillis=new ArrayList<>();
+        dayCal = Calendar.getInstance();
+        dayCal.set(Calendar.HOUR_OF_DAY, 23);
+        dayCal.set(Calendar.MINUTE, 59);
+        dayCal.set(Calendar.SECOND, 59);
+        dayCal.set(Calendar.MILLISECOND, 999);
+        lastThirtyDaysEndTimeInMillis.add(dayCal.getTimeInMillis());
+        for (int i = 0; i < 29; i++) {
+            dayCal.add(Calendar.DATE, -(1));
+            //System.out.println(dayCal.getTime());
+            lastThirtyDaysEndTimeInMillis.add(dayCal.getTimeInMillis());
+        }
+        Map<String,List<Long>> lastThirtyDaysMap = new HashMap<>();
+        lastThirtyDaysMap.put("StartTimeList",lastThirtyDaysStartTimeInMillis);
+        lastThirtyDaysMap.put("EndTimeList",lastThirtyDaysEndTimeInMillis);
+        lastThirtyDaysMap.put("No",lastThirtyDaysNo);
+        //System.out.println("lastThirtyDaysMap.size:"+lastThirtyDaysEndTimeInMillis.size());
+        return lastThirtyDaysMap;
+    }
+
+    public Map<String,List<Long>> getLastTwentyFourHoursMap(){
+        List<Long> lastTwentyFourHoursStartTimeInMillis=new ArrayList<>();
+        List<Long> lastTwentyFourHoursNo = new ArrayList<>();
+        Calendar dayCal = Calendar.getInstance();
+        //dayCal.set(Calendar.HOUR_OF_DAY, 00);
+        dayCal.set(Calendar.MINUTE, 0);
+        dayCal.set(Calendar.SECOND, 0);
+        dayCal.set(Calendar.MILLISECOND, 0);
+        lastTwentyFourHoursStartTimeInMillis.add(dayCal.getTimeInMillis());
+        lastTwentyFourHoursNo.add(new Long(dayCal.get(Calendar.HOUR_OF_DAY)));
+        for (int i = 0; i < 23; i++) {
+            dayCal.add(Calendar.HOUR_OF_DAY, -(1));
+            lastTwentyFourHoursNo.add(new Long(dayCal.get(Calendar.HOUR_OF_DAY)));
+            lastTwentyFourHoursStartTimeInMillis.add(dayCal.getTimeInMillis());
+        }
+
+        List<Long> lastTwentyFourHoursEndTimeInMillis=new ArrayList<>();
+        dayCal = Calendar.getInstance();
+        //dayCal.set(Calendar.HOUR_OF_DAY, 23);
+        dayCal.set(Calendar.MINUTE, 59);
+        dayCal.set(Calendar.SECOND, 59);
+        dayCal.set(Calendar.MILLISECOND, 999);
+        lastTwentyFourHoursEndTimeInMillis.add(dayCal.getTimeInMillis());
+        for (int i = 0; i < 23; i++) {
+            dayCal.add(Calendar.HOUR_OF_DAY, -(1));
+            //System.out.println(dayCal.getTime());
+            lastTwentyFourHoursEndTimeInMillis.add(dayCal.getTimeInMillis());
+        }
+        Map<String,List<Long>> lastTwentyFourHoursMap = new HashMap<>();
+        lastTwentyFourHoursMap.put("StartTimeList",lastTwentyFourHoursStartTimeInMillis);
+        lastTwentyFourHoursMap.put("EndTimeList",lastTwentyFourHoursEndTimeInMillis);
+        lastTwentyFourHoursMap.put("No",lastTwentyFourHoursNo);
+
+        System.out.println("StartTimeList.size"+lastTwentyFourHoursStartTimeInMillis.size());
+        System.out.println("EndTimeList.size"+lastTwentyFourHoursEndTimeInMillis.size());
+        System.out.println("DaysNo.size"+lastTwentyFourHoursNo.size());
+        System.out.println(lastTwentyFourHoursMap);
+        return lastTwentyFourHoursMap;
+    }
+
+
 }

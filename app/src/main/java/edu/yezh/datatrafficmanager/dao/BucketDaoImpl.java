@@ -172,38 +172,41 @@ public class BucketDaoImpl implements BucketDao {
 
     @Override
     public List<AppsInfo> getInstalledAppsTodayTrafficData(Context context, String subscriberID , int networkType) {
-        NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
-        NetworkStats networkStats = null;
+        /*NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
+        NetworkStats networkStats = null;*/
         List<AppsInfo> allInstalledAppsTrafficData = new ArrayList<>();
         DateTools dateTools = new DateTools();
         InstalledAppsInfoTools installedAppsInfoTools = new InstalledAppsInfoTools();
         List<AppsInfo> allInstalledAppsInfo = installedAppsInfoTools.getAllInstalledAppsInfo(context);
-        System.out.println("安装应用信息列表长度:"+allInstalledAppsInfo.size());
+        //System.out.println("安装应用信息列表长度:"+allInstalledAppsInfo.size());
         for (int i=0;i<allInstalledAppsInfo.size();i++) {
             AppsInfo singleInstalledAppsInfo = allInstalledAppsInfo.get(i);
             //System.out.println(singleInstalledAppsInfo.toString());
             long startDayMorning = dateTools.getTimesTodayMorning();
+            TransInfo data = new TransInfo(0,0);
             try {
                 //networkStats = networkStatsManager.queryDetailsForUid(ConnectivityManager.TYPE_WIFI, "", dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis(), Integer.valueOf(singleInstalledAppsInfo.get("uid")));
                 //System.out.println("开始时间:"+m);
-                networkStats = networkStatsManager.queryDetailsForUid(networkType, subscriberID,startDayMorning, System.currentTimeMillis(), Integer.valueOf(singleInstalledAppsInfo.getUid()));
+                //networkStats = networkStatsManager.queryDetailsForUid);
+                data = getTrafficDataOfApp(context, subscriberID,networkType,startDayMorning, System.currentTimeMillis(), Integer.valueOf(singleInstalledAppsInfo.getUid()));
             } catch (Exception e) {
                 Log.e("严重错误", "错误信息:" + e.toString());
             }
-            NetworkStats.Bucket bucket = new NetworkStats.Bucket();
+            /*NetworkStats.Bucket bucket = new NetworkStats.Bucket();
             long rxBytes = bucket.getRxBytes();
-            long txBytes = bucket.getTxBytes();
+            long txBytes = bucket.getTxBytes();*/
 
             /*networkStats.getNextBucket(bucket);
             rxBytes += bucket.getRxBytes();
             txBytes += bucket.getTxBytes();*/
 
-            while(networkStats.hasNextBucket()) {
+            /*while(networkStats.hasNextBucket()) {
                 networkStats.getNextBucket(bucket);
                 rxBytes += bucket.getRxBytes();
                 txBytes += bucket.getTxBytes();
-            }
-
+            }*/
+            long rxBytes = data.getRx();
+            long txBytes =data.getTx();
             if (rxBytes == 0L&&txBytes==0L){
                 continue;
             }
@@ -215,5 +218,34 @@ public class BucketDaoImpl implements BucketDao {
         }
         //System.out.println(allInstalledAppsTrafficData.toString());
         return allInstalledAppsTrafficData;
+    }
+
+    @Override
+    public TransInfo getTrafficDataOfApp(Context context, String subscriberID, int networkType, long startTime, long endTime, int uid) {
+        NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
+        NetworkStats networkStats = networkStatsManager.queryDetailsForUid(networkType, subscriberID,startTime, endTime, uid);
+        NetworkStats.Bucket bucket = new NetworkStats.Bucket();
+        long rxBytes = bucket.getRxBytes();
+        long txBytes = bucket.getTxBytes();
+        while(networkStats.hasNextBucket()) {
+            networkStats.getNextBucket(bucket);
+            rxBytes += bucket.getRxBytes();
+            txBytes += bucket.getTxBytes();
+        }
+        TransInfo data = new TransInfo(rxBytes,txBytes);
+        return data;
+    }
+
+    @Override
+    public List<TransInfo> getAppTrafficDataForPeriod(Context context, String subscriberID, int networkType, Map<String, List<Long>> timeMap, int uid) {
+        List<Long> StartTimeList = timeMap.get("StartTimeList");
+        List<Long> EndTimeList = timeMap.get("EndTimeList");
+        List<TransInfo> AppTrafficDataList = new ArrayList<>();
+
+        int size = StartTimeList.size();
+        for (int i=0;i<size;i++){
+            AppTrafficDataList.add(getTrafficDataOfApp(context,subscriberID,networkType,StartTimeList.get(i),EndTimeList.get(i),uid));
+        }
+        return AppTrafficDataList;
     }
 }

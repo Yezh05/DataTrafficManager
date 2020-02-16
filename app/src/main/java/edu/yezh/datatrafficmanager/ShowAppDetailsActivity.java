@@ -27,7 +27,9 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
@@ -44,6 +46,8 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_details);
+        View view = this.getWindow().getDecorView();
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -74,8 +78,6 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
        ImageViewDetailAppIcon.setImageDrawable(appIcon);
        DateTools dateTools =  new DateTools();
        BytesFormatter bytesFormatter = new BytesFormatter();
-       dateTools.getLastThirtyDaysMap();
-       dateTools.getLastTwentyFourHoursMap();
 
         BucketDao bucketDao = new BucketDaoImpl();
 
@@ -98,21 +100,37 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
                 "  下载流量:" +Math.round(Double.valueOf(appTodayTrafficDataRx.getValue())*100D )/100D+appTodayTrafficDataRx.getType()+
                 "  总量:"+Math.round(Double.valueOf(appTodayTrafficDataTotal.getValue())*100D )/100D+appTodayTrafficDataTotal.getType());
 
+        Map<String,List<Long>> LastThirtyDaysMap = dateTools. getLastThirtyDaysMap();
+        List<TransInfo> lastThirtyDaysTrafficData = bucketDao.getAppTrafficDataForPeriod(this,subscriberID,networkType,LastThirtyDaysMap,uid);
+        List<Long> LastThirtyDaysNoList = LastThirtyDaysMap.get("No");
+        Collections.reverse(LastThirtyDaysNoList);
+        Collections.reverse(lastThirtyDaysTrafficData);
+        showChart(view, lastThirtyDaysTrafficData, LastThirtyDaysNoList,R.id.LineChartAppLastThirtyDaysTrafficData,"日");
 
-
-       // List<TransInfo> lastThirtyDaysTrafficData =
+        Map<String,List<Long>> LastTwentyFourHoursMap = dateTools. getLastTwentyFourHoursPerTwoHourMap();
+        List<TransInfo> lastTwentyFourHoursTrafficData = bucketDao.getAppTrafficDataForPeriod(this,subscriberID,networkType,LastTwentyFourHoursMap,uid);
+        List<Long> LastTwentyFourHoursNoList = LastTwentyFourHoursMap.get("No");
+        Collections.reverse(lastTwentyFourHoursTrafficData);
+        Collections.reverse(LastTwentyFourHoursNoList);
+        //System.out.println(lastTwentyFourHoursTrafficData);
+        showChart(view, lastTwentyFourHoursTrafficData, LastTwentyFourHoursNoList,R.id.LineChartAppLastTwentyFourHoursTrafficData,"时");
     }
-    private void showChart(View view, List<TransInfo> lastSevenDaysTrafficData, List<Integer> lastSevenDays){
+    private void showChart(View view, List<TransInfo> valueDataList, List<Long> xLineNoList,int chartId,String unit){
         BytesFormatter bytesFormatter = new BytesFormatter();
 
-        LineChart lineChart = view.findViewById(R.id.LineChartAppLastThirtyDaysTrafficData);
+       //LineChart lineChart = view.findViewById(R.id.LineChartAppLastThirtyDaysTrafficData);
+        LineChart lineChart = view.findViewById(chartId);
         final ArrayList<Entry> values = new ArrayList<>();
         /*values.add(new Entry(100, 30));*/
 
-        final String[] Xvalues = new String[lastSevenDays.size()];
-        for (int i=0;i<lastSevenDays.size();i++){
-            values.add(new Entry(i,lastSevenDaysTrafficData.get(i).getTotal()));
-            Xvalues[i]= lastSevenDays.get(i) + "日" ;
+        final String[] Xvalues = new String[xLineNoList.size()];
+        for (int i=0;i<xLineNoList.size();i++){
+            values.add(new Entry(i,valueDataList.get(i).getTotal()));
+            /*if (unit.equals("时")){
+                Xvalues[i]= xLineNoList.get(i) +unit +"-"+(xLineNoList.get(i)+2) +unit;
+            }else {*/
+            Xvalues[i]= xLineNoList.get(i) +unit ;
+            //}
         }
 
         IAxisValueFormatter formatter = new IAxisValueFormatter() {
@@ -135,6 +153,11 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         lineDataSet.setLineWidth(2);
         lineDataSet.setCircleColor(Color.parseColor("#2F4F4F"));
         lineDataSet.setDrawCircleHole(false);
+        if (unit.equals("时")){
+          lineDataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        }
+
+
         dataSets.add(lineDataSet);
         LineData data1 = new LineData(dataSets);
         lineChart.setData(data1);
@@ -144,6 +167,7 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         lineChart.getXAxis().setValueFormatter(formatter);
         lineChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         lineChart.getXAxis().setDrawGridLines(false);
+        lineChart.getXAxis().setAvoidFirstLastClipping(true);
 
         lineChart.getAxisRight().setEnabled(false);
         //lineChart.getAxisLeft().setEnabled(false);
@@ -151,6 +175,9 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         lineChart.getAxisLeft().setDrawLabels(false);
         lineChart.getAxisLeft().setDrawAxisLine(false);
         lineChart.animateXY(0,1200);
+        lineChart.setVisibleXRangeMaximum(6);
+        lineChart.setViewPortOffsets(50,50,50,50);
+        lineChart.moveViewToX(valueDataList.size()-1);
 
         lineChart.getDescription().setEnabled(false);
         lineChart.invalidate();

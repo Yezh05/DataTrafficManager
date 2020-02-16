@@ -191,7 +191,7 @@ public class DateTools {
         return lastThirtyDaysMap;
     }
 
-    public Map<String,List<Long>> getLastTwentyFourHoursMap(){
+    public Map<String,List<Long>> getLastTwentyFourHoursPerTwoHourMap(){
         List<Long> lastTwentyFourHoursStartTimeInMillis=new ArrayList<>();
         List<Long> lastTwentyFourHoursNo = new ArrayList<>();
         Calendar dayCal = Calendar.getInstance();
@@ -199,23 +199,28 @@ public class DateTools {
         dayCal.set(Calendar.MINUTE, 0);
         dayCal.set(Calendar.SECOND, 0);
         dayCal.set(Calendar.MILLISECOND, 0);
-        lastTwentyFourHoursStartTimeInMillis.add(dayCal.getTimeInMillis());
-        lastTwentyFourHoursNo.add(new Long(dayCal.get(Calendar.HOUR_OF_DAY)));
-        for (int i = 0; i < 23; i++) {
-            dayCal.add(Calendar.HOUR_OF_DAY, -(1));
+        //lastTwentyFourHoursStartTimeInMillis.add(dayCal.getTimeInMillis());
+        //lastTwentyFourHoursNo.add(new Long(dayCal.get(Calendar.HOUR_OF_DAY)));
+        //String NoString
+
+        for (int i = 0; i < 8; i++) {
+            dayCal.add(Calendar.HOUR_OF_DAY, -(3));
             lastTwentyFourHoursNo.add(new Long(dayCal.get(Calendar.HOUR_OF_DAY)));
             lastTwentyFourHoursStartTimeInMillis.add(dayCal.getTimeInMillis());
         }
 
         List<Long> lastTwentyFourHoursEndTimeInMillis=new ArrayList<>();
         dayCal = Calendar.getInstance();
+        dayCal.set(Calendar.MINUTE, 0);
+        dayCal.set(Calendar.SECOND, 0);
+        dayCal.set(Calendar.MILLISECOND, 0);
         //dayCal.set(Calendar.HOUR_OF_DAY, 23);
-        dayCal.set(Calendar.MINUTE, 59);
+        /*dayCal.set(Calendar.MINUTE, 59);
         dayCal.set(Calendar.SECOND, 59);
-        dayCal.set(Calendar.MILLISECOND, 999);
+        dayCal.set(Calendar.MILLISECOND, 999);*/
         lastTwentyFourHoursEndTimeInMillis.add(dayCal.getTimeInMillis());
-        for (int i = 0; i < 23; i++) {
-            dayCal.add(Calendar.HOUR_OF_DAY, -(1));
+        for (int i = 0; i < 7; i++) {
+            dayCal.add(Calendar.HOUR_OF_DAY, -(3));
             //System.out.println(dayCal.getTime());
             lastTwentyFourHoursEndTimeInMillis.add(dayCal.getTimeInMillis());
         }
@@ -223,11 +228,10 @@ public class DateTools {
         lastTwentyFourHoursMap.put("StartTimeList",lastTwentyFourHoursStartTimeInMillis);
         lastTwentyFourHoursMap.put("EndTimeList",lastTwentyFourHoursEndTimeInMillis);
         lastTwentyFourHoursMap.put("No",lastTwentyFourHoursNo);
-
-        System.out.println("StartTimeList.size"+lastTwentyFourHoursStartTimeInMillis.size());
+        /*System.out.println("StartTimeList.size"+lastTwentyFourHoursStartTimeInMillis.size());
         System.out.println("EndTimeList.size"+lastTwentyFourHoursEndTimeInMillis.size());
-        System.out.println("DaysNo.size"+lastTwentyFourHoursNo.size());
-        System.out.println(lastTwentyFourHoursMap);
+        System.out.println("DaysNo.size"+lastTwentyFourHoursNo.size());*/
+        //System.out.println(lastTwentyFourHoursMap);
         return lastTwentyFourHoursMap;
     }
 

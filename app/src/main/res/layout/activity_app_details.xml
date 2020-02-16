@@ -119,10 +119,41 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:background="#009688" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="15dp"
+            android:text="30天流量使用情况"
+            />
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/LineChartAppLastThirtyDaysTrafficData"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="20dp" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="#009688" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="#009688" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="15dp"
+            android:text="24小时流量使用情况"
+            />
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/LineChartAppLastTwentyFourHoursTrafficData"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
             android:layout_marginBottom="20dp" />
         <View
             android:layout_width="match_parent"

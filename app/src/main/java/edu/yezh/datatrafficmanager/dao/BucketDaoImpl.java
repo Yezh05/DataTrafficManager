@@ -131,7 +131,7 @@ public class BucketDaoImpl implements BucketDao {
         DateTools dateTools = new DateTools();
         InstalledAppsInfoTools installedAppsInfoTools = new InstalledAppsInfoTools();
         List<AppsInfo> allInstalledAppsInfo = installedAppsInfoTools.getAllInstalledAppsInfo(context);
-        System.out.println("安装应用信息列表长度:"+allInstalledAppsInfo.size());
+        //System.out.println("安装应用信息列表长度:"+allInstalledAppsInfo.size());
         for (int i=0;i<allInstalledAppsInfo.size();i++) {
             AppsInfo singleInstalledAppsInfo = allInstalledAppsInfo.get(i);
             //System.out.println(singleInstalledAppsInfo.toString());
@@ -227,12 +227,17 @@ public class BucketDaoImpl implements BucketDao {
         NetworkStats.Bucket bucket = new NetworkStats.Bucket();
         long rxBytes = bucket.getRxBytes();
         long txBytes = bucket.getTxBytes();
+
         while(networkStats.hasNextBucket()) {
+            //System.out.println("bucket has Next");
             networkStats.getNextBucket(bucket);
+            //System.out.println("BUCKET STARTTIME"+bucket.getStartTimeStamp());
+            //System.out.println("BUCKET ENDTIME"+bucket.getEndTimeStamp());
             rxBytes += bucket.getRxBytes();
             txBytes += bucket.getTxBytes();
         }
         TransInfo data = new TransInfo(rxBytes,txBytes);
+
         return data;
     }
 
@@ -246,6 +251,10 @@ public class BucketDaoImpl implements BucketDao {
         for (int i=0;i<size;i++){
             AppTrafficDataList.add(getTrafficDataOfApp(context,subscriberID,networkType,StartTimeList.get(i),EndTimeList.get(i),uid));
         }
+       // System.out.println(1+""+getTrafficDataOfApp(context,subscriberID,networkType,1581843600000l,1581854399999l+1l,uid));
+        /*System.out.println(2+""+getTrafficDataOfApp(context,subscriberID,networkType,1581771600000L,1581857999999L,uid));
+        System.out.println(3+""+getTrafficDataOfApp(context,subscriberID,networkType,1581771600000L,1581854399999L,uid));*/
+        //System.out.println(AppTrafficDataList);
         return AppTrafficDataList;
     }
 }

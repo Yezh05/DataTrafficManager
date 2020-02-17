@@ -1,8 +1,5 @@
 package edu.yezh.datatrafficmanager.tools;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 
 public class BytesFormatter {
@@ -34,7 +31,7 @@ public class BytesFormatter {
                     + size % 100 + "GB";
         }
     }*/
-    public OutputTrafficData getPrintSizebyModel(long originSize){
+    public OutputTrafficData getPrintSizeByModel(long originSize){
         OutputTrafficData data;
         //如果字节数少于1024，则直接以B为单位，否则先除于1024，后3位因太少无意义
         double size = Double.valueOf(String.valueOf(originSize));

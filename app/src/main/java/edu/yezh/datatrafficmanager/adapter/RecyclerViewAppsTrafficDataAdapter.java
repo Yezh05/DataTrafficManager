@@ -53,9 +53,9 @@ public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<Rec
             int nowPosition = position-1;
             final AppsInfo OneInstalledAppsTrafficData = InstalledAppsTrafficData.get(nowPosition);
             holder.TextViewColAppName.setText(OneInstalledAppsTrafficData.getName());
-            OutputTrafficData dataAppRX = bytesFormatter.getPrintSizebyModel(OneInstalledAppsTrafficData.getRxBytes());
+            OutputTrafficData dataAppRX = bytesFormatter.getPrintSizeByModel(OneInstalledAppsTrafficData.getRxBytes());
             holder.TextViewColAppRX.setText(Math.round(Double.valueOf(dataAppRX.getValue())*100D)/100D + dataAppRX.getType());
-            OutputTrafficData dataAppTX = bytesFormatter.getPrintSizebyModel(OneInstalledAppsTrafficData.getTxBytes());
+            OutputTrafficData dataAppTX = bytesFormatter.getPrintSizeByModel(OneInstalledAppsTrafficData.getTxBytes());
             holder.TextViewColAppTX.setText(Math.round(Double.valueOf(dataAppTX.getValue())*100D)/100D + dataAppTX.getType());
             holder.ImageViewColAppIcon.setImageDrawable(OneInstalledAppsTrafficData.getAppIcon());
 

@@ -43,7 +43,9 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -61,6 +63,7 @@ import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.NotificationTools;
 import edu.yezh.datatrafficmanager.tools.SimTools;
+import edu.yezh.datatrafficmanager.tools.chartTools.CustomMarkerView;
 import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -144,6 +147,7 @@ public class MyFragment1 extends Fragment {
                     case R.id.action_refresh:
                         button_SIM1.performClick();
 
+
                         break;
 
                 }
@@ -182,7 +186,7 @@ public class MyFragment1 extends Fragment {
             long ThisMonthData =bucketDao.getTrafficDataOfThisMonth(context,subscriberID, networkType).getTotal();
 
 
-            OutputTrafficData readableThisMonthData = bytesFormatter.getPrintSizebyModel(ThisMonthData);
+            OutputTrafficData readableThisMonthData = bytesFormatter.getPrintSizeByModel(ThisMonthData);
             TextView TextViewData4GThisMonth = view.findViewById(R.id.TextViewData4GThisMonth);
             TextViewData4GThisMonth.setText(Math.round(Double.valueOf(readableThisMonthData.getValue())*100D)/100D + readableThisMonthData.getType());
 
@@ -191,7 +195,7 @@ public class MyFragment1 extends Fragment {
             long rxBytesStartDayToToday = bucketStartDayToToday.getRxBytes();*/
             long rxBytesStartDayToToday = bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay,networkType).getTotal();
 
-            OutputTrafficData readableDataStartDayToToday = bytesFormatter.getPrintSizebyModel(rxBytesStartDayToToday);
+            OutputTrafficData readableDataStartDayToToday = bytesFormatter.getPrintSizeByModel(rxBytesStartDayToToday);
             TextView TextViewData4GStartDayToToday = view.findViewById(R.id.TextViewData4GStartDayToToday);
             TextViewData4GStartDayToToday.setText(  Math.round(Double.valueOf(readableDataStartDayToToday.getValue())*100D)/100D + readableDataStartDayToToday.getType());
 
@@ -209,14 +213,14 @@ public class MyFragment1 extends Fragment {
             TextViewDataUseStatus.setText( String.valueOf(PercentDataUseStatus)+"%\n"+ TextDataUseStatus );
 
             List<TransInfo> lastThirtyDaysTrafficData = bucketDao.getLastThirtyDaysTrafficData(context,subscriberID,networkType);
-            OutputTrafficData todayUsage =  bytesFormatter.getPrintSizebyModel(lastThirtyDaysTrafficData.get(0).getTotal());
+            OutputTrafficData todayUsage =  bytesFormatter.getPrintSizeByModel(lastThirtyDaysTrafficData.get(0).getTotal());
 
             TextView TextViewData4GToday = view.findViewById(R.id.TextViewData4GToday);
             TextViewData4GToday.setText(Math.round(Double.valueOf(todayUsage.getValue())*100D)/100D +todayUsage.getType());
 
             //System.out.println("dataPlanBytes:"+Math.round(dataPlan* 1024D * 1024D * 1024D));
             //System.out.println("rxBytesStartDayToToday:"+rxBytesStartDayToToday);
-            OutputTrafficData restTrafficDataAmount = bytesFormatter.getPrintSizebyModel(Math.round(dataPlan* 1024D * 1024D * 1024D) - rxBytesStartDayToToday);
+            OutputTrafficData restTrafficDataAmount = bytesFormatter.getPrintSizeByModel(Math.round(dataPlan* 1024D * 1024D * 1024D) - rxBytesStartDayToToday);
 
             NotificationTools.setNotification(context,
                     "今日 "+Math.round(Double.valueOf(todayUsage.getValue())) +todayUsage.getType()+"   "
@@ -364,7 +368,7 @@ public class MyFragment1 extends Fragment {
 
         };
 
-        LineDataSet lineDataSet = new LineDataSet(values,"数据");
+        final LineDataSet lineDataSet = new LineDataSet(values,"数据");
         //lineDataSet.setValues(values);
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
         lineDataSet.setMode(LineDataSet.Mode.LINEAR);
@@ -376,6 +380,10 @@ public class MyFragment1 extends Fragment {
         lineDataSet.setLineWidth(2);
         lineDataSet.setCircleColor(Color.parseColor("#2F4F4F"));
         lineDataSet.setDrawCircleHole(false);
+        //lineDataSet.setHighlightEnabled(false);
+        lineDataSet.setDrawHighlightIndicators(false);
+        //lineDataSet.set
+
         dataSets.add(lineDataSet);
         LineData data1 = new LineData(dataSets);
         lineChart.setData(data1);
@@ -395,8 +403,13 @@ public class MyFragment1 extends Fragment {
         lineChart.setVisibleXRangeMaximum(6);
         lineChart.setViewPortOffsets(50,50,50,50);
         lineChart.moveViewToX(valueDataList.size()-1);
-
         lineChart.getDescription().setEnabled(false);
+
+
+        CustomMarkerView mv = new CustomMarkerView(getContext(),
+                R.layout.customer_marker_view);
+        lineChart.setMarkerView(mv);
+
         lineChart.invalidate();
     }
     /*
@@ -427,8 +440,8 @@ public class MyFragment1 extends Fragment {
                     //view1 = (TextView) view.findViewById(R.id.view1);
                     //view1.setText("Current Data Rate per second= " + currentDataRate);
                     // System.out.println("Current Data Rate per second= " + bytesFormatter.getPrintSize(currentDataRate));
-                    OutputTrafficData dataRealTimeTxSpeed = bytesFormatter.getPrintSizebyModel(currentTxDataRate);
-                    OutputTrafficData dataRealTimeRxSpeed = bytesFormatter.getPrintSizebyModel(currentRxDataRate);
+                    OutputTrafficData dataRealTimeTxSpeed = bytesFormatter.getPrintSizeByModel(currentTxDataRate);
+                    OutputTrafficData dataRealTimeRxSpeed = bytesFormatter.getPrintSizeByModel(currentRxDataRate);
                     textViewRealTimeTxSpeed.setText( Math.round(Double.valueOf(dataRealTimeTxSpeed.getValue())) + dataRealTimeTxSpeed.getType() + "/s");
                     textViewRealTimeRxSpeed.setText( Math.round(Double.valueOf(dataRealTimeRxSpeed.getValue())) + dataRealTimeRxSpeed.getType() + "/s");
                     RXOld[0] = overTxTraffic;
@@ -470,7 +483,7 @@ public class MyFragment1 extends Fragment {
                         textViewString+="\n";
                     }
                     flag++;
-                    OutputTrafficData dataAppTodayUseageOutofLimit = bytesFormatter.getPrintSizebyModel(allBytes);
+                    OutputTrafficData dataAppTodayUseageOutofLimit = bytesFormatter.getPrintSizeByModel(allBytes);
                     textViewString+=name+" 使用了"+Math.round(Double.valueOf(dataAppTodayUseageOutofLimit.getValue())*100D)/100D + dataAppTodayUseageOutofLimit.getType()+" 超过了设置阀值";
                 }
             }

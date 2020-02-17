@@ -5,8 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -46,7 +44,7 @@ public class ListViewAdapter extends BaseAdapter {
         BytesFormatter bytesFormatter = new BytesFormatter();
         Long dataBytes= Long.valueOf(lastSixMonthsTrafficDataMap.get("LastSixMonthsTrafficDataList").get(position));
         String col1String = lastSixMonthsTrafficDataMap.get("MonthString").get(position);
-        OutputTrafficData DataMonthUsage = bytesFormatter.getPrintSizebyModel(dataBytes);
+        OutputTrafficData DataMonthUsage = bytesFormatter.getPrintSizeByModel(dataBytes);
         String col2String = Math.round(Double.valueOf(DataMonthUsage.getValue())*100D)/100D + DataMonthUsage.getType();
         TextView textViewCol1;
         TextView textViewCol2;

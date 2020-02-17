@@ -129,8 +129,7 @@
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/LineChartAppLastThirtyDaysTrafficData"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginBottom="20dp" />
+            android:layout_height="200dp" />
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"

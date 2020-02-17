@@ -1,13 +1,10 @@
 package edu.yezh.datatrafficmanager;
 
-import android.app.usage.NetworkStats;
-import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,9 +36,8 @@ import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.model.TransInfo;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
+import edu.yezh.datatrafficmanager.tools.chartTools.CustomMarkerView;
 import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
-
-import static android.content.Context.NETWORK_STATS_SERVICE;
 
 public class MyFragment2 extends Fragment {
     final int networkType = ConnectivityManager.TYPE_WIFI;
@@ -78,7 +74,7 @@ public class MyFragment2 extends Fragment {
         return view;
     }
 
-    public void initialPage(View view, final Context context){
+    private void initialPage(View view, final Context context){
         final int dataPlanStartDay = 1;
         final String subscriberID = "";
         BytesFormatter bytesFormatter = new BytesFormatter();
@@ -87,42 +83,37 @@ public class MyFragment2 extends Fragment {
 
         try {
             TransInfo ThisMonthUsageData = bucketDao.getTrafficDataOfThisMonth(context,subscriberID,networkType);
-            OutputTrafficData ThisMonthUsageDataRx = bytesFormatter.getPrintSizebyModel(ThisMonthUsageData.getRx());
+            OutputTrafficData ThisMonthUsageDataRx = bytesFormatter.getPrintSizeByModel(ThisMonthUsageData.getRx());
             TextView textViewDataWLANThisMonthRx = view.findViewById(R.id.DataWLANThisMonthRx);
             textViewDataWLANThisMonthRx.setText(Math.round(Double.valueOf(ThisMonthUsageDataRx.getValue())*100D)/100D + ThisMonthUsageDataRx.getType());
 
-            OutputTrafficData ThisMonthUsageDataTx = bytesFormatter.getPrintSizebyModel(ThisMonthUsageData.getTx());
+            OutputTrafficData ThisMonthUsageDataTx = bytesFormatter.getPrintSizeByModel(ThisMonthUsageData.getTx());
             TextView textViewDataWLANThisMonthTx = view.findViewById(R.id.DataWLANThisMonthTx);
             textViewDataWLANThisMonthTx.setText(Math.round(Double.valueOf(ThisMonthUsageDataTx.getValue())*100D)/100D + ThisMonthUsageDataTx.getType());
 
-            OutputTrafficData ThisMonthUsageDataTotal = bytesFormatter.getPrintSizebyModel(ThisMonthUsageData.getTotal());
+            OutputTrafficData ThisMonthUsageDataTotal = bytesFormatter.getPrintSizeByModel(ThisMonthUsageData.getTotal());
             TextView textViewDataWLANThisMonthTotal = view.findViewById(R.id.DataWLANThisMonthTotal);
             textViewDataWLANThisMonthTotal.setText(Math.round(Double.valueOf(ThisMonthUsageDataTotal.getValue())*100D)/100D + ThisMonthUsageDataTotal.getType());
 
             TransInfo TodayUsageData = bucketDao.getTrafficDataOfToday(context,subscriberID,networkType);
-            OutputTrafficData TodayUsageDataRx = bytesFormatter.getPrintSizebyModel(TodayUsageData.getRx());
+            OutputTrafficData TodayUsageDataRx = bytesFormatter.getPrintSizeByModel(TodayUsageData.getRx());
             TextView textViewDataWLANTodayRx = view.findViewById(R.id.DataWLANTodayRx);
             textViewDataWLANTodayRx.setText(Math.round(Double.valueOf(TodayUsageDataRx.getValue())*100D)/100D + TodayUsageDataRx.getType());
 
-            OutputTrafficData TodayUsageDataTx = bytesFormatter.getPrintSizebyModel(TodayUsageData.getTx());
+            OutputTrafficData TodayUsageDataTx = bytesFormatter.getPrintSizeByModel(TodayUsageData.getTx());
             TextView textViewDataWLANTodayTx = view.findViewById(R.id.DataWLANTodayTx);
             textViewDataWLANTodayTx.setText(Math.round(Double.valueOf(TodayUsageDataTx.getValue())*100D)/100D + TodayUsageDataTx.getType());
 
-            OutputTrafficData TodayUsageDataTotal = bytesFormatter.getPrintSizebyModel(TodayUsageData.getTotal());
+            OutputTrafficData TodayUsageDataTotal = bytesFormatter.getPrintSizeByModel(TodayUsageData.getTotal());
             TextView textViewDataWLANTodayTotal = view.findViewById(R.id.DataWLANTodayTotal);
             textViewDataWLANTodayTotal.setText(Math.round(Double.valueOf(TodayUsageDataTotal.getValue())*100D)/100D + TodayUsageDataTotal.getType());
-
-
 
         } catch (Exception e) {
             Log.e("严重错误", e.toString() );
         }
 
-
-
         MyFragment1 myFragment1 = new MyFragment1();
         myFragment1.showRealTimeNetSpeed(view);
-
 
         RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getInstalledAppsTrafficData(context,subscriberID,dataPlanStartDay,networkType),context,subscriberID,networkType);
         RecyclerView RecyclerViewAppsTrafficData = (RecyclerView) view.findViewById(R.id.RecyclerViewAppsTrafficData);
@@ -130,7 +121,6 @@ public class MyFragment2 extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         RecyclerViewAppsTrafficData.setLayoutManager(layoutManager);
-
 
         List<TransInfo> lastSevenDaysTrafficData = bucketDao.getLastThirtyDaysTrafficData(context, subscriberID, networkType);
         List<Long> DaysNoList = dateTools.getLastThirtyDaysMap().get("No");
@@ -151,15 +141,12 @@ public class MyFragment2 extends Fragment {
                 startActivity(intent);
             }
         });
-        //myFragment1.showChart();
     }
 
     public void showChart(View view,List<TransInfo> valueDataList, List<Long> DaysNoList){
         System.out.println("lastSevenDaysTrafficData:"+valueDataList.size());
 
-        BytesFormatter bytesFormatter = new BytesFormatter();
-
-        LineChart lineChart = (LineChart) view.findViewById(R.id.LineChartLastSevenDaysTrafficData);
+        LineChart lineChart = view.findViewById(R.id.LineChartLastSevenDaysTrafficData);
 
         final ArrayList<Entry> values = new ArrayList<>();
         final String[] Xvalues = new String[DaysNoList.size()];
@@ -186,6 +173,8 @@ public class MyFragment2 extends Fragment {
         lineDataSet.setLineWidth(2);
         lineDataSet.setCircleColor(Color.parseColor("#2F4F4F"));
         lineDataSet.setDrawCircleHole(false);
+        lineDataSet.setDrawHighlightIndicators(false);
+
         dataSets.add(lineDataSet);
         LineData data1 = new LineData(dataSets);
         lineChart.setData(data1);
@@ -204,8 +193,12 @@ public class MyFragment2 extends Fragment {
         lineChart.setVisibleXRangeMaximum(6);
         lineChart.setViewPortOffsets(50,50,50,50);
         lineChart.moveViewToX(valueDataList.size()-1);
-
         lineChart.getDescription().setEnabled(false);
+
+        CustomMarkerView mv = new CustomMarkerView(getContext(),
+                R.layout.customer_marker_view);
+        lineChart.setMarkerView(mv);
+
         lineChart.invalidate();
     }
 

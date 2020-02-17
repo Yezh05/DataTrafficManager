@@ -13,16 +13,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.AxisBase;
-import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.data.PieData;
-import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
@@ -33,12 +28,12 @@ import java.util.Map;
 
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
-import edu.yezh.datatrafficmanager.model.AppsInfo;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.model.TransInfo;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.InstalledAppsInfoTools;
+import edu.yezh.datatrafficmanager.tools.chartTools.CustomMarkerView;
 import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 
 public class ShowAppDetailsActivity extends AppCompatActivity {
@@ -85,17 +80,17 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         TransInfo appTodayTrafficData=bucketDao.getTrafficDataOfApp(this,subscriberID,networkType,dateTools.getTimesTodayMorning(),System.currentTimeMillis(),uid);
 
         TextView TextViewAppThisMonthInfo = findViewById(R.id.TextViewAppThisMonthInfo);
-        OutputTrafficData appThisMonthTrafficDataRx = bytesFormatter.getPrintSizebyModel(appThisMonthTrafficData.getRx());
-        OutputTrafficData appThisMonthTrafficDataTx = bytesFormatter.getPrintSizebyModel(appThisMonthTrafficData.getTx());
-        OutputTrafficData appThisMonthTrafficDataTotal = bytesFormatter.getPrintSizebyModel(appThisMonthTrafficData.getTotal());
+        OutputTrafficData appThisMonthTrafficDataRx = bytesFormatter.getPrintSizeByModel(appThisMonthTrafficData.getRx());
+        OutputTrafficData appThisMonthTrafficDataTx = bytesFormatter.getPrintSizeByModel(appThisMonthTrafficData.getTx());
+        OutputTrafficData appThisMonthTrafficDataTotal = bytesFormatter.getPrintSizeByModel(appThisMonthTrafficData.getTotal());
         TextViewAppThisMonthInfo.setText("上传流量:" +Math.round(Double.valueOf(appThisMonthTrafficDataTx.getValue())*100D )/100D+appThisMonthTrafficDataTx.getType()+
                 "  下载流量:" +Math.round(Double.valueOf(appThisMonthTrafficDataRx.getValue())*100D )/100D+appThisMonthTrafficDataRx.getType()+
                 "  总量:"+Math.round(Double.valueOf(appThisMonthTrafficDataTotal.getValue())*100D )/100D+appThisMonthTrafficDataTotal.getType());
 
         TextView TextViewAppTodayInfo = findViewById(R.id.TextViewAppTodayInfo);
-        OutputTrafficData appTodayTrafficDataRx = bytesFormatter.getPrintSizebyModel(appTodayTrafficData.getRx());
-        OutputTrafficData appTodayTrafficDataTx = bytesFormatter.getPrintSizebyModel(appTodayTrafficData.getTx());
-        OutputTrafficData appTodayTrafficDataTotal = bytesFormatter.getPrintSizebyModel(appTodayTrafficData.getTotal());
+        OutputTrafficData appTodayTrafficDataRx = bytesFormatter.getPrintSizeByModel(appTodayTrafficData.getRx());
+        OutputTrafficData appTodayTrafficDataTx = bytesFormatter.getPrintSizeByModel(appTodayTrafficData.getTx());
+        OutputTrafficData appTodayTrafficDataTotal = bytesFormatter.getPrintSizeByModel(appTodayTrafficData.getTotal());
         TextViewAppTodayInfo.setText("上传流量:" +Math.round(Double.valueOf(appTodayTrafficDataTx.getValue())*100D )/100D+appTodayTrafficDataTx.getType()+
                 "  下载流量:" +Math.round(Double.valueOf(appTodayTrafficDataRx.getValue())*100D )/100D+appTodayTrafficDataRx.getType()+
                 "  总量:"+Math.round(Double.valueOf(appTodayTrafficDataTotal.getValue())*100D )/100D+appTodayTrafficDataTotal.getType());
@@ -153,6 +148,7 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         lineDataSet.setLineWidth(2);
         lineDataSet.setCircleColor(Color.parseColor("#2F4F4F"));
         lineDataSet.setDrawCircleHole(false);
+        lineDataSet.setDrawHighlightIndicators(false);
         if (unit.equals("时")){
           lineDataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         }
@@ -178,8 +174,13 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         lineChart.setVisibleXRangeMaximum(6);
         lineChart.setViewPortOffsets(50,50,50,50);
         lineChart.moveViewToX(valueDataList.size()-1);
-
         lineChart.getDescription().setEnabled(false);
+
+        CustomMarkerView mv = new CustomMarkerView(view.getContext(),
+                R.layout.customer_marker_view);
+        lineChart.setMarkerView(mv);
+
+
         lineChart.invalidate();
     }
 

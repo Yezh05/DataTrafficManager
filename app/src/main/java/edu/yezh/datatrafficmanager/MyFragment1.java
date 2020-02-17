@@ -47,6 +47,7 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import edu.yezh.datatrafficmanager.dao.BucketDao;
@@ -207,23 +208,27 @@ public class MyFragment1 extends Fragment {
             TextView TextViewDataUseStatus = (TextView)view.findViewById(R.id.TextViewDataUseStatus);
             TextViewDataUseStatus.setText( String.valueOf(PercentDataUseStatus)+"%\n"+ TextDataUseStatus );
 
-            List<TransInfo> lastSevenDaysTrafficData = bucketDao.getLastSevenDaysTrafficData(context,subscriberID,networkType);
-            OutputTrafficData todayUseage =  bytesFormatter.getPrintSizebyModel(lastSevenDaysTrafficData.get(6).getTotal());
+            List<TransInfo> lastThirtyDaysTrafficData = bucketDao.getLastThirtyDaysTrafficData(context,subscriberID,networkType);
+            OutputTrafficData todayUsage =  bytesFormatter.getPrintSizebyModel(lastThirtyDaysTrafficData.get(0).getTotal());
 
             TextView TextViewData4GToday = view.findViewById(R.id.TextViewData4GToday);
-            TextViewData4GToday.setText(Math.round(Double.valueOf(todayUseage.getValue())*100D)/100D +todayUseage.getType());
+            TextViewData4GToday.setText(Math.round(Double.valueOf(todayUsage.getValue())*100D)/100D +todayUsage.getType());
 
             //System.out.println("dataPlanBytes:"+Math.round(dataPlan* 1024D * 1024D * 1024D));
             //System.out.println("rxBytesStartDayToToday:"+rxBytesStartDayToToday);
             OutputTrafficData restTrafficDataAmount = bytesFormatter.getPrintSizebyModel(Math.round(dataPlan* 1024D * 1024D * 1024D) - rxBytesStartDayToToday);
 
             NotificationTools.setNotification(context,
-                    "今日 "+Math.round(Double.valueOf(todayUseage.getValue())) +todayUseage.getType()+"   "
+                    "今日 "+Math.round(Double.valueOf(todayUsage.getValue())) +todayUsage.getType()+"   "
                         +"剩余 "+Math.round(Double.valueOf(restTrafficDataAmount.getValue())) + restTrafficDataAmount.getType()+"   "
                         +"总量 "+Math.round(dataPlan)+"GB"
             ,TextDataUseStatus);
 
-            showChart(view,PercentDataUseStatus,lastSevenDaysTrafficData,dateTools.getLastSevenDays());
+
+            List<Long> DaysNoList = dateTools.getLastThirtyDaysMap().get("No");
+            Collections.reverse(lastThirtyDaysTrafficData);
+            Collections.reverse(DaysNoList);
+            showChart(view,PercentDataUseStatus,lastThirtyDaysTrafficData,DaysNoList);
 
             RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getInstalledAppsTrafficData(context,subscriberID,dataPlanStartDay,networkType),context,subscriberID,networkType);
             RecyclerView RecyclerViewAppsTrafficData = view.findViewById(R.id.RecyclerViewAppsTrafficData);
@@ -309,7 +314,7 @@ public class MyFragment1 extends Fragment {
         return dataPlan;
     }
 
-    private void showChart(View view, int PercentDataUseStatus, List<TransInfo> lastSevenDaysTrafficData, List<Integer> lastSevenDays){
+    private void showChart(View view, int PercentDataUseStatus, List<TransInfo> valueDataList, List<Long> DaysNoList){
         BytesFormatter bytesFormatter = new BytesFormatter();
         PieChart pieChart = (PieChart)view.findViewById(R.id.Chart1);
         List yVals = new ArrayList<>();
@@ -345,10 +350,10 @@ public class MyFragment1 extends Fragment {
         final ArrayList<Entry> values = new ArrayList<>();
         /*values.add(new Entry(100, 30));*/
 
-        final String[] Xvalues = new String[lastSevenDays.size()];
-        for (int i=0;i<lastSevenDays.size();i++){
-            values.add(new Entry(i,lastSevenDaysTrafficData.get(i).getTotal()));
-            Xvalues[i]= lastSevenDays.get(i) + "日" ;
+        final String[] Xvalues = new String[DaysNoList.size()];
+        for (int i=0;i<DaysNoList.size();i++){
+            values.add(new Entry(i,valueDataList.get(i).getTotal()));
+            Xvalues[i]= DaysNoList.get(i) + "日" ;
         }
 
         IAxisValueFormatter formatter = new IAxisValueFormatter() {
@@ -387,6 +392,9 @@ public class MyFragment1 extends Fragment {
         lineChart.getAxisLeft().setDrawLabels(false);
         lineChart.getAxisLeft().setDrawAxisLine(false);
         lineChart.animateXY(0,1200);
+        lineChart.setVisibleXRangeMaximum(6);
+        lineChart.setViewPortOffsets(50,50,50,50);
+        lineChart.moveViewToX(valueDataList.size()-1);
 
         lineChart.getDescription().setEnabled(false);
         lineChart.invalidate();

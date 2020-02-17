@@ -18,7 +18,24 @@ import edu.yezh.datatrafficmanager.tools.InstalledAppsInfoTools;
 import static android.content.Context.NETWORK_STATS_SERVICE;
 
 public class BucketDaoImpl implements BucketDao {
+    @Override
+    public TransInfo getTrafficData(Context context, String subscriberID, int networkType, long startTime, long endTime) {
+        try {
+            NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
+            NetworkStats.Bucket bucket = networkStatsManager.querySummaryForDevice(networkType, subscriberID, startTime, endTime);
+            TransInfo useBytes = new TransInfo( bucket.getRxBytes(),bucket.getTxBytes());
+            return useBytes;
+        } catch (Exception e) {
+            Log.e("严重错误", "错误信息:" + e.toString());
+            return null;
+        }
+    }
 
+    @Override
+    public TransInfo getTrafficDataOfToday(Context context, String subscriberID, int networkType) {
+        TransInfo useBytes = getTrafficData( context,  subscriberID,  networkType,new DateTools().getTimesTodayMorning(), System.currentTimeMillis());
+        return useBytes;
+    }
 
     @Override
     public TransInfo getTrafficDataOfThisMonth(Context context,String subscriberID,int networkType) {
@@ -26,11 +43,12 @@ public class BucketDaoImpl implements BucketDao {
         //List<Long> rxBytesList = new ArrayList<Long>();
         //for (SubscriptionInfo info : subscriptionInfoList) {
             try {
-                NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
+                /*NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
                 NetworkStats.Bucket bucketThisMonth = null;
                 DateTools dateTools = new DateTools();
                 bucketThisMonth = networkStatsManager.querySummaryForDevice(networkType, subscriberID, dateTools.getTimesMonthmorning(), System.currentTimeMillis());
-                TransInfo useBytes = new TransInfo( bucketThisMonth.getRxBytes(),bucketThisMonth.getTxBytes());
+                */
+                TransInfo useBytes = getTrafficData( context,  subscriberID,  networkType,new DateTools().getTimesMonthmorning(), System.currentTimeMillis());
                 /*rxBytesList.add(rxBytes);*/
                 return useBytes;
             } catch (Exception e) {
@@ -47,11 +65,14 @@ public class BucketDaoImpl implements BucketDao {
         //List<Long> rxBytesList = new ArrayList<Long>();
         //for (SubscriptionInfo info : subscriptionInfoList) {
         try {
-            NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
+            /*NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
             NetworkStats.Bucket bucketStartDayToToday = null;
             DateTools dateTools = new DateTools();
             bucketStartDayToToday = networkStatsManager.querySummaryForDevice(networkType,subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis());
-            TransInfo useBytesStartDayToToday = new TransInfo( bucketStartDayToToday.getRxBytes(),bucketStartDayToToday.getTxBytes());
+            */
+
+
+            TransInfo useBytesStartDayToToday = getTrafficData( context,  subscriberID,  networkType,new DateTools().getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis());
             //rxBytesList.add(rxBytesStartDayToToday);
             //Log.e("当前卡流量",String.valueOf(rxBytesStartDayToToday));
             return useBytesStartDayToToday;
@@ -63,19 +84,21 @@ public class BucketDaoImpl implements BucketDao {
         //return rxBytesList;
     }
     @Override
-    public List<TransInfo> getLastSevenDaysTrafficData(Context context, String subscriberID,int networkType) {
+    public List<TransInfo> getLastThirtyDaysTrafficData(Context context, String subscriberID, int networkType) {
         List<TransInfo> lastSevenDaysTrafficData = new ArrayList<>();
         try {
             NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
             NetworkStats.Bucket bucket;
             DateTools dateTools = new DateTools();
-            List<Long> lastSevenDaysStartTimeInMillis = dateTools.getLastSevenDaysStartTimeInMillis();
-            List<Long> lastSevenDaysEndTimeInMillis = dateTools.getLastSevenDaysEndTimeInMillis();
+            /*List<Long> lastSevenDaysStartTimeInMillis = dateTools.getLastSevenDaysStartTimeInMillis();
+            List<Long> lastSevenDaysEndTimeInMillis = dateTools.getLastSevenDaysEndTimeInMillis();*/
             //System.out.println("起始时间长度："+lastSevenDaysStartTimeInMillis.size());
             //System.out.println("结束时间长度："+lastSevenDaysEndTimeInMillis.size());
-
-            for (int i=6;i>=0;i--){
-                bucket = networkStatsManager.querySummaryForDevice(networkType,subscriberID, lastSevenDaysStartTimeInMillis.get(i), lastSevenDaysEndTimeInMillis.get(i));
+            Map<String,List<Long>> LastThirtyDaysMap = dateTools.getLastThirtyDaysMap();
+            List<Long> lastThirtyDaysStartTimeInMillis = LastThirtyDaysMap.get("StartTimeList");
+            List<Long> lastThirtyDaysEndTimeInMillis = LastThirtyDaysMap.get("EndTimeList");
+            for (int i=0;i<lastThirtyDaysEndTimeInMillis.size();i++){
+                bucket = networkStatsManager.querySummaryForDevice(networkType,subscriberID, lastThirtyDaysStartTimeInMillis.get(i), lastThirtyDaysEndTimeInMillis.get(i));
                 TransInfo useBytes = new TransInfo( bucket.getRxBytes(),bucket.getTxBytes());
 
                 //System.out.println("第"+i+"次添加数据："+useBytes);
@@ -95,25 +118,25 @@ public class BucketDaoImpl implements BucketDao {
     }
 
     @Override
-    public Map<String,List<String>> getLastSixMonthsTrafficData(Context context, String subscriberID, int dataPlanStartDay,int networkType) {
+    public Map<String,List<String>> getLastTwelveMonthsTrafficData(Context context, String subscriberID, int dataPlanStartDay, int networkType) {
         Map<String,List<String>> lastSixMonthsTrafficDataMap=new HashMap<>();
         try {
             NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
             NetworkStats.Bucket bucket;
             DateTools dateTools = new DateTools();
-            Map<String,List<String>> lastSixMonthsMap = dateTools.getLastSixMonthsMap(dataPlanStartDay);
-            List<String> lastSixMonthsStartTimeInMillisList = lastSixMonthsMap.get("StartTimeList");
-            List<String> lastSixMonthsEndTimeInMillisList = lastSixMonthsMap.get("EndTimeList");
-            List<String> lastSixMonthsStartMonthAndEndMonth = lastSixMonthsMap.get("MonthString");
+            Map<String,List<String>> lastSixMonthsMap = dateTools.getLastTwelveMonthsMap(dataPlanStartDay);
+            List<String> lastTwelveMonthsStartTimeInMillisList = lastSixMonthsMap.get("StartTimeList");
+            List<String> lastTwelveMonthsEndTimeInMillisList = lastSixMonthsMap.get("EndTimeList");
+            List<String> lastTwelveMonthsStartMonthAndEndMonth = lastSixMonthsMap.get("MonthString");
 
             List<String> lastSixMonthsTrafficDataList = new ArrayList<>();
-            for (int i = 0; i<6; i++){
-                bucket = networkStatsManager.querySummaryForDevice(networkType,subscriberID, Long.valueOf(lastSixMonthsStartTimeInMillisList.get(i)),Long.valueOf(lastSixMonthsEndTimeInMillisList.get(i)));
+            for (int i = 0; i<lastTwelveMonthsStartTimeInMillisList.size(); i++){
+                bucket = networkStatsManager.querySummaryForDevice(networkType,subscriberID, Long.valueOf(lastTwelveMonthsStartTimeInMillisList.get(i)),Long.valueOf(lastTwelveMonthsEndTimeInMillisList.get(i)));
                 long useBytes = bucket.getRxBytes()+bucket.getTxBytes();
                 lastSixMonthsTrafficDataList.add(String.valueOf(useBytes));
             }
             lastSixMonthsTrafficDataMap.put("LastSixMonthsTrafficDataList",lastSixMonthsTrafficDataList);
-            lastSixMonthsTrafficDataMap.put("MonthString",lastSixMonthsStartMonthAndEndMonth);
+            lastSixMonthsTrafficDataMap.put("MonthString",lastTwelveMonthsStartMonthAndEndMonth);
             return lastSixMonthsTrafficDataMap;
         }catch (Exception e){
             Log.e("严重错误", "错误信息:" + e.toString());

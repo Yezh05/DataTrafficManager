@@ -105,7 +105,9 @@ public class DateTools {
         Collections.reverse(lastSevenDays);
         return lastSevenDays;
     }
-    public Map<String,List<String>> getLastSixMonthsMap(int startDay){
+
+    public Map<String,List<String>> getLastTwelveMonthsMap(int startDay){
+        final int size = 12;
         //Integer startDay=1;
         Map<String,List<String>> lastSixMonthsMap = new HashMap<>();
         Calendar dayCal = Calendar.getInstance();
@@ -123,7 +125,7 @@ public class DateTools {
         dayCal.set(Calendar.MILLISECOND, 000);
         dayCal.set(Calendar.DATE, startDay);
         dayCal.add(Calendar.MONTH, -1);
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < size; i++) {
             //System.out.println(dayCal.getTime());
             lastSixMonthsStartTimeInMillisList.add( String.valueOf(dayCal.getTimeInMillis() ));
             lastSixMonthsStartMonthAndEndMonth.add(dayCal.get(Calendar.YEAR)+"/"+( dayCal.get(Calendar.MONTH)+1+"" ));
@@ -134,7 +136,7 @@ public class DateTools {
         if(today>=startDay){
             dayCal.add(Calendar.MONTH, 1);
         }
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < size; i++) {
             dayCal.set(Calendar.HOUR_OF_DAY, 00);
             dayCal.set(Calendar.MINUTE, 00);
             dayCal.set(Calendar.SECOND, 00);

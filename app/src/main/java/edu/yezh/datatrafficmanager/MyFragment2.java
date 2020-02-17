@@ -7,16 +7,13 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toolbar;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -32,6 +29,7 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import edu.yezh.datatrafficmanager.dao.BucketDao;
@@ -83,26 +81,45 @@ public class MyFragment2 extends Fragment {
     public void initialPage(View view, final Context context){
         final int dataPlanStartDay = 1;
         final String subscriberID = "";
-        NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
-        NetworkStats.Bucket bucket = null;
-
-
-        DateTools dateTools = new DateTools();
-        try {bucket = networkStatsManager.querySummaryForDevice(networkType, "", dateTools.getTimesMonthmorning(), System.currentTimeMillis());
-            //Log.i("Info", "Total: " + (bucket.getRxBytes() + bucket.getTxBytes()));
-            long rxBytes = bucket.getRxBytes();
-            BytesFormatter bytesFormatter = new BytesFormatter();
-            OutputTrafficData todayUseageReadableData = bytesFormatter.getPrintSizebyModel(rxBytes);
-            TextView textView = view.findViewById(R.id.DataWLANThisMonth);
-            textView.setText("本月已下载\n" + Math.round(Double.valueOf(todayUseageReadableData.getValue())*100D)/100D + todayUseageReadableData.getType());
-
-        } catch (RemoteException e) {
-            Log.e("bucket", "GetTotalError");
-            e.printStackTrace();
-        }
-        //showRealTimeNetSpeed(view);
-
+        BytesFormatter bytesFormatter = new BytesFormatter();
         BucketDao bucketDao = new BucketDaoImpl();
+        DateTools dateTools = new DateTools();
+
+        try {
+            TransInfo ThisMonthUsageData = bucketDao.getTrafficDataOfThisMonth(context,subscriberID,networkType);
+            OutputTrafficData ThisMonthUsageDataRx = bytesFormatter.getPrintSizebyModel(ThisMonthUsageData.getRx());
+            TextView textViewDataWLANThisMonthRx = view.findViewById(R.id.DataWLANThisMonthRx);
+            textViewDataWLANThisMonthRx.setText(Math.round(Double.valueOf(ThisMonthUsageDataRx.getValue())*100D)/100D + ThisMonthUsageDataRx.getType());
+
+            OutputTrafficData ThisMonthUsageDataTx = bytesFormatter.getPrintSizebyModel(ThisMonthUsageData.getTx());
+            TextView textViewDataWLANThisMonthTx = view.findViewById(R.id.DataWLANThisMonthTx);
+            textViewDataWLANThisMonthTx.setText(Math.round(Double.valueOf(ThisMonthUsageDataTx.getValue())*100D)/100D + ThisMonthUsageDataTx.getType());
+
+            OutputTrafficData ThisMonthUsageDataTotal = bytesFormatter.getPrintSizebyModel(ThisMonthUsageData.getTotal());
+            TextView textViewDataWLANThisMonthTotal = view.findViewById(R.id.DataWLANThisMonthTotal);
+            textViewDataWLANThisMonthTotal.setText(Math.round(Double.valueOf(ThisMonthUsageDataTotal.getValue())*100D)/100D + ThisMonthUsageDataTotal.getType());
+
+            TransInfo TodayUsageData = bucketDao.getTrafficDataOfToday(context,subscriberID,networkType);
+            OutputTrafficData TodayUsageDataRx = bytesFormatter.getPrintSizebyModel(TodayUsageData.getRx());
+            TextView textViewDataWLANTodayRx = view.findViewById(R.id.DataWLANTodayRx);
+            textViewDataWLANTodayRx.setText(Math.round(Double.valueOf(TodayUsageDataRx.getValue())*100D)/100D + TodayUsageDataRx.getType());
+
+            OutputTrafficData TodayUsageDataTx = bytesFormatter.getPrintSizebyModel(TodayUsageData.getTx());
+            TextView textViewDataWLANTodayTx = view.findViewById(R.id.DataWLANTodayTx);
+            textViewDataWLANTodayTx.setText(Math.round(Double.valueOf(TodayUsageDataTx.getValue())*100D)/100D + TodayUsageDataTx.getType());
+
+            OutputTrafficData TodayUsageDataTotal = bytesFormatter.getPrintSizebyModel(TodayUsageData.getTotal());
+            TextView textViewDataWLANTodayTotal = view.findViewById(R.id.DataWLANTodayTotal);
+            textViewDataWLANTodayTotal.setText(Math.round(Double.valueOf(TodayUsageDataTotal.getValue())*100D)/100D + TodayUsageDataTotal.getType());
+
+
+
+        } catch (Exception e) {
+            Log.e("严重错误", e.toString() );
+        }
+
+
+
         MyFragment1 myFragment1 = new MyFragment1();
         myFragment1.showRealTimeNetSpeed(view);
 
@@ -115,8 +132,12 @@ public class MyFragment2 extends Fragment {
         RecyclerViewAppsTrafficData.setLayoutManager(layoutManager);
 
 
-        List<TransInfo> lastSevenDaysTrafficData = bucketDao.getLastSevenDaysTrafficData(context, subscriberID, networkType);
-        showChart(view, lastSevenDaysTrafficData, dateTools.getLastSevenDays());
+        List<TransInfo> lastSevenDaysTrafficData = bucketDao.getLastThirtyDaysTrafficData(context, subscriberID, networkType);
+        List<Long> DaysNoList = dateTools.getLastThirtyDaysMap().get("No");
+        Collections.reverse(lastSevenDaysTrafficData);
+        Collections.reverse(DaysNoList);
+        showChart(view, lastSevenDaysTrafficData,DaysNoList);
+
         Button buttonShowLastSixMonthTrafficData = (Button) view.findViewById(R.id.ButtonShowLastSixMonthTrafficData);
         buttonShowLastSixMonthTrafficData.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,16 +154,18 @@ public class MyFragment2 extends Fragment {
         //myFragment1.showChart();
     }
 
-    public void showChart(View view,List<TransInfo> lastSevenDaysTrafficData, List<Integer> lastSevenDays){
+    public void showChart(View view,List<TransInfo> valueDataList, List<Long> DaysNoList){
+        System.out.println("lastSevenDaysTrafficData:"+valueDataList.size());
+
         BytesFormatter bytesFormatter = new BytesFormatter();
 
         LineChart lineChart = (LineChart) view.findViewById(R.id.LineChartLastSevenDaysTrafficData);
 
         final ArrayList<Entry> values = new ArrayList<>();
-        final String[] Xvalues = new String[lastSevenDays.size()];
-        for (int i=0;i<lastSevenDays.size();i++){
-            values.add(new Entry(i,lastSevenDaysTrafficData.get(i).getTotal()));
-            Xvalues[i]= lastSevenDays.get(i) + "日" ;
+        final String[] Xvalues = new String[DaysNoList.size()];
+        for (int i=0;i<DaysNoList.size();i++){
+            values.add(new Entry(i,valueDataList.get(i).getTotal()));
+            Xvalues[i]= DaysNoList.get(i) + "日" ;
         }
         IAxisValueFormatter formatter = new IAxisValueFormatter() {
             @Override
@@ -178,6 +201,9 @@ public class MyFragment2 extends Fragment {
         lineChart.getAxisLeft().setDrawLabels(false);
         lineChart.getAxisLeft().setDrawAxisLine(false);
         lineChart.animateXY(000,1200);
+        lineChart.setVisibleXRangeMaximum(6);
+        lineChart.setViewPortOffsets(50,50,50,50);
+        lineChart.moveViewToX(valueDataList.size()-1);
 
         lineChart.getDescription().setEnabled(false);
         lineChart.invalidate();

@@ -370,6 +370,12 @@
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
                     android:background="#009688" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="应用程序使用情况"
+                    android:textSize="15dp" />
             </LinearLayout>
 
             <RelativeLayout
@@ -383,10 +389,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </RelativeLayout>
-
             <View
                 android:layout_width="match_parent"
-                android:layout_height="20dp"></View>
+                android:layout_height="2dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:background="#009688" />
+            <!--<View
+                android:layout_width="match_parent"
+                android:layout_height="20dp"></View>-->
         </LinearLayout>
 
     </ScrollView>

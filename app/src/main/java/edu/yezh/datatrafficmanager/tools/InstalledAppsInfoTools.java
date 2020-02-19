@@ -49,7 +49,7 @@ public class InstalledAppsInfoTools {
                             singleAppInfo.setName(applicationLabel);
                             singleAppInfo.setAppIcon(getAppIconByPackageName(context,packageName));
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            //e.printStackTrace();
                             singleAppInfo.setName(packageName);
                         }
                         //uidList.add(String.valueOf(uid));

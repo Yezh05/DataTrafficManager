@@ -8,4 +8,5 @@
     <string name="tab_text_3">工具</string>
     <string name="title_activity_show_data_list">显示数据</string>
     <string name="title_activity_show_app_details">应用流量数据详情</string>
+    <string name="title_activity_custom_query">自定义时间段流量数据查询</string>
 </resources>

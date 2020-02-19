@@ -76,8 +76,8 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
 
         BucketDao bucketDao = new BucketDaoImpl();
 
-        TransInfo appThisMonthTrafficData = bucketDao.getTrafficDataOfApp(this,subscriberID,networkType,dateTools.getTimesMonthmorning(),System.currentTimeMillis(),uid);
-        TransInfo appTodayTrafficData=bucketDao.getTrafficDataOfApp(this,subscriberID,networkType,dateTools.getTimesTodayMorning(),System.currentTimeMillis(),uid);
+        TransInfo appThisMonthTrafficData = bucketDao.getAppTrafficData(this,subscriberID,networkType,dateTools.getTimesMonthmorning(),System.currentTimeMillis(),uid);
+        TransInfo appTodayTrafficData=bucketDao.getAppTrafficData(this,subscriberID,networkType,dateTools.getTimesTodayMorning(),System.currentTimeMillis(),uid);
 
         TextView TextViewAppThisMonthInfo = findViewById(R.id.TextViewAppThisMonthInfo);
         OutputTrafficData appThisMonthTrafficDataRx = bytesFormatter.getPrintSizeByModel(appThisMonthTrafficData.getRx());
@@ -96,14 +96,14 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
                 "  总量:"+Math.round(Double.valueOf(appTodayTrafficDataTotal.getValue())*100D )/100D+appTodayTrafficDataTotal.getType());
 
         Map<String,List<Long>> LastThirtyDaysMap = dateTools. getLastThirtyDaysMap();
-        List<TransInfo> lastThirtyDaysTrafficData = bucketDao.getAppTrafficDataForPeriod(this,subscriberID,networkType,LastThirtyDaysMap,uid);
+        List<TransInfo> lastThirtyDaysTrafficData = bucketDao.getAppTrafficDataOfPeriod(this,subscriberID,networkType,LastThirtyDaysMap,uid);
         List<Long> LastThirtyDaysNoList = LastThirtyDaysMap.get("No");
         Collections.reverse(LastThirtyDaysNoList);
         Collections.reverse(lastThirtyDaysTrafficData);
         showChart(view, lastThirtyDaysTrafficData, LastThirtyDaysNoList,R.id.LineChartAppLastThirtyDaysTrafficData,"日");
 
         Map<String,List<Long>> LastTwentyFourHoursMap = dateTools. getLastTwentyFourHoursPerTwoHourMap();
-        List<TransInfo> lastTwentyFourHoursTrafficData = bucketDao.getAppTrafficDataForPeriod(this,subscriberID,networkType,LastTwentyFourHoursMap,uid);
+        List<TransInfo> lastTwentyFourHoursTrafficData = bucketDao.getAppTrafficDataOfPeriod(this,subscriberID,networkType,LastTwentyFourHoursMap,uid);
         List<Long> LastTwentyFourHoursNoList = LastTwentyFourHoursMap.get("No");
         Collections.reverse(lastTwentyFourHoursTrafficData);
         Collections.reverse(LastTwentyFourHoursNoList);

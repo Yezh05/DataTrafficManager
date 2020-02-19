@@ -105,7 +105,7 @@ public class PoiTools {
             cell.setCellValue(trafficDataOfThisMonth.getTotal());
             //rowLine++;
 
-            TransInfo trafficDataFromStartDay =bucketDao.getTrafficDataFromStartDay(context,subscriberID,dataPlanStartDay,networkType);
+            TransInfo trafficDataFromStartDay =bucketDao.getTrafficDataFromStartDayToToday(context,subscriberID,dataPlanStartDay,networkType);
             rowLine++;
             titles = new String[]{"月结日","套餐限额(GB)","从月结日起流量已使用(字节)"};
             row = sheet.createRow(rowLine);
@@ -137,7 +137,7 @@ public class PoiTools {
                 cell.setCellStyle(style);
             }
             rowLine++;
-            List<AppsInfo> installedAppsTrafficData = bucketDao.getInstalledAppsTrafficData(context,subscriberID,dataPlanStartDay,networkType);
+            List<AppsInfo> installedAppsTrafficData = bucketDao.getAllInstalledAppsTrafficData(context,subscriberID,networkType,new DateTools().getTimesStartDayMorning(dataPlanStartDay),System.currentTimeMillis());
             for (int j=0;j<installedAppsTrafficData.size();j++){
                 row = sheet.createRow(rowLine);
 
@@ -236,8 +236,8 @@ public class PoiTools {
                 cell.setCellStyle(style);
             }
             rowLine++;
-            List<AppsInfo> installedAppsTrafficData = bucketDao.getInstalledAppsTrafficData(context,subscriberID,dataPlanStartDay,
-                    networkType);
+            List<AppsInfo> installedAppsTrafficData = bucketDao.getAllInstalledAppsTrafficData(context,subscriberID,
+                    networkType,new DateTools().getTimesStartDayMorning(dataPlanStartDay),System.currentTimeMillis());
             for (int j=0;j<installedAppsTrafficData.size();j++){
                 row = sheet.createRow(rowLine);
 

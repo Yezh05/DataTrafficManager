@@ -40,8 +40,8 @@ public class DateTools {
         //System.out.println(targetCal.getTimeInMillis());
 
         int today= todayCal.get(Calendar.DATE);
-        int thisMonth= todayCal.get(Calendar.MONTH)+1;
-        int thisyear = todayCal.get(Calendar.YEAR);
+        /*int thisMonth= todayCal.get(Calendar.MONTH)+1;
+        int thisyear = todayCal.get(Calendar.YEAR);*/
         //System.out.println("计算前时间:"+today+"/"+thisMonth+"/"+thisyear);
 
         if (today<startDay){
@@ -49,14 +49,14 @@ public class DateTools {
             //System.out.println("需要前推1个月");
         }
 
-        int  targetday= targetCal.get(Calendar.DATE);
+        /*int  targetday= targetCal.get(Calendar.DATE);
         int  targetMonth= targetCal.get(Calendar.MONTH)+1;
-        int targetyear = targetCal.get(Calendar.YEAR);
+        int targetyear = targetCal.get(Calendar.YEAR);*/
         //System.out.println("计算后时间:"+targetday+"/"+targetMonth+"/"+targetyear+" 毫秒表示:"+targetCal.getTimeInMillis());
         return targetCal.getTimeInMillis();
     }
 
-    public List<Long> getLastSevenDaysStartTimeInMillis(){
+    /*public List<Long> getLastSevenDaysStartTimeInMillis(){
         List<Long> lastSevenDaysStartTimeInMillis=new ArrayList<>();
         Calendar dayCal = Calendar.getInstance();
         dayCal.set(Calendar.HOUR_OF_DAY, 00);
@@ -104,7 +104,7 @@ public class DateTools {
         }
         Collections.reverse(lastSevenDays);
         return lastSevenDays;
-    }
+    }*/
 
     public Map<String,List<String>> getLastTwelveMonthsMap(int startDay){
         final int size = 12;

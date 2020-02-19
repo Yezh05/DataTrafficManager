@@ -33,7 +33,7 @@ public class ShowDataListActivity extends AppCompatActivity {
         Bundle bundle = intent.getExtras();
         BucketDao bucketDao = new BucketDaoImpl();
         ListView listViewData = (ListView)findViewById(R.id.ListViewData);
-        ListViewAdapter adapter = new ListViewAdapter(ShowDataListActivity.this,bucketDao.getLastTwelveMonthsTrafficData(this,bundle.getString("subscriberID"),bundle.getInt("dataPlanStartDay"), bundle.getInt("networkType")));
+        ListViewAdapter adapter = new ListViewAdapter(ShowDataListActivity.this,bucketDao.getTrafficDataOfLastTwelveMonths(this,bundle.getString("subscriberID"),bundle.getInt("dataPlanStartDay"), bundle.getInt("networkType")));
         listViewData.setAdapter(adapter);
 
 

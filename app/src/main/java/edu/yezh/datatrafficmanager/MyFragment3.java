@@ -2,6 +2,7 @@ package edu.yezh.datatrafficmanager;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -21,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -55,7 +57,9 @@ import edu.yezh.datatrafficmanager.tools.PoiTools;
 public class MyFragment3 extends Fragment {
     public MyFragment3() {
     }
-    int i =0 ;
+
+    int i = 0;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.t3, container, false);
@@ -80,7 +84,7 @@ public class MyFragment3 extends Fragment {
         buttonSHowAppsTrafficData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bucketDao.getInstalledAppsTrafficData(context,"",1, ConnectivityManager.TYPE_WIFI);
+                bucketDao.getAllInstalledAppsTrafficData(context,"",1, ConnectivityManager.TYPE_WIFI);
             }
         });*/
         Button buttonSetAppsUnusualTrafficDataAmount = view.findViewById(R.id.ButtonSetAppsUnusualTrafficDataAmount);
@@ -107,20 +111,19 @@ public class MyFragment3 extends Fragment {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        outputDataToFTP(view,context);
+                        outputDataToFTP(view, context);
                     }
                 }).start();
             }
         });
 
-        /*Button ButtonNotice = view.findViewById(R.id.ButtonNotice);
-        ButtonNotice.setOnClickListener(new View.OnClickListener() {
+        Button ButtonCustomQuery = view.findViewById(R.id.ButtonCustomQuery);
+        ButtonCustomQuery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setNotification(context,String.valueOf(i),"message");
-                i++;
+                handleCustomQuery(context);
             }
-        });*/
+        });
 
         return view;
     }
@@ -149,9 +152,9 @@ public class MyFragment3 extends Fragment {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             //Calendar dayCal = Calendar.getInstance();
             //String nowtime = "" + dayCal.get(Calendar.YEAR) + (dayCal.get(Calendar.MONTH) + 1) + dayCal.get(Calendar.DATE) + dayCal.get(Calendar.HOUR_OF_DAY) + dayCal.get(Calendar.MINUTE) + dayCal.get(Calendar.SECOND);
-            Date date=new Date();
-            SimpleDateFormat formatter=new SimpleDateFormat("yyyyMMddHHmmss");
-            String nowtime=formatter.format(date);
+            Date date = new Date();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+            String nowtime = formatter.format(date);
 
             String pathString = context.getExternalFilesDir("").getAbsolutePath() + "/TrafficData_" + nowtime + ".xls";
             Path path = Paths.get(pathString);
@@ -164,12 +167,12 @@ public class MyFragment3 extends Fragment {
                 }
             }
             try {
-                FileOutputStream fos = new FileOutputStream(pathString,false);
+                FileOutputStream fos = new FileOutputStream(pathString, false);
                 //OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
                 /*byte bytes[] = "DIU1".getBytes();
                 Files.write(path,bytes);*/
 
-                final HSSFWorkbook wb = PoiTools.getHSSFWorkbook(null,context);
+                final HSSFWorkbook wb = PoiTools.getHSSFWorkbook(null, context);
                 wb.write(fos);
                 fos.flush();
                 fos.close();
@@ -181,14 +184,15 @@ public class MyFragment3 extends Fragment {
             }
         }
     }
+
     private void outputDataToFTP(View view, Context context) {
 
         //if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            //Calendar dayCal = Calendar.getInstance();
-            //String nowtime = "" + dayCal.get(Calendar.YEAR) + (dayCal.get(Calendar.MONTH) + 1) + dayCal.get(Calendar.DATE) + dayCal.get(Calendar.HOUR_OF_DAY) + dayCal.get(Calendar.MINUTE) + dayCal.get(Calendar.SECOND);
-            Date date=new Date();
-            SimpleDateFormat formatter=new SimpleDateFormat("yyyyMMddHHmmss");
-            String nowtime=formatter.format(date);
+        //Calendar dayCal = Calendar.getInstance();
+        //String nowtime = "" + dayCal.get(Calendar.YEAR) + (dayCal.get(Calendar.MONTH) + 1) + dayCal.get(Calendar.DATE) + dayCal.get(Calendar.HOUR_OF_DAY) + dayCal.get(Calendar.MINUTE) + dayCal.get(Calendar.SECOND);
+        Date date = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        String nowtime = formatter.format(date);
 
             /*String pathString = context.getExternalFilesDir("").getAbsolutePath() + "/TrafficData_" + nowtime + ".xls";
             Path path = Paths.get(pathString);
@@ -200,38 +204,43 @@ public class MyFragment3 extends Fragment {
                     Log.e("严重错误", e.toString());
                 }
             }*/
-            try {
-                //FileOutputStream fos = new FileOutputStream(pathString,false);
-                //OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
+        try {
+            //FileOutputStream fos = new FileOutputStream(pathString,false);
+            //OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
                 /*byte bytes[] = "DIU1".getBytes();
                 Files.write(path,bytes);*/
 
-                final HSSFWorkbook wb = PoiTools.getHSSFWorkbook(null,context);
+            final HSSFWorkbook wb = PoiTools.getHSSFWorkbook(null, context);
                 /*wb.write(fos);
                 fos.flush();
                 fos.close();*/
 
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                wb.write(bos);
-                bos.flush();
-                InputStream inputStream = new ByteArrayInputStream(bos.toByteArray());
-                bos.close();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            wb.write(bos);
+            bos.flush();
+            InputStream inputStream = new ByteArrayInputStream(bos.toByteArray());
+            bos.close();
 
-                boolean flag = FtpFileTool.uploadFile("119.3.181.85",21,"Administrator","Yezhonghan43","/TrafficManagerData/","TD_" + nowtime + ".xls",inputStream);
+            boolean flag = FtpFileTool.uploadFile("119.3.181.85", 21, "Administrator", "Yezhonghan43", "/TrafficManagerData/", "TD_" + nowtime + ".xls", inputStream);
 
-                System.out.println("FTP上传状态:"+(flag));
-                if (flag==true){
+            System.out.println("FTP上传状态:" + (flag));
+            if (flag == true) {
                 Snackbar.make(view, "导出成功", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();}else{
-                    Snackbar.make(view, "导出错误", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            } catch (Exception e) {
-                Log.e("严重错误", e.toString());
+                        .setAction("Action", null).show();
+            } else {
+                Snackbar.make(view, "导出错误", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
             }
+        } catch (Exception e) {
+            Log.e("严重错误", e.toString());
         }
-    //}
+    }
 
+    //}
+    private void handleCustomQuery( Context context) {
+        Intent intent = new Intent(context,CustomQueryActivity.class);
+        startActivity(intent);
+    }
 
 
 }

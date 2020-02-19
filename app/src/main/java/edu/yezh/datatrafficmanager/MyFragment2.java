@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -115,14 +116,15 @@ public class MyFragment2 extends Fragment {
         MyFragment1 myFragment1 = new MyFragment1();
         myFragment1.showRealTimeNetSpeed(view);
 
-        RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getInstalledAppsTrafficData(context,subscriberID,dataPlanStartDay,networkType),context,subscriberID,networkType);
+        RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getAllInstalledAppsTrafficData(context,subscriberID,networkType,dateTools.getTimesStartDayMorning(dataPlanStartDay),System.currentTimeMillis()),context,subscriberID,networkType);
         RecyclerView RecyclerViewAppsTrafficData = (RecyclerView) view.findViewById(R.id.RecyclerViewAppsTrafficData);
         RecyclerViewAppsTrafficData.setAdapter(recyclerViewAppsTrafficDataAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        RecyclerViewAppsTrafficData.addItemDecoration(new DividerItemDecoration(context,DividerItemDecoration.VERTICAL));
         RecyclerViewAppsTrafficData.setLayoutManager(layoutManager);
 
-        List<TransInfo> lastSevenDaysTrafficData = bucketDao.getLastThirtyDaysTrafficData(context, subscriberID, networkType);
+        List<TransInfo> lastSevenDaysTrafficData = bucketDao.getTrafficDataOfLastThirtyDays(context, subscriberID, networkType);
         List<Long> DaysNoList = dateTools.getLastThirtyDaysMap().get("No");
         Collections.reverse(lastSevenDaysTrafficData);
         Collections.reverse(DaysNoList);

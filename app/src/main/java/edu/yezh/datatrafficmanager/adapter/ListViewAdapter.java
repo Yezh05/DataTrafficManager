@@ -8,7 +8,6 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.List;
-import java.util.Map;
 
 import edu.yezh.datatrafficmanager.R;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;

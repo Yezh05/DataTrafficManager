@@ -1,7 +1,6 @@
 package edu.yezh.datatrafficmanager.dao;
 
 import android.content.Context;
-import android.telephony.SubscriptionInfo;
 
 import java.util.List;
 import java.util.Map;

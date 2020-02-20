@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -44,21 +45,24 @@ public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<Rec
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         if (position==0){
+            holder.ImageViewColAppIcon.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,1,1));
             holder.TextViewColAppName.setText("应用名称");
             holder.TextViewColAppRX.setText("下载流量");
             holder.TextViewColAppTX.setText("上传流量");
+            holder.TextViewColAppTotal.setText("总量");
         }else
         {
             BytesFormatter bytesFormatter = new BytesFormatter();
             int nowPosition = position-1;
             final AppsInfo OneInstalledAppsTrafficData = InstalledAppsTrafficData.get(nowPosition);
             holder.TextViewColAppName.setText(OneInstalledAppsTrafficData.getName());
-            OutputTrafficData dataAppRX = bytesFormatter.getPrintSizeByModel(OneInstalledAppsTrafficData.getRxBytes());
+            OutputTrafficData dataAppRX = bytesFormatter.getPrintSizeByModel(OneInstalledAppsTrafficData.getTrans().getRx());
             holder.TextViewColAppRX.setText(Math.round(Double.valueOf(dataAppRX.getValue())*100D)/100D + dataAppRX.getType());
-            OutputTrafficData dataAppTX = bytesFormatter.getPrintSizeByModel(OneInstalledAppsTrafficData.getTxBytes());
+            OutputTrafficData dataAppTX = bytesFormatter.getPrintSizeByModel(OneInstalledAppsTrafficData.getTrans().getTx());
             holder.TextViewColAppTX.setText(Math.round(Double.valueOf(dataAppTX.getValue())*100D)/100D + dataAppTX.getType());
             holder.ImageViewColAppIcon.setImageDrawable(OneInstalledAppsTrafficData.getAppIcon());
-
+            OutputTrafficData dataAppTotal = bytesFormatter.getPrintSizeByModel(OneInstalledAppsTrafficData.getTrans().getTotal());
+            holder.TextViewColAppTotal.setText(Math.round(Double.valueOf(dataAppTotal.getValue())*100D)/100D + dataAppTotal.getType());
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -67,8 +71,8 @@ public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<Rec
                     bundle.putString("uid",OneInstalledAppsTrafficData.getUid());
                     bundle.putString("name",OneInstalledAppsTrafficData.getName());
                     bundle.putString("packageName",OneInstalledAppsTrafficData.getPackageName());
-                    bundle.putLong("rx",OneInstalledAppsTrafficData.getRxBytes());
-                    bundle.putLong("tx",OneInstalledAppsTrafficData.getTxBytes());
+                    bundle.putLong("rx",OneInstalledAppsTrafficData.getTrans().getRx());
+                    bundle.putLong("tx",OneInstalledAppsTrafficData.getTrans().getTx());
                     bundle.putString("subscriberID",subscriberID);
                     bundle.putInt("networkType",networkType);
                     intent.putExtras(bundle);
@@ -86,7 +90,7 @@ public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<Rec
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder{
-        TextView TextViewColAppName,TextViewColAppTX,TextViewColAppRX;
+        TextView TextViewColAppName,TextViewColAppTX,TextViewColAppRX,TextViewColAppTotal;
         ImageView ImageViewColAppIcon;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -94,6 +98,7 @@ public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<Rec
             TextViewColAppName = itemView.findViewById(R.id.TextViewColAppName);
             TextViewColAppTX = itemView.findViewById(R.id.TextViewColAppTX);
             TextViewColAppRX = itemView.findViewById(R.id.TextViewColAppRX);
+            TextViewColAppTotal = itemView.findViewById(R.id.TextViewColAppTotal);
         }
     }
 

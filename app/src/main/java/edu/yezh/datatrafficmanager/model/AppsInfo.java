@@ -2,14 +2,13 @@ package edu.yezh.datatrafficmanager.model;
 
 import android.graphics.drawable.Drawable;
 
-import java.io.Serializable;
-
-public class AppsInfo implements Serializable {
+public class AppsInfo {
     private String uid;
     private String packageName;
     private String name;
     private Drawable appIcon;
-    private long rxBytes,txBytes;
+    //private long rxBytes,txBytes;
+    private TransInfo trans;
     public AppsInfo() {
         super();
     }
@@ -19,26 +18,27 @@ public class AppsInfo implements Serializable {
         this.packageName = packageName;
         this.name = name;
         this.appIcon = appIcon;
-        this.rxBytes = rxBytes;
-        this.txBytes = txBytes;
+        this.trans = new TransInfo(rxBytes,txBytes);
     }
 
-    public long getRxBytes() {
-        return rxBytes;
+    public AppsInfo(String uid, String packageName, String name, Drawable appIcon, TransInfo trans) {
+        this.uid = uid;
+        this.packageName = packageName;
+        this.name = name;
+        this.appIcon = appIcon;
+        this.trans = trans;
     }
 
-    public void setRxBytes(long rxBytes) {
-        this.rxBytes = rxBytes;
+    public TransInfo getTrans() {
+        return trans;
     }
 
-    public long getTxBytes() {
-        return txBytes;
+    public void setTrans(TransInfo trans) {
+        this.trans = trans;
     }
-
-    public void setTxBytes(long txBytes) {
-        this.txBytes = txBytes;
+    public void setTrans(long rxBytes, long txBytes) {
+        this.trans = new TransInfo(rxBytes,txBytes);
     }
-
     public String getUid() {
         return uid;
     }
@@ -78,8 +78,7 @@ public class AppsInfo implements Serializable {
                 ", packageName='" + packageName + '\'' +
                 ", name='" + name + '\'' +
                 ", appIcon=" + appIcon +
-                ", rxBytes=" + rxBytes +
-                ", txBytes=" + txBytes +
+                ", trans=" + trans +
                 '}';
     }
 }

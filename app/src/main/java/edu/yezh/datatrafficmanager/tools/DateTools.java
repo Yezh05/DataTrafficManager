@@ -23,9 +23,11 @@ public class DateTools {
     public Long getTimesMonthmorning() {
         Calendar cal = Calendar.getInstance();
         cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+        cal.set(Calendar.MILLISECOND,0);
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
         //Log.d("thismounthtime",cal.getTime().toString());
         Long time = cal.getTimeInMillis();
+        System.out.println("本月开始时间："+cal.getTime()+"毫秒："+cal.getTimeInMillis());
         return time;
     }
 
@@ -53,6 +55,7 @@ public class DateTools {
         int  targetMonth= targetCal.get(Calendar.MONTH)+1;
         int targetyear = targetCal.get(Calendar.YEAR);*/
         //System.out.println("计算后时间:"+targetday+"/"+targetMonth+"/"+targetyear+" 毫秒表示:"+targetCal.getTimeInMillis());
+        System.out.println("月结日开始时间："+targetCal.getTime()+"毫秒："+targetCal.getTimeInMillis());
         return targetCal.getTimeInMillis();
     }
 
@@ -146,7 +149,7 @@ public class DateTools {
             lastSixMonthsEndTimeInMillisList.add(String.valueOf(dayCal.getTimeInMillis()));
             //System.out.println(dayCal.getTime());
             if (startDay!=1) {
-                lastSixMonthsStartMonthAndEndMonth.set(i, lastSixMonthsStartMonthAndEndMonth.get(i)+"~"+dayCal.get(Calendar.YEAR)+"/"+(dayCal.get(Calendar.MONTH)+1)+"");
+                lastSixMonthsStartMonthAndEndMonth.set(i, lastSixMonthsStartMonthAndEndMonth.get(i)+"\n"+dayCal.get(Calendar.YEAR)+"/"+(dayCal.get(Calendar.MONTH)+1)+"");
                 dayCal.add(Calendar.MONTH, -1);
             }
 

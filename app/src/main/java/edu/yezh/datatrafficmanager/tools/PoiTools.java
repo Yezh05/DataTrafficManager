@@ -148,9 +148,9 @@ public class PoiTools {
                 cell = row.createCell(2);
                 cell.setCellValue(installedAppsTrafficData.get(j).getPackageName());
                 cell = row.createCell(3);
-                cell.setCellValue(installedAppsTrafficData.get(j).getTxBytes());
+                cell.setCellValue(installedAppsTrafficData.get(j).getTrans().getTx());
                 cell = row.createCell(4);
-                cell.setCellValue(installedAppsTrafficData.get(j).getRxBytes());
+                cell.setCellValue(installedAppsTrafficData.get(j).getTrans().getRx());
                 rowLine++;
             }
             rowLine++;
@@ -248,9 +248,9 @@ public class PoiTools {
                 cell = row.createCell(2);
                 cell.setCellValue(installedAppsTrafficData.get(j).getPackageName());
                 cell = row.createCell(3);
-                cell.setCellValue(installedAppsTrafficData.get(j).getTxBytes());
+                cell.setCellValue(installedAppsTrafficData.get(j).getTrans().getTx());
                 cell = row.createCell(4);
-                cell.setCellValue(installedAppsTrafficData.get(j).getRxBytes());
+                cell.setCellValue(installedAppsTrafficData.get(j).getTrans().getRx());
                 rowLine++;
             }
             rowLine++;

@@ -473,8 +473,8 @@ public class MyFragment1 extends Fragment {
             for (int k=0;k<installedAppsTodayTrafficDataList.size();k++){
                 AppsInfo i=installedAppsTodayTrafficDataList.get(k);
                 String name = i.getName();
-                long rxBytes = i.getRxBytes();
-                long txBytes = i.getTxBytes();
+                long rxBytes = i.getTrans().getRx();
+                long txBytes = i.getTrans().getTx();
                 long allBytes = rxBytes+txBytes;
                 if(allBytes>=(appsMAXTraffic*1024*1024)){
                     if (flag!=0){

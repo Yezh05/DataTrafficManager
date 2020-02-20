@@ -35,8 +35,6 @@ public class ShowDataListActivity extends AppCompatActivity {
         ListView listViewData = (ListView)findViewById(R.id.ListViewData);
         ListViewAdapter adapter = new ListViewAdapter(ShowDataListActivity.this,bucketDao.getTrafficDataOfLastTwelveMonths(this,bundle.getString("subscriberID"),bundle.getInt("dataPlanStartDay"), bundle.getInt("networkType")));
         listViewData.setAdapter(adapter);
-
-
         /*FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override

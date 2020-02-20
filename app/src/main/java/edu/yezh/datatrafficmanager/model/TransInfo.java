@@ -1,6 +1,6 @@
 package edu.yezh.datatrafficmanager.model;
 
-public class TransInfo {
+public class TransInfo implements Comparable<TransInfo> {
     long rx,tx,total;
 
     public TransInfo(long rx, long tx) {
@@ -28,5 +28,17 @@ public class TransInfo {
                 ", tx=" + tx +
                 ", total=" + total +
                 '}';
+    }
+
+    @Override
+    public int compareTo(TransInfo o) {
+        if(this.total-o.getTotal()>0){
+            return 1;
+        }else if (this.total-o.getTotal()<0){
+            return -1;
+        }else
+        {
+            return  0;
+        }
     }
 }

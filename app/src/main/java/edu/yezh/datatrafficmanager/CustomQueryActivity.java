@@ -3,6 +3,7 @@ package edu.yezh.datatrafficmanager;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -59,8 +61,43 @@ public class CustomQueryActivity extends AppCompatActivity {
         subscriberID = null;
         networkType = -1000;
 
-        initSpinner(context);
 
+        int startCode = 0;
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+        try{
+
+
+            startCode = bundle.getInt("startCode");
+
+
+        }catch (Exception e){
+            System.out.println("出错："+e.toString());
+
+        }
+
+        if (startCode==900){
+            LinearLayout linearLayout = findViewById(R.id.LinearLayoutSettingBar);
+            linearLayout.setVisibility(View.GONE);
+            subscriberID = bundle.getString("subscriberID");
+            System.out.println("subscriberID:"+subscriberID);
+            networkType = bundle.getInt("networkType");
+            System.out.println("networkType:"+networkType);
+
+            Calendar c1 = Calendar.getInstance();
+            c1.setTimeInMillis(bundle.getLong("startTime"));
+            calStartTime = c1;
+            System.out.println("开始时间:"+calStartTime.getTime());
+
+            Calendar c2 = Calendar.getInstance();
+            c2.setTimeInMillis(bundle.getLong("endTime"));
+            calEndTime = c2;
+            System.out.println("结束时间:"+calEndTime.getTime());
+
+            handleCustomQuery(context);
+        }else{
+
+        initSpinner(context);
         Button buttonCustomQuerySetStartTime = findViewById(R.id.ButtonCustomQuerySetStartTime);
         Button buttonCustomQuerySetEndTime = findViewById(R.id.ButtonCustomQuerySetEndTime);
         buttonCustomQuerySetStartTime.setOnClickListener(new View.OnClickListener() {
@@ -87,7 +124,7 @@ public class CustomQueryActivity extends AppCompatActivity {
             public void onClick(View v) {
                 handleCustomQuery(context);
             }
-        });
+        });}
     }
     private  void initSpinner(Context context){
         final List<SimInfo> simInfoList = new SimTools().getSubscriptionInfoList(context);
@@ -175,30 +212,36 @@ public class CustomQueryActivity extends AppCompatActivity {
     }
     private void handleCustomQuery(Context context){
         if (calStartTime!=null && calEndTime!=null){
-            BucketDao bucketDao = new BucketDaoImpl();
-            BytesFormatter bytesFormatter = new BytesFormatter();
-            TransInfo customQueryData = bucketDao.getTrafficData(context,subscriberID,networkType,calStartTime.getTimeInMillis(),calEndTime.getTimeInMillis());
+            if(calStartTime.getTimeInMillis()<calEndTime.getTimeInMillis()) {
+                BucketDao bucketDao = new BucketDaoImpl();
+                BytesFormatter bytesFormatter = new BytesFormatter();
+                System.out.println("查询:" + subscriberID + "\n" + networkType + "\n" + calStartTime.getTime() + "\n" + calEndTime.getTime());
+                TransInfo customQueryData = bucketDao.getTrafficData(context, subscriberID, networkType, calStartTime.getTimeInMillis(), calEndTime.getTimeInMillis());
 
-            OutputTrafficData customQueryDataTotal = bytesFormatter.getPrintSizeByModel(customQueryData.getTotal());
-            TextView TextViewCustomQueryTotal = findViewById(R.id.TextViewCustomQueryTotal);
-            TextViewCustomQueryTotal.setText(Math.round(Double.valueOf(customQueryDataTotal.getValue())*100D)/100D + customQueryDataTotal.getType());
+                OutputTrafficData customQueryDataTotal = bytesFormatter.getPrintSizeByModel(customQueryData.getTotal());
+                TextView TextViewCustomQueryTotal = findViewById(R.id.TextViewCustomQueryTotal);
+                TextViewCustomQueryTotal.setText(Math.round(Double.valueOf(customQueryDataTotal.getValue()) * 100D) / 100D + customQueryDataTotal.getType());
+                //System.out.println("总量："+Math.round(Double.valueOf(customQueryDataTotal.getValue())*100D)/100D + customQueryDataTotal.getType());
 
-            OutputTrafficData customQueryDataRx = bytesFormatter.getPrintSizeByModel(customQueryData.getRx());
-            TextView TextViewCustomQueryRx = findViewById(R.id.TextViewCustomQueryRx);
-            TextViewCustomQueryRx.setText(Math.round(Double.valueOf(customQueryDataRx.getValue())*100D)/100D + customQueryDataRx.getType());
+                OutputTrafficData customQueryDataRx = bytesFormatter.getPrintSizeByModel(customQueryData.getRx());
+                TextView TextViewCustomQueryRx = findViewById(R.id.TextViewCustomQueryRx);
+                TextViewCustomQueryRx.setText(Math.round(Double.valueOf(customQueryDataRx.getValue()) * 100D) / 100D + customQueryDataRx.getType());
 
-            OutputTrafficData customQueryDataTx = bytesFormatter.getPrintSizeByModel(customQueryData.getTx());
-            TextView TextViewCustomQueryTx = findViewById(R.id.TextViewCustomQueryTx);
-            TextViewCustomQueryTx.setText(Math.round(Double.valueOf(customQueryDataTx.getValue())*100D)/100D + customQueryDataTx.getType());
+                OutputTrafficData customQueryDataTx = bytesFormatter.getPrintSizeByModel(customQueryData.getTx());
+                TextView TextViewCustomQueryTx = findViewById(R.id.TextViewCustomQueryTx);
+                TextViewCustomQueryTx.setText(Math.round(Double.valueOf(customQueryDataTx.getValue()) * 100D) / 100D + customQueryDataTx.getType());
 
-            RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getAllInstalledAppsTrafficData(context,subscriberID,networkType,calStartTime.getTimeInMillis(),calEndTime.getTimeInMillis()),context,subscriberID,networkType);
-            RecyclerView RecyclerViewAppsTrafficData = findViewById(R.id.RecyclerViewAppsTrafficData);
-            RecyclerViewAppsTrafficData.setAdapter(recyclerViewAppsTrafficDataAdapter);
-            LinearLayoutManager layoutManager = new LinearLayoutManager(context);
-            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-            RecyclerViewAppsTrafficData.addItemDecoration(new DividerItemDecoration(context,DividerItemDecoration.VERTICAL));
-            RecyclerViewAppsTrafficData.setLayoutManager(layoutManager);
-
+                RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getAllInstalledAppsTrafficData(context, subscriberID, networkType, calStartTime.getTimeInMillis(), calEndTime.getTimeInMillis()), context, subscriberID, networkType);
+                RecyclerView RecyclerViewAppsTrafficData = findViewById(R.id.RecyclerViewAppsTrafficData);
+                RecyclerViewAppsTrafficData.setAdapter(recyclerViewAppsTrafficDataAdapter);
+                LinearLayoutManager layoutManager = new LinearLayoutManager(context);
+                layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+                RecyclerViewAppsTrafficData.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
+                RecyclerViewAppsTrafficData.setLayoutManager(layoutManager);
+            }else
+            {
+                Toast.makeText(context,"时间段设置错误",Toast.LENGTH_LONG).show();
+            }
         }else {
             Toast.makeText(context,"请选择开始和结束时间",Toast.LENGTH_SHORT).show();
         }

@@ -3,6 +3,7 @@ package edu.yezh.datatrafficmanager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,18 +31,13 @@ public class ShowDataListActivity extends AppCompatActivity {
         });
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
+        String subscriberID = bundle.getString("subscriberID");
+        int networkType = bundle.getInt("networkType");
         BucketDao bucketDao = new BucketDaoImpl();
         ListView listViewData = (ListView)findViewById(R.id.ListViewData);
-        ListViewAdapter adapter = new ListViewAdapter(ShowDataListActivity.this,bucketDao.getTrafficDataOfLastTwelveMonths(this,bundle.getString("subscriberID"),bundle.getInt("dataPlanStartDay"), bundle.getInt("networkType")));
+        ListViewAdapter adapter = new ListViewAdapter(ShowDataListActivity.this,subscriberID,networkType,bucketDao.getTrafficDataOfLastTwelveMonths(this,subscriberID,bundle.getInt("dataPlanStartDay"),networkType));
         listViewData.setAdapter(adapter);
-        /*FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
+
     }
 
 }

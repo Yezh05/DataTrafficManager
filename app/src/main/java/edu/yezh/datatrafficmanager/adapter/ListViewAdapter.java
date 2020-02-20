@@ -1,14 +1,18 @@
 package edu.yezh.datatrafficmanager.adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
+import edu.yezh.datatrafficmanager.CustomQueryActivity;
 import edu.yezh.datatrafficmanager.R;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.model.TransInfo;
@@ -28,19 +32,28 @@ public class ListViewAdapter extends BaseAdapter {
         //System.out.println(objectsDataList.get("LastSixMonthsTrafficDataList").size());
         return objectsDataList.get("LastSixMonthsTrafficDataList").size();
     }*/
-
+    String subscriberID ;
+    int networkType ;
     List<Object> objectsDataList;
     Context context;
-    public ListViewAdapter(Context context,List<Object> objectsDataList) {
+    /*public ListViewAdapter(Context context,List<Object> objectsDataList) {
         super();
         this.context=context;
         this.objectsDataList = objectsDataList;
+    }*/
+
+    public ListViewAdapter(Context context,String subscriberID, int networkType, List<Object> objectsDataList) {
+        super();
+        this.subscriberID = subscriberID;
+        this.networkType = networkType;
+        this.objectsDataList = objectsDataList;
+        this.context = context;
     }
 
     @Override
     public int getCount() {
         //System.out.println(objectsDataList.get("LastSixMonthsTrafficDataList").size());
-        return ((List<TransInfo>)objectsDataList.get(1)).size();
+        return ((List<TransInfo>)objectsDataList.get(1)).size()+1;
     }
 
     @Override
@@ -54,7 +67,7 @@ public class ListViewAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
 
         TextView textViewCol1,textViewCol2,textViewCol3,textViewCol4;
         if (convertView == null) {
@@ -76,14 +89,15 @@ public class ListViewAdapter extends BaseAdapter {
 
         }
         if (position!=0) {
+            final int realPosition = position-1;
             BytesFormatter bytesFormatter = new BytesFormatter();
 
             List<TransInfo> transInfoList =  (List<TransInfo>)objectsDataList.get(1);
             List<String> monthStringList = (List<String>)objectsDataList.get(0);
 
-            TransInfo dataBytes = transInfoList.get(position);
+            TransInfo dataBytes = transInfoList.get(realPosition);
 
-            String col1String = monthStringList.get(position);
+            String col1String = monthStringList.get(realPosition);
             textViewCol1.setText(col1String);
 
             OutputTrafficData DataRx = bytesFormatter.getPrintSizeByModel(dataBytes.getRx());
@@ -98,6 +112,21 @@ public class ListViewAdapter extends BaseAdapter {
             String col4String = Math.round(Double.valueOf(DataTotal.getValue()) * 100D) / 100D + DataTotal.getType();
             textViewCol4.setText(col4String);
 
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(context, CustomQueryActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("subscriberID",subscriberID);
+                    //System.out.println("点击时:"+bundle.getLong("startTime"));
+                    bundle.putInt("networkType",networkType);
+                    bundle.putInt("startCode",900);
+                    bundle.putLong("startTime", Long.parseLong (((List<String>) objectsDataList.get(2)).get(realPosition)));
+                    bundle.putLong("endTime", Long.parseLong (((List<String>) objectsDataList.get(3)).get(realPosition)));
+                    intent.putExtras(bundle);
+                    context.startActivity(intent);
+                }
+            });
         }else {
             textViewCol1.setText("时间");
             textViewCol2.setText("上传流量");

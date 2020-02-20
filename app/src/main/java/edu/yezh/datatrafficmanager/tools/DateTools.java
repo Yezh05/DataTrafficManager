@@ -24,7 +24,7 @@ public class DateTools {
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
         //Log.d("thismounthtime",cal.getTime().toString());
         Long time = cal.getTimeInMillis();
-        System.out.println("本月开始时间："+cal.getTime()+"毫秒："+cal.getTimeInMillis());
+        //System.out.println("本月开始时间："+cal.getTime()+"毫秒："+cal.getTimeInMillis());
         return time;
     }
 
@@ -52,7 +52,7 @@ public class DateTools {
         int  targetMonth= targetCal.get(Calendar.MONTH)+1;
         int targetyear = targetCal.get(Calendar.YEAR);*/
         //System.out.println("计算后时间:"+targetday+"/"+targetMonth+"/"+targetyear+" 毫秒表示:"+targetCal.getTimeInMillis());
-        System.out.println("月结日开始时间："+targetCal.getTime()+"毫秒："+targetCal.getTimeInMillis());
+        //System.out.println("月结日开始时间："+targetCal.getTime()+"毫秒："+targetCal.getTimeInMillis());
         return targetCal.getTimeInMillis();
     }
 

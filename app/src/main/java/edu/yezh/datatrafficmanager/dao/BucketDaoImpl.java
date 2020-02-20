@@ -149,6 +149,8 @@ public class BucketDaoImpl implements BucketDao {
 
             objectsDataList.add(0,lastTwelveMonthsStartMonthAndEndMonth);
             objectsDataList.add(1,lastTwelveMonthsTrafficDataTotalList);
+            objectsDataList.add(2,lastTwelveMonthsStartTimeInMillisList);
+            objectsDataList.add(3,lastTwelveMonthsEndTimeInMillisList);
             return  objectsDataList;
         } catch (Exception e) {
             Log.e("严重错误", "错误信息:" + e.toString());

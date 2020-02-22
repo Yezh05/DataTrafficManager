@@ -72,4 +72,7 @@ public class SimTools {
         //Log.e("Q_M", "IMSI--" + imsi);
         return imsi;
     }
+    public int getCount(Context context){
+        return getSubscriptionInfoList(context).size();
+    }
 }

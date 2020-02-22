@@ -53,10 +53,12 @@ import java.util.List;
 import edu.yezh.datatrafficmanager.adapter.RecyclerViewAppsTrafficDataAdapter;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
+import edu.yezh.datatrafficmanager.dao.db.AppPreferenceDao;
 import edu.yezh.datatrafficmanager.model.AppsInfo;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.model.SimInfo;
 import edu.yezh.datatrafficmanager.model.TransInfo;
+import edu.yezh.datatrafficmanager.model.tb.AppPreference;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.NotificationTools;
@@ -68,6 +70,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class MyFragment1 extends Fragment {
     final int networkType = ConnectivityManager.TYPE_MOBILE;
+    int ACTIVE_SIM_PAGE_NO;
     private Handler handler;
     public MyFragment1() {
     }
@@ -75,18 +78,14 @@ public class MyFragment1 extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.t1, container, false);
-        //TextView txt_content = (TextView) view.findViewById(R.id.txt_content);
-        //txt_content.setText("第一个Fragment");
         Log.e("标签页", "移动网络页面");
 
         final Context context = this.getContext();
-        //BucketDao bucketDao = new BucketDaoImpl();
+
         SimTools simTools = new SimTools();
-        /*NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);*/
-        /*NetworkStats.Bucket bucket = null;*/
-        //TelephonyManager tm = (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
+
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
+            //  Consider calling
             //    Activity#requestPermissions
             // here to request the missing permissions, and then overriding
             //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
@@ -95,19 +94,8 @@ public class MyFragment1 extends Fragment {
             // for Activity#requestPermissions for more details.
             ActivityCompat.requestPermissions(this.getActivity(), new String[]{"android.permission.READ_PHONE_STATE"}, 1);
         }
-        //subscriberID = tm.getSubscriberId();
 
         final List<SimInfo> simInfoList = simTools.getSubscriptionInfoList(context);
-
-        /*FloatingActionButton fab = view.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                *//*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();*//*
-                openEditViewAlert();
-            }
-        });*/
 
         showRealTimeNetSpeed(view);
 
@@ -119,6 +107,7 @@ public class MyFragment1 extends Fragment {
             public void onClick(View v) {
                 button_SIM1.setTextColor(Color.parseColor("#009688"));
                 button_SIM2.setTextColor(Color.BLACK);
+                ACTIVE_SIM_PAGE_NO = 1;
                 setTrafficDataView( view, simInfoList.get(0).getSubscriberId());
             }
         });
@@ -129,6 +118,7 @@ public class MyFragment1 extends Fragment {
                 public void onClick(View v) {
                     button_SIM2.setTextColor(Color.parseColor("#009688"));
                     button_SIM1.setTextColor(Color.BLACK);
+                    ACTIVE_SIM_PAGE_NO = 2;
                     setTrafficDataView(view, simInfoList.get(1).getSubscriberId());
                 }
             });
@@ -136,7 +126,6 @@ public class MyFragment1 extends Fragment {
             button_SIM2.setVisibility(View.GONE);
         }
         button_SIM1.performClick();
-
         Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -144,17 +133,12 @@ public class MyFragment1 extends Fragment {
                 switch (item.getItemId()) {
                     case R.id.action_refresh:
                         button_SIM1.performClick();
-
-
                         break;
-
                 }
                 return false;
             }
         });
-
         return view;
-
     }
     /*获取并显示流量使用情况*/
     public void setTrafficDataView(View view, final String subscriberID){
@@ -165,21 +149,7 @@ public class MyFragment1 extends Fragment {
             BytesFormatter bytesFormatter = new BytesFormatter();
             DateTools dateTools = new DateTools();
 
-
-            /*TextView TextViewSubscriberID = (TextView)view.findViewById(R.id.TextViewSubscriberID);
-            TextViewSubscriberID.setText(subscriberID);*/
-
             float dataPlan = showTextViewDataPlan(view,subscriberID);
-            //bucketDao.t1(context);
-
-            /*NetworkStatsManager networkStatsManager = (NetworkStatsManager) context.getSystemService(NETWORK_STATS_SERVICE);
-            NetworkStats.Bucket bucketThisMonth = null;
-            NetworkStats.Bucket bucketStartDayToToday = null;
-            DateTools dateTools = new DateTools();
-            bucketThisMonth = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE, subscriberID, dateTools.getTimesMonthmorning(), System.currentTimeMillis());
-            //Log.w("Info", "Total: " + (bucket.getRxBytes() + bucket.getTxBytes()));
-
-            long rxBytes = bucketThisMonth.getRxBytes();*/
 
             long ThisMonthData =bucketDao.getTrafficDataOfThisMonth(context,subscriberID, networkType).getTotal();
 
@@ -189,11 +159,15 @@ public class MyFragment1 extends Fragment {
             TextViewData4GThisMonth.setText(Math.round(Double.valueOf(readableThisMonthData.getValue())*100D)/100D + readableThisMonthData.getType());
 
             final int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,1);
-            /*bucketStartDayToToday = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE, subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis());
-            long rxBytesStartDayToToday = bucketStartDayToToday.getRxBytes();*/
-            long rxBytesStartDayToToday = bucketDao.getTrafficDataFromStartDayToToday(context,subscriberID,dataPlanStartDay,networkType).getTotal();
 
-            OutputTrafficData readableDataStartDayToToday = bytesFormatter.getPrintSizeByModel(rxBytesStartDayToToday);
+
+            long ignoreTrafficDataThisMonth = statisticAppIgnoreTrafficData(context,subscriberID,dateTools.getTimesStartDayMorning(dataPlanStartDay));
+            long ignoreTrafficDataToday = statisticAppIgnoreTrafficData(context,subscriberID,dateTools.getTimesTodayMorning());
+            System.out.println("本月忽略应用流量："+ignoreTrafficDataThisMonth);
+            System.out.println("本日忽略应用流量："+ignoreTrafficDataToday);
+
+            long rxBytesStartDayToToday = bucketDao.getTrafficDataFromStartDayToToday(context,subscriberID,dataPlanStartDay,networkType).getTotal();
+            OutputTrafficData readableDataStartDayToToday = bytesFormatter.getPrintSizeByModel(rxBytesStartDayToToday-ignoreTrafficDataThisMonth);
             TextView TextViewData4GStartDayToToday = view.findViewById(R.id.TextViewData4GStartDayToToday);
             TextViewData4GStartDayToToday.setText(  Math.round(Double.valueOf(readableDataStartDayToToday.getValue())*100D)/100D + readableDataStartDayToToday.getType());
 
@@ -211,13 +185,11 @@ public class MyFragment1 extends Fragment {
             TextViewDataUseStatus.setText( String.valueOf(PercentDataUseStatus)+"%\n"+ TextDataUseStatus );
 
             List<TransInfo> lastThirtyDaysTrafficData = bucketDao.getTrafficDataOfLastThirtyDays(context,subscriberID,networkType);
-            OutputTrafficData todayUsage =  bytesFormatter.getPrintSizeByModel(lastThirtyDaysTrafficData.get(0).getTotal());
+            OutputTrafficData todayUsage =  bytesFormatter.getPrintSizeByModel(lastThirtyDaysTrafficData.get(0).getTotal()-ignoreTrafficDataToday);
 
             TextView TextViewData4GToday = view.findViewById(R.id.TextViewData4GToday);
             TextViewData4GToday.setText(Math.round(Double.valueOf(todayUsage.getValue())*100D)/100D +todayUsage.getType());
 
-            //System.out.println("dataPlanBytes:"+Math.round(dataPlan* 1024D * 1024D * 1024D));
-            //System.out.println("rxBytesStartDayToToday:"+rxBytesStartDayToToday);
             OutputTrafficData restTrafficDataAmount = bytesFormatter.getPrintSizeByModel(Math.round(dataPlan* 1024D * 1024D * 1024D) - rxBytesStartDayToToday);
 
             NotificationTools.setNotification(context,
@@ -419,11 +391,6 @@ public class MyFragment1 extends Fragment {
         handler = new Handler();
         final TextView textViewRealTimeTxSpeed = view.findViewById(R.id.TextViewRealTimeTxSpeed);
         final TextView textViewRealTimeRxSpeed = view.findViewById(R.id.TextViewRealTimeRxSpeed);
-        //TextView view1 = null;
-        //view1 = (TextView) view.findViewById(R.id.view1);
-        //view1.setText("Current Data Rate per second= " + currentDataRate);
-        // System.out.println("Current Data Rate per second= " + bytesFormatter.getPrintSize(currentDataRate));
-        //System.out.println("Run");
         Runnable runnable = new Runnable() {
             int firstTimeShow = 0;
 
@@ -434,10 +401,6 @@ public class MyFragment1 extends Fragment {
                     long overRxTraffic = TrafficStats.getTotalRxBytes();
                     long currentTxDataRate = overTxTraffic - RXOld[0];
                     long currentRxDataRate = overRxTraffic - RXOld[1];
-                    //TextView view1 = null;
-                    //view1 = (TextView) view.findViewById(R.id.view1);
-                    //view1.setText("Current Data Rate per second= " + currentDataRate);
-                    // System.out.println("Current Data Rate per second= " + bytesFormatter.getPrintSize(currentDataRate));
                     OutputTrafficData dataRealTimeTxSpeed = bytesFormatter.getPrintSizeByModel(currentTxDataRate);
                     OutputTrafficData dataRealTimeRxSpeed = bytesFormatter.getPrintSizeByModel(currentRxDataRate);
                     textViewRealTimeTxSpeed.setText( Math.round(Double.valueOf(dataRealTimeTxSpeed.getValue())) + dataRealTimeTxSpeed.getType() + "/s");
@@ -491,6 +454,31 @@ public class MyFragment1 extends Fragment {
             TextViewAppTrafficDataWarning.setText(textViewString);
         }else {
             TextViewAppTrafficDataWarning.setText(textViewString);
+        }
+    }
+    private long statisticAppIgnoreTrafficData(Context context,String subscriberID,long startTime ){
+        List<AppPreference> appPreferenceList = new AppPreferenceDao(context).find();
+        long ignoreAmount =0L;
+        if (appPreferenceList!=null){
+            BucketDao bucketDao = new BucketDaoImpl();
+            for (int i=0;i<appPreferenceList.size();i++){
+                AppPreference tempAppPreference = appPreferenceList.get(i);
+                switch (ACTIVE_SIM_PAGE_NO){
+                    case 1: {
+                        if (tempAppPreference.getSim1IgnoreFlag()==1){
+                            ignoreAmount+= bucketDao.getAppTrafficData(context,subscriberID,networkType,startTime,System.currentTimeMillis(),Integer.valueOf(tempAppPreference.getUid())).getTotal();
+                        }
+                    } break;
+                    case 2: {
+                        if (tempAppPreference.getSim2IgnoreFlag()==1){
+                            ignoreAmount+= bucketDao.getAppTrafficData(context,subscriberID,networkType,startTime,System.currentTimeMillis(),Integer.valueOf(tempAppPreference.getUid())).getTotal();
+                        }
+                    } break;
+                }
+            }
+            return ignoreAmount;
+        }else {
+            return ignoreAmount;
         }
     }
 }

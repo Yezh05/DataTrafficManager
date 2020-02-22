@@ -1,11 +1,16 @@
 package edu.yezh.datatrafficmanager;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -28,11 +33,15 @@ import java.util.Map;
 
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
+import edu.yezh.datatrafficmanager.dao.db.AppPreferenceDao;
+import edu.yezh.datatrafficmanager.dao.db.DBOpenHepler;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.model.TransInfo;
+import edu.yezh.datatrafficmanager.model.tb.AppPreference;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.InstalledAppsInfoTools;
+import edu.yezh.datatrafficmanager.tools.SimTools;
 import edu.yezh.datatrafficmanager.tools.chartTools.CustomMarkerView;
 import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 
@@ -59,21 +68,36 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
          int uid=Integer.valueOf(bundle.getString("uid"));
          String name=bundle.getString("name");
          String packageName=bundle.getString("packageName");
-        long rxBytes = bundle.getLong("rx");
-        long txBytes=bundle.getLong("tx");
+        /*long rxBytes = bundle.getLong("rx");
+        long txBytes=bundle.getLong("tx");*/
         String subscriberID = bundle.getString("subscriberID");
         int networkType =bundle.getInt("networkType");
-        Drawable appIcon = new InstalledAppsInfoTools().getAppIconByPackageName(this,packageName);
 
+        init(view,uid,name,packageName,subscriberID,networkType);
+    }
+    private void init(View view,int uid,String name,String packageName,String subscriberID,int networkType){
+        Drawable appIcon = new InstalledAppsInfoTools().getAppIconByPackageName(this,packageName);
         TextView appDetailsName =  findViewById(R.id.AppDetailsName);
         appDetailsName.setText(name);
         TextView appDetailsPackageName =  findViewById(R.id.AppDetailsPackageName);
         appDetailsPackageName.setText(packageName);
-       ImageView ImageViewDetailAppIcon = findViewById(R.id.ImageViewDetailAppIcon);
-       ImageViewDetailAppIcon.setImageDrawable(appIcon);
-       DateTools dateTools =  new DateTools();
-       BytesFormatter bytesFormatter = new BytesFormatter();
+        ImageView ImageViewDetailAppIcon = findViewById(R.id.ImageViewDetailAppIcon);
+        ImageViewDetailAppIcon.setImageDrawable(appIcon);
 
+        if (networkType == ConnectivityManager.TYPE_WIFI){
+            LinearLayout linearLayoutSetSIMIgnore = view.findViewById(R.id.LinearLayoutSetSIMIgnore);
+            linearLayoutSetSIMIgnore.setVisibility(View.GONE);
+        }else {
+           int simAmount =   new SimTools().getCount(view.getContext());
+            if (simAmount==1){
+                LinearLayout linearLayoutSetBarSIM2Ignore = view.findViewById(R.id.LinearLayoutSetBarSIM2Ignore);
+                linearLayoutSetBarSIM2Ignore.setVisibility(View.GONE);
+            }
+        }
+        setIgnoreSwitch( view, String.valueOf(uid),packageName);
+
+        DateTools dateTools =  new DateTools();
+        BytesFormatter bytesFormatter = new BytesFormatter();
         BucketDao bucketDao = new BucketDaoImpl();
 
         TransInfo appThisMonthTrafficData = bucketDao.getAppTrafficData(this,subscriberID,networkType,dateTools.getTimesMonthmorning(),System.currentTimeMillis(),uid);
@@ -183,5 +207,60 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
 
         lineChart.invalidate();
     }
+    private void setIgnoreSwitch(View view,String uid,String packageName){
+        final AppPreferenceDao appPreferenceDao = new AppPreferenceDao(view.getContext());
+        AppPreference tempAppPreference = appPreferenceDao.find(uid);
+        final AppPreference appPreference;
+        if (tempAppPreference==null){
+            appPreference = new AppPreference(uid,packageName,0,0);
+            appPreferenceDao.add(appPreference);
+        }else{
+            appPreference = tempAppPreference;
+        }
+        int sim1IgnoreFlag  = appPreference.getSim1IgnoreFlag();
+        int sim2IgnoreFlag  = appPreference.getSim2IgnoreFlag();
+        try {
+            Switch switchSetSIM1Ignore = view.findViewById(R.id.SwitchSetSIM1Ignore);
+            if (sim1IgnoreFlag != 0){
+                switchSetSIM1Ignore.setChecked(true);
+            }
+            switchSetSIM1Ignore.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked == true){
+                        appPreference.setSim1IgnoreFlag(1);
+                        appPreferenceDao.update(appPreference);
+                    }else {
+                        appPreference.setSim1IgnoreFlag(0);
+                        appPreferenceDao.update(appPreference);
+                    }
+                }
+            });
 
+        }catch (Exception e){
+            System.out.println("严重错误："+e.toString());
+        }
+
+        try {
+            Switch switchSetSIM2Ignore = view.findViewById(R.id.SwitchSetSIM2Ignore);
+            if (sim2IgnoreFlag != 0){
+                switchSetSIM2Ignore.setChecked(true);
+            }
+            switchSetSIM2Ignore.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked == true){
+                        appPreference.setSim2IgnoreFlag(1);
+                        appPreferenceDao.update(appPreference);
+                    }else {
+                        appPreference.setSim2IgnoreFlag(0);
+                        appPreferenceDao.update(appPreference);
+                    }
+                }
+            });
+        }catch (Exception e){
+            System.out.println("严重错误："+e.toString());
+        }
+
+    }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="data_type">
+        <item>字节</item>
+        <item>KB</item>
+        <item>MB</item>
+        <item>GB</item>
+    </string-array>
+    <string-array name="regulate_type">
+        <item>已使用</item>
+        <item>剩余</item>
+    </string-array>
+</resources>

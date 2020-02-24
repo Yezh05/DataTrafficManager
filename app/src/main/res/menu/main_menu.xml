@@ -9,5 +9,11 @@
         android:title="刷新"
         android:showAsAction="always"
         tools:ignore="AppCompatResource" />
-
+    <item
+        android:id="@+id/action_regulate"
+        android:icon="@drawable/ic_action_regulate"
+        android:orderInCategory="100"
+        android:title="流量校正"
+        android:showAsAction="always"
+        tools:ignore="AppCompatResource" />
 </menu>

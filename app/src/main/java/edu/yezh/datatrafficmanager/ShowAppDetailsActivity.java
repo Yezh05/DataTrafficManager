@@ -1,6 +1,5 @@
 package edu.yezh.datatrafficmanager;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -34,10 +33,9 @@ import java.util.Map;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.dao.db.AppPreferenceDao;
-import edu.yezh.datatrafficmanager.dao.db.DBOpenHepler;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.model.TransInfo;
-import edu.yezh.datatrafficmanager.model.tb.AppPreference;
+import edu.yezh.datatrafficmanager.model.tb.Tb_AppPreference;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.InstalledAppsInfoTools;
@@ -100,7 +98,7 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         BytesFormatter bytesFormatter = new BytesFormatter();
         BucketDao bucketDao = new BucketDaoImpl();
 
-        TransInfo appThisMonthTrafficData = bucketDao.getAppTrafficData(this,subscriberID,networkType,dateTools.getTimesMonthmorning(),System.currentTimeMillis(),uid);
+        TransInfo appThisMonthTrafficData = bucketDao.getAppTrafficData(this,subscriberID,networkType,dateTools.getTimesMonthMorning(),System.currentTimeMillis(),uid);
         TransInfo appTodayTrafficData=bucketDao.getAppTrafficData(this,subscriberID,networkType,dateTools.getTimesTodayMorning(),System.currentTimeMillis(),uid);
 
         TextView TextViewAppThisMonthInfo = findViewById(R.id.TextViewAppThisMonthInfo);
@@ -209,16 +207,16 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
     }
     private void setIgnoreSwitch(View view,String uid,String packageName){
         final AppPreferenceDao appPreferenceDao = new AppPreferenceDao(view.getContext());
-        AppPreference tempAppPreference = appPreferenceDao.find(uid);
-        final AppPreference appPreference;
-        if (tempAppPreference==null){
-            appPreference = new AppPreference(uid,packageName,0,0);
-            appPreferenceDao.add(appPreference);
+        Tb_AppPreference tempTbAppPreference = appPreferenceDao.find(uid);
+        final Tb_AppPreference tbAppPreference;
+        if (tempTbAppPreference ==null){
+            tbAppPreference = new Tb_AppPreference(uid,packageName,0,0);
+            appPreferenceDao.add(tbAppPreference);
         }else{
-            appPreference = tempAppPreference;
+            tbAppPreference = tempTbAppPreference;
         }
-        int sim1IgnoreFlag  = appPreference.getSim1IgnoreFlag();
-        int sim2IgnoreFlag  = appPreference.getSim2IgnoreFlag();
+        int sim1IgnoreFlag  = tbAppPreference.getSim1IgnoreFlag();
+        int sim2IgnoreFlag  = tbAppPreference.getSim2IgnoreFlag();
         try {
             Switch switchSetSIM1Ignore = view.findViewById(R.id.SwitchSetSIM1Ignore);
             if (sim1IgnoreFlag != 0){
@@ -228,11 +226,11 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked == true){
-                        appPreference.setSim1IgnoreFlag(1);
-                        appPreferenceDao.update(appPreference);
+                        tbAppPreference.setSim1IgnoreFlag(1);
+                        appPreferenceDao.update(tbAppPreference);
                     }else {
-                        appPreference.setSim1IgnoreFlag(0);
-                        appPreferenceDao.update(appPreference);
+                        tbAppPreference.setSim1IgnoreFlag(0);
+                        appPreferenceDao.update(tbAppPreference);
                     }
                 }
             });
@@ -250,11 +248,11 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked == true){
-                        appPreference.setSim2IgnoreFlag(1);
-                        appPreferenceDao.update(appPreference);
+                        tbAppPreference.setSim2IgnoreFlag(1);
+                        appPreferenceDao.update(tbAppPreference);
                     }else {
-                        appPreference.setSim2IgnoreFlag(0);
-                        appPreferenceDao.update(appPreference);
+                        tbAppPreference.setSim2IgnoreFlag(0);
+                        appPreferenceDao.update(tbAppPreference);
                     }
                 }
             });

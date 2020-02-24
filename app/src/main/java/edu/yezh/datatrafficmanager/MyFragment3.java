@@ -36,6 +36,7 @@ import java.util.Date;
 
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
+import edu.yezh.datatrafficmanager.dao.db.DataTrafficRegulateDao;
 import edu.yezh.datatrafficmanager.tools.FtpFileTool;
 import edu.yezh.datatrafficmanager.tools.PoiTools;
 
@@ -55,7 +56,7 @@ public class MyFragment3 extends Fragment {
         final Context context = view.getContext();
 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
+            // TOD Consider calling
             //    Activity#requestPermissions
             // here to request the missing permissions, and then overriding
             //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
@@ -108,6 +109,17 @@ public class MyFragment3 extends Fragment {
             @Override
             public void onClick(View v) {
                 handleCustomQuery(context);
+            }
+        });
+
+        Button ButtonResetTrafficDataRegulate = view.findViewById(R.id.ButtonResetTrafficDataRegulate);
+        ButtonResetTrafficDataRegulate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DataTrafficRegulateDao dataTrafficRegulateDao = new DataTrafficRegulateDao(context);
+                dataTrafficRegulateDao.deteleAll();
+                Snackbar.make(view, "已重置", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
             }
         });
 

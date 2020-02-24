@@ -1,14 +1,14 @@
 package edu.yezh.datatrafficmanager.model.tb;
 
-public class AppPreference {
+public class Tb_AppPreference {
     private String uid, pkgName;
     private int sim1IgnoreFlag,sim2IgnoreFlag;
 
-    public AppPreference() {
+    public Tb_AppPreference() {
         super();
     }
 
-    public AppPreference(String uid, String pkgName, int sim1IgnoreFlag, int sim2IgnoreFlag) {
+    public Tb_AppPreference(String uid, String pkgName, int sim1IgnoreFlag, int sim2IgnoreFlag) {
         this.uid = uid;
         this.pkgName = pkgName;
         this.sim1IgnoreFlag = sim1IgnoreFlag;
@@ -49,7 +49,7 @@ public class AppPreference {
 
     @Override
     public String toString() {
-        return "AppPreference{" +
+        return "Tb_AppPreference{" +
                 "uid='" + uid + '\'' +
                 ", pkgName='" + pkgName + '\'' +
                 ", sim1IgnoreFlag=" + sim1IgnoreFlag +

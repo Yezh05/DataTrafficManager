@@ -1,53 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:gravity="center"
-        >
-    <TextView
-        android:textSize="50dp"
-        android:gravity="center"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="工具" />
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:background="#009688" />
-    <!--<Button
-        android:id="@+id/ButtonSHowAppsTrafficData"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="查看应用流量使用情况"
-        />-->
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="工具"
+            android:textSize="50dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="#009688" />
+        <!--<Button
+            android:id="@+id/ButtonSHowAppsTrafficData"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="查看应用流量使用情况"
+            />-->
         <Button
             android:id="@+id/ButtonCustomQuery"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="自定义流量数据查询"/>
-    <Button
-        android:id="@+id/ButtonSetAppsUnusualTrafficDataAmount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="设置应用异常流量阀值"
-        />
-    <Button
-        android:id="@+id/ButtonOutputDataToFile"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="导出使用数据到文件"
-        />
-    <Button
-        android:id="@+id/ButtonOutputDataToFTP"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="导出使用数据到服务器"
-        />
+            android:text="自定义流量数据查询" />
+
+        <Button
+            android:id="@+id/ButtonSetAppsUnusualTrafficDataAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="设置应用异常流量阀值" />
+
+        <Button
+            android:id="@+id/ButtonResetTrafficDataRegulate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="重置流量校正" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="#009688" />
+
+        <Button
+            android:id="@+id/ButtonOutputDataToFile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="导出使用数据到文件" />
+
+        <Button
+            android:id="@+id/ButtonOutputDataToFTP"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="导出使用数据到服务器" />
     </LinearLayout>
 </RelativeLayout>

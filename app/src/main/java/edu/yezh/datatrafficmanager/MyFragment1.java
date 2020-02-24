@@ -55,11 +55,13 @@ import edu.yezh.datatrafficmanager.adapter.RecyclerViewAppsTrafficDataAdapter;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.dao.db.AppPreferenceDao;
+import edu.yezh.datatrafficmanager.dao.db.DataTrafficRegulateDao;
 import edu.yezh.datatrafficmanager.model.AppsInfo;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.model.SimInfo;
 import edu.yezh.datatrafficmanager.model.TransInfo;
-import edu.yezh.datatrafficmanager.model.tb.AppPreference;
+import edu.yezh.datatrafficmanager.model.tb.Tb_AppPreference;
+import edu.yezh.datatrafficmanager.model.tb.Tb_DataTrafficRegulate;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.NotificationTools;
@@ -67,11 +69,14 @@ import edu.yezh.datatrafficmanager.tools.SimTools;
 import edu.yezh.datatrafficmanager.tools.chartTools.CustomMarkerView;
 import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 
+
+
 import static android.content.Context.MODE_PRIVATE;
 
 public class MyFragment1 extends Fragment {
     final int networkType = ConnectivityManager.TYPE_MOBILE;
     int ACTIVE_SIM_PAGE_NO;
+    int dataPlanStartDay;
     private Handler handler;
 
     public MyFragment1() {
@@ -113,8 +118,6 @@ public class MyFragment1 extends Fragment {
                 button_SIM2.setTextColor(Color.BLACK);
                 ACTIVE_SIM_PAGE_NO = 1;
                 setTrafficDataView(view, simInfoList.get(0).getSubscriberId());
-
-
             }
         });
         if (simInfoList.size() == 2) {
@@ -132,7 +135,7 @@ public class MyFragment1 extends Fragment {
             button_SIM2.setVisibility(View.GONE);
         }
         button_SIM1.performClick();
-        handleToolBarItem(context, button_SIM1, button_SIM2, simInfoList);
+        handleToolBarItem(context, button_SIM1, button_SIM2, simInfoList );
 
         return view;
     }
@@ -155,7 +158,7 @@ public class MyFragment1 extends Fragment {
             TextView TextViewData4GThisMonth = view.findViewById(R.id.TextViewData4GThisMonth);
             TextViewData4GThisMonth.setText(Math.round(Double.valueOf(readableThisMonthData.getValue()) * 100D) / 100D + readableThisMonthData.getType());
 
-            final int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID, 1);
+            dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID, 1);
 
 
             long ignoreTrafficDataThisMonth = statisticAppIgnoreTrafficData(context, subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay));
@@ -163,12 +166,25 @@ public class MyFragment1 extends Fragment {
             System.out.println("本月忽略应用流量：" + ignoreTrafficDataThisMonth);
             System.out.println("本日忽略应用流量：" + ignoreTrafficDataToday);
 
-            long rxBytesStartDayToToday = bucketDao.getTrafficDataFromStartDayToToday(context, subscriberID, dataPlanStartDay, networkType).getTotal();
-            OutputTrafficData readableDataStartDayToToday = bytesFormatter.getPrintSizeByModel(rxBytesStartDayToToday - ignoreTrafficDataThisMonth);
+            long totalBytesStartDayToToday = bucketDao.getTrafficDataFromStartDayToToday(context, subscriberID, dataPlanStartDay, networkType).getTotal();
+            long realTotalBytesStartDayToToday = totalBytesStartDayToToday - ignoreTrafficDataThisMonth;
+
+            try {
+                DataTrafficRegulateDao dataTrafficRegulateDao = new DataTrafficRegulateDao(context);
+                Tb_DataTrafficRegulate tb_dataTrafficRegulate = dataTrafficRegulateDao.find(subscriberID);
+                if (dateTools.getTimesStartDayMorning(dataPlanStartDay)<= tb_dataTrafficRegulate.getSettime() && tb_dataTrafficRegulate.getSettime() <= System.currentTimeMillis()){
+                    realTotalBytesStartDayToToday = realTotalBytesStartDayToToday - tb_dataTrafficRegulate.getValue();
+                }
+            }catch (Exception e){
+                System.out.println("数据错误"+e.toString());
+            }
+
+
+            OutputTrafficData readableDataStartDayToToday = bytesFormatter.getPrintSizeByModel(realTotalBytesStartDayToToday);
             TextView TextViewData4GStartDayToToday = view.findViewById(R.id.TextViewData4GStartDayToToday);
             TextViewData4GStartDayToToday.setText(Math.round(Double.valueOf(readableDataStartDayToToday.getValue()) * 100D) / 100D + readableDataStartDayToToday.getType());
 
-            float DataUseStatus = (rxBytesStartDayToToday / (dataPlan * 1024 * 1024 * 1024)) * 100;
+            float DataUseStatus = (realTotalBytesStartDayToToday / (dataPlan * 1024 * 1024 * 1024)) * 100;
             int PercentDataUseStatus = Math.round(DataUseStatus);
             String TextDataUseStatus = "";
             if (PercentDataUseStatus < 0) {
@@ -196,7 +212,7 @@ public class MyFragment1 extends Fragment {
             TextView TextViewData4GToday = view.findViewById(R.id.TextViewData4GToday);
             TextViewData4GToday.setText(Math.round(Double.valueOf(todayUsage.getValue()) * 100D) / 100D + todayUsage.getType());
 
-            OutputTrafficData restTrafficDataAmount = bytesFormatter.getPrintSizeByModel(Math.round(dataPlan * 1024D * 1024D * 1024D) - rxBytesStartDayToToday);
+            OutputTrafficData restTrafficDataAmount = bytesFormatter.getPrintSizeByModel(Math.round(dataPlan * 1024D * 1024D * 1024D) - realTotalBytesStartDayToToday);
 
             NotificationTools.setNotification(context,
                     "今日 " + Math.round(Double.valueOf(todayUsage.getValue())) + todayUsage.getType() + "   "
@@ -210,7 +226,10 @@ public class MyFragment1 extends Fragment {
             Collections.reverse(DaysNoList);
             showChart(view, PercentDataUseStatus, lastThirtyDaysTrafficData, DaysNoList);
 
-            RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getAllInstalledAppsTrafficData(context, subscriberID, networkType, dateTools.getTimesStartDayMorning(dataPlanStartDay), System.currentTimeMillis()), context, subscriberID, networkType);
+            RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(
+                    bucketDao.getAllInstalledAppsTrafficData(context, subscriberID, networkType, dateTools.getTimesStartDayMorning(dataPlanStartDay),
+                            System.currentTimeMillis()), context, subscriberID, networkType);
+
             RecyclerView RecyclerViewAppsTrafficData = view.findViewById(R.id.RecyclerViewAppsTrafficData);
             RecyclerViewAppsTrafficData.setAdapter(recyclerViewAppsTrafficDataAdapter);
             LinearLayoutManager layoutManager = new LinearLayoutManager(context);
@@ -467,22 +486,22 @@ public class MyFragment1 extends Fragment {
     }
 
     private long statisticAppIgnoreTrafficData(Context context, String subscriberID, long startTime) {
-        List<AppPreference> appPreferenceList = new AppPreferenceDao(context).find();
+        List<Tb_AppPreference> tbAppPreferenceList = new AppPreferenceDao(context).find();
         long ignoreAmount = 0L;
-        if (appPreferenceList != null) {
+        if (tbAppPreferenceList != null) {
             BucketDao bucketDao = new BucketDaoImpl();
-            for (int i = 0; i < appPreferenceList.size(); i++) {
-                AppPreference tempAppPreference = appPreferenceList.get(i);
+            for (int i = 0; i < tbAppPreferenceList.size(); i++) {
+                Tb_AppPreference tempTbAppPreference = tbAppPreferenceList.get(i);
                 switch (ACTIVE_SIM_PAGE_NO) {
                     case 1: {
-                        if (tempAppPreference.getSim1IgnoreFlag() == 1) {
-                            ignoreAmount += bucketDao.getAppTrafficData(context, subscriberID, networkType, startTime, System.currentTimeMillis(), Integer.valueOf(tempAppPreference.getUid())).getTotal();
+                        if (tempTbAppPreference.getSim1IgnoreFlag() == 1) {
+                            ignoreAmount += bucketDao.getAppTrafficData(context, subscriberID, networkType, startTime, System.currentTimeMillis(), Integer.valueOf(tempTbAppPreference.getUid())).getTotal();
                         }
                     }
                     break;
                     case 2: {
-                        if (tempAppPreference.getSim2IgnoreFlag() == 1) {
-                            ignoreAmount += bucketDao.getAppTrafficData(context, subscriberID, networkType, startTime, System.currentTimeMillis(), Integer.valueOf(tempAppPreference.getUid())).getTotal();
+                        if (tempTbAppPreference.getSim2IgnoreFlag() == 1) {
+                            ignoreAmount += bucketDao.getAppTrafficData(context, subscriberID, networkType, startTime, System.currentTimeMillis(), Integer.valueOf(tempTbAppPreference.getUid())).getTotal();
                         }
                     }
                     break;
@@ -494,7 +513,7 @@ public class MyFragment1 extends Fragment {
         }
     }
 
-    private void handleToolBarItem(final Context context, final Button button_SIM1, final Button button_SIM2, List<SimInfo> simInfoList) {
+    private void handleToolBarItem(final Context context, final Button button_SIM1, final Button button_SIM2, final List<SimInfo> simInfoList) {
         Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -513,10 +532,10 @@ public class MyFragment1 extends Fragment {
                         final AlertDialog alertDialog = new AlertDialog.Builder(context).create();
                         alertDialog.setView(viewCustomerDialogDataInput);
                         final EditText editText = viewCustomerDialogDataInput.findViewById(R.id.EditText_Traffic_Data_Value);
-                        final Spinner spinnerRegulateType = viewCustomerDialogDataInput.findViewById(R.id.Spinner_Traffic_Data_RegulateType);
+                        //final Spinner spinnerRegulateType = viewCustomerDialogDataInput.findViewById(R.id.Spinner_Traffic_Data_RegulateType);
                         final Spinner spinnerDataType = viewCustomerDialogDataInput.findViewById(R.id.Spinner_Traffic_Data_Type);
                         spinnerDataType.setSelection(3);
-                        editText.setFocusable(true);
+
                         Button btnCancel = viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogCancel);
                         btnCancel.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -528,34 +547,51 @@ public class MyFragment1 extends Fragment {
                         btnConfirm.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                Toast.makeText(context,"数据："+spinnerRegulateType.getSelectedItem().toString()+editText.getText()+""+spinnerDataType.getSelectedItem().toString(),Toast.LENGTH_LONG).show();
+                                String subscriberId = simInfoList.get(ACTIVE_SIM_PAGE_NO-1).getSubscriberId();
+                                DataTrafficRegulateDao dataTrafficRegulateDao = new DataTrafficRegulateDao(context);
+                                Tb_DataTrafficRegulate tb_dataTrafficRegulate = dataTrafficRegulateDao.find(subscriberId);
+                                System.out.println(tb_dataTrafficRegulate);
+                                if (tb_dataTrafficRegulate==null){
+                                    tb_dataTrafficRegulate = new Tb_DataTrafficRegulate(subscriberId,0,System.currentTimeMillis());
+                                    dataTrafficRegulateDao.add(tb_dataTrafficRegulate);
+                                }
+
+                                BucketDao bucketDao = new BucketDaoImpl();
+                                BytesFormatter bytesFormatter = new BytesFormatter();
+                                long inputUse =  bytesFormatter.convertValueToLong( Double.valueOf(editText.getText().toString()),spinnerDataType.getSelectedItem().toString());
+                                long systemUse = bucketDao.getTrafficDataFromStartDayToToday(context,subscriberId,dataPlanStartDay,networkType).getTotal();
+                                tb_dataTrafficRegulate.setValue(systemUse-inputUse);
+                                tb_dataTrafficRegulate.setSettime(System.currentTimeMillis());
+                                dataTrafficRegulateDao.update(tb_dataTrafficRegulate);
+
+                                Toast.makeText(context,"数据：已使用"
+                                        +editText.getText()+""+spinnerDataType.getSelectedItem().toString(),Toast.LENGTH_LONG).show();
                                 alertDialog.dismiss();
 
                             }
                         });
+                        String title;
                         if (ACTIVE_SIM_PAGE_NO == 1) {
-                            String title = "SIM1流量校正";
-
+                            title = "SIM1流量校正";
                             alertDialog.setTitle(title);
-                            alertDialog.show();
-
-
-                            Toast.makeText(context, title, Toast.LENGTH_LONG).show();
-                            System.out.println(title);
                         } else {
-                            String title = "SIM2流量校正";
+                             title = "SIM2流量校正";
                             alertDialog.setTitle(title);
-                            alertDialog.show();
-
-
-                            Toast.makeText(context, title, Toast.LENGTH_LONG).show();
-                            System.out.println(title);
                         }
+                        alertDialog.show();
+                        editText.setFocusableInTouchMode(true);
+                        editText.setFocusable(true);
+                        editText.requestFocus();
+                        //getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
+                        Toast.makeText(context, title, Toast.LENGTH_LONG).show();
+                        System.out.println(title);
                     }
                     break;
                 }
                 return false;
             }
         });
+
     }
 }

@@ -41,7 +41,7 @@ public class BucketDaoImpl implements BucketDao {
     @Override
     public TransInfo getTrafficDataOfThisMonth(Context context, String subscriberID, int networkType) {
         try {
-            TransInfo useBytes = getTrafficData(context, subscriberID, networkType, new DateTools().getTimesMonthmorning(), System.currentTimeMillis());
+            TransInfo useBytes = getTrafficData(context, subscriberID, networkType, new DateTools().getTimesMonthMorning(), System.currentTimeMillis());
 
             return useBytes;
         } catch (Exception e) {

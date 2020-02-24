@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -528,64 +529,82 @@ public class MyFragment1 extends Fragment {
                     }
                     break;
                     case R.id.action_regulate: {
-                        final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.customer_dialog_data_input_view,null);
-                        final AlertDialog alertDialog = new AlertDialog.Builder(context).create();
-                        alertDialog.setView(viewCustomerDialogDataInput);
-                        final EditText editText = viewCustomerDialogDataInput.findViewById(R.id.EditText_Traffic_Data_Value);
-                        //final Spinner spinnerRegulateType = viewCustomerDialogDataInput.findViewById(R.id.Spinner_Traffic_Data_RegulateType);
-                        final Spinner spinnerDataType = viewCustomerDialogDataInput.findViewById(R.id.Spinner_Traffic_Data_Type);
-                        spinnerDataType.setSelection(3);
 
-                        Button btnCancel = viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogCancel);
-                        btnCancel.setOnClickListener(new View.OnClickListener() {
+                        final String[] items = { "自动校正","手动校正" };
+                        AlertDialog.Builder listDialog =  new AlertDialog.Builder(context);
+                        listDialog.setTitle("流量校正");
+                        listDialog.setItems(items, new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(View v) {
-                                alertDialog.dismiss();
-                            }
-                        });
-                        Button btnConfirm= viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogConfirm);
-                        btnConfirm.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                String subscriberId = simInfoList.get(ACTIVE_SIM_PAGE_NO-1).getSubscriberId();
-                                DataTrafficRegulateDao dataTrafficRegulateDao = new DataTrafficRegulateDao(context);
-                                Tb_DataTrafficRegulate tb_dataTrafficRegulate = dataTrafficRegulateDao.find(subscriberId);
-                                System.out.println(tb_dataTrafficRegulate);
-                                if (tb_dataTrafficRegulate==null){
-                                    tb_dataTrafficRegulate = new Tb_DataTrafficRegulate(subscriberId,0,System.currentTimeMillis());
-                                    dataTrafficRegulateDao.add(tb_dataTrafficRegulate);
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which){
+                                    case 0: {
+                                        Toast.makeText(context,"自动校正功能建造中",Toast.LENGTH_LONG).show();
+                                    } break;
+                                    case 1: {
+                                        final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.customer_dialog_data_input_view,null);
+                                        final AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+                                        alertDialog.setView(viewCustomerDialogDataInput);
+                                        final EditText editText = viewCustomerDialogDataInput.findViewById(R.id.EditText_Traffic_Data_Value);
+                                        //final Spinner spinnerRegulateType = viewCustomerDialogDataInput.findViewById(R.id.Spinner_Traffic_Data_RegulateType);
+                                        final Spinner spinnerDataType = viewCustomerDialogDataInput.findViewById(R.id.Spinner_Traffic_Data_Type);
+                                        spinnerDataType.setSelection(3);
+
+                                        Button btnCancel = viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogCancel);
+                                        btnCancel.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                alertDialog.dismiss();
+                                            }
+                                        });
+                                        Button btnConfirm= viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogConfirm);
+                                        btnConfirm.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                String subscriberId = simInfoList.get(ACTIVE_SIM_PAGE_NO-1).getSubscriberId();
+                                                DataTrafficRegulateDao dataTrafficRegulateDao = new DataTrafficRegulateDao(context);
+                                                Tb_DataTrafficRegulate tb_dataTrafficRegulate = dataTrafficRegulateDao.find(subscriberId);
+                                                System.out.println(tb_dataTrafficRegulate);
+                                                if (tb_dataTrafficRegulate==null){
+                                                    tb_dataTrafficRegulate = new Tb_DataTrafficRegulate(subscriberId,0,System.currentTimeMillis());
+                                                    dataTrafficRegulateDao.add(tb_dataTrafficRegulate);
+                                                }
+
+                                                BucketDao bucketDao = new BucketDaoImpl();
+                                                BytesFormatter bytesFormatter = new BytesFormatter();
+                                                long inputUse =  bytesFormatter.convertValueToLong( Double.valueOf(editText.getText().toString()),spinnerDataType.getSelectedItem().toString());
+                                                long systemUse = bucketDao.getTrafficDataFromStartDayToToday(context,subscriberId,dataPlanStartDay,networkType).getTotal();
+                                                tb_dataTrafficRegulate.setValue(systemUse-inputUse);
+                                                tb_dataTrafficRegulate.setSettime(System.currentTimeMillis());
+                                                dataTrafficRegulateDao.update(tb_dataTrafficRegulate);
+
+                                                Toast.makeText(context,"数据：已使用"
+                                                        +editText.getText()+""+spinnerDataType.getSelectedItem().toString(),Toast.LENGTH_LONG).show();
+                                                alertDialog.dismiss();
+
+                                            }
+                                        });
+                                        String title;
+                                        if (ACTIVE_SIM_PAGE_NO == 1) {
+                                            title = "SIM1流量校正";
+                                            alertDialog.setTitle(title);
+                                        } else {
+                                            title = "SIM2流量校正";
+                                            alertDialog.setTitle(title);
+                                        }
+                                        alertDialog.show();
+                                        editText.setFocusableInTouchMode(true);
+                                        editText.setFocusable(true);
+                                        editText.requestFocus();
+                                        //getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
+                                        Toast.makeText(context, title, Toast.LENGTH_LONG).show();
+                                        //System.out.println(title);
+                                    } break;
                                 }
-
-                                BucketDao bucketDao = new BucketDaoImpl();
-                                BytesFormatter bytesFormatter = new BytesFormatter();
-                                long inputUse =  bytesFormatter.convertValueToLong( Double.valueOf(editText.getText().toString()),spinnerDataType.getSelectedItem().toString());
-                                long systemUse = bucketDao.getTrafficDataFromStartDayToToday(context,subscriberId,dataPlanStartDay,networkType).getTotal();
-                                tb_dataTrafficRegulate.setValue(systemUse-inputUse);
-                                tb_dataTrafficRegulate.setSettime(System.currentTimeMillis());
-                                dataTrafficRegulateDao.update(tb_dataTrafficRegulate);
-
-                                Toast.makeText(context,"数据：已使用"
-                                        +editText.getText()+""+spinnerDataType.getSelectedItem().toString(),Toast.LENGTH_LONG).show();
-                                alertDialog.dismiss();
-
                             }
                         });
-                        String title;
-                        if (ACTIVE_SIM_PAGE_NO == 1) {
-                            title = "SIM1流量校正";
-                            alertDialog.setTitle(title);
-                        } else {
-                             title = "SIM2流量校正";
-                            alertDialog.setTitle(title);
-                        }
-                        alertDialog.show();
-                        editText.setFocusableInTouchMode(true);
-                        editText.setFocusable(true);
-                        editText.requestFocus();
-                        //getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                        listDialog.show();
 
-                        Toast.makeText(context, title, Toast.LENGTH_LONG).show();
-                        System.out.println(title);
                     }
                     break;
                 }

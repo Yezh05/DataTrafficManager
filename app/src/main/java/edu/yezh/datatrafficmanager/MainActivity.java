@@ -74,74 +74,19 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         }
     }
     public void initial(){
-
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), this);
         ViewPager viewPager = findViewById(R.id.view_pager);
         viewPager.setAdapter(sectionsPagerAdapter);
         TabLayout tabs = findViewById(R.id.tabs);
         tabs.setupWithViewPager(viewPager);
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.inflateMenu(R.menu.main_menu);
-        //toolbar.inflateMenu(R.menu.main_menu);
-
-        /*toolbar.setNavigationIcon(R.drawable.ic_action_menu);
-          final DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.drawerLayout);
-          final NavigationView navigationView = (NavigationView)findViewById(R.id.navigationView);
-          System.out.println("drawerLayout是否为空?"+(drawerLayout==null));
-        System.out.println("navigationView是否为空?"+(navigationView==null));
-
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (drawerLayout.isDrawerOpen(navigationView)){
-                    drawerLayout.closeDrawer(navigationView);
-
-
-                }else{
-
-                    drawerLayout.openDrawer(navigationView);
-
-                }
-
-                System.out.println("drawerLayout是否为空?"+String.valueOf(drawerLayout==null));
-                System.out.println("navigationView是否为空?"+(navigationView==null));
-            }
-        });*/
     }
     public void getPermission() {
-        /*if (ContextCompat.checkSelfPermission((Context) this, "android.permission.READ_PHONE_STATE") != 0 && !ActivityCompat.shouldShowRequestPermissionRationale((Activity) this, "android.permission.READ_PHONE_STATE"))
-        {    ActivityCompat.requestPermissions((Activity) this,
-                    new String[]{"android.permission.PACKAGE_USAGE_STATS", "android.permission.READ_PHONE_STATE", "android.permission.ACCESS_NETWORK_STATE"},
-                    1);
-        }
-        return true;*/
-        /*boolean hasPM = ContextCompat.checkSelfPermission(this, "android.permission.READ_PHONE_STATE") == PackageManager.PERMISSION_GRANTED
-                &&   ContextCompat.checkSelfPermission(this, "android.permission.PACKAGE_USAGE_STATS") == PackageManager.PERMISSION_GRANTED
-                &&   ContextCompat.checkSelfPermission(this, "android.permission.ACCESS_NETWORK_STATE") == PackageManager.PERMISSION_GRANTED
-                &&   ContextCompat.checkSelfPermission(this, "android.permission.READ_NETWORK_USAGE_HISTORY") == PackageManager.PERMISSION_GRANTED
-                ;
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{"android.permission.READ_PHONE_STATE"}, 1);
-        }
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.PACKAGE_USAGE_STATS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{"android.permission.PACKAGE_USAGE_STATS"}, 1);
-        }
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{"android.permission.ACCESS_NETWORK_STATE"}, 1);
-        }*/
-        /*if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_NETWORK_USAGE_HISTORY) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{"android.permission.READ_NETWORK_USAGE_HISTORY"}, 1);
-        }*/
-           /* String[] permissions = new String[]{"android.permission.PACKAGE_USAGE_STATS",
-                    "android.permission.READ_PHONE_STATE", "android.permission.ACCESS_NETWORK_STATE","android.permission.READ_NETWORK_USAGE_HISTORY"};
-            ActivityCompat.requestPermissions((Activity) this, permissions,1);*/
-            System.out.println("获取其他权限");
-
+        System.out.println("获取其他权限");
         String PERMISSION_STORAGE_MSG = "请授予权限，否则影响部分使用功能";
         int PERMISSION_STORAGE_CODE = 10001;
-        String[] PERMS = {Manifest.permission.READ_PHONE_STATE,Manifest.permission.INTERNET};
+        String[] PERMS = {Manifest.permission.READ_PHONE_STATE,Manifest.permission.INTERNET,Manifest.permission.SEND_SMS,Manifest.permission.READ_SMS,Manifest.permission.RECEIVE_SMS};
         if (EasyPermissions.hasPermissions(this, PERMS)) {
             // 已经申请过权限，做想做的事
             initial();
@@ -179,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     }
     @AfterPermissionGranted(10001)
     public void success(){
-        Toast.makeText(this, "哈哈哈哈哈哈成功了", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "获取权限成功", Toast.LENGTH_SHORT).show();
         initial();
     }
 

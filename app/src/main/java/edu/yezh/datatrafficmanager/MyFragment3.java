@@ -33,12 +33,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.dao.db.DataTrafficRegulateDao;
+import edu.yezh.datatrafficmanager.model.OutputTrafficData;
+import edu.yezh.datatrafficmanager.model.Sms;
+import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.FtpFileTool;
 import edu.yezh.datatrafficmanager.tools.PoiTools;
+import edu.yezh.datatrafficmanager.tools.sms.SMSTools;
 
 
 public class MyFragment3 extends Fragment {
@@ -123,7 +129,69 @@ public class MyFragment3 extends Fragment {
             }
         });
 
+        Button ButtonSENDSMS = view.findViewById(R.id.ButtonSENDSMS);
+        ButtonSENDSMS.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SMSTools smsTools = new SMSTools(context);
+                smsTools.sendSMS("10001","108",2);
+            }
+        });
+
+        Button ButtonSENDSMS2 = view.findViewById(R.id.ButtonSENDSMS2);
+        ButtonSENDSMS2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SMSTools smsTools = new SMSTools(context);
+                smsTools.sendSMS("10086","CXLL",1);
+            }
+        });
+
+        Button ButtonREADSMS = view.findViewById(R.id.ButtonREADSMS);
+        ButtonREADSMS.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SMSTools smsTools = new SMSTools(context);
+                Sms sms = smsTools.getAllSms("中国移动");
+                //System.out.println(sms);
+
+                System.out.println("-----------------------");
+                String strContent = sms.getMsg().toString();
+                String flagStr = "使用";
+                int int_flag=strContent.indexOf(flagStr);
+                if (!(int_flag>0)){
+                    flagStr = "已用";
+                    int_flag=strContent.indexOf(flagStr);
+                }
+                strContent=strContent.substring(int_flag+2);
+                System.out.println(strContent);
+                System.out.println("-----------------------");
+
+                Pattern pattern = Pattern.compile("[A-Z]");
+                Matcher matcher = pattern.matcher(strContent);
+
+                if(matcher.find()) {
+                    //System.out.println(matcher.start());
+                    int_flag=strContent.indexOf(matcher.group());
+                    System.out.println("位置:"+int_flag);
+                    strContent=strContent.substring(0,int_flag+1);
+                    System.out.println(strContent);
+
+                    String type = strContent.substring(strContent.length()-1);
+                    Double value = Double.parseDouble(strContent.substring(0,strContent.length()-1));
+                    BytesFormatter bytesFormatter = new BytesFormatter();
+                    long data =  bytesFormatter.convertValueToLong(value,type);
+                    System.out.println(data);
+
+                } else {
+                    System.out.println("Not found!");
+                }
+
+            }
+        });
         return view;
+
+
     }
 
     private void openEditViewAlert(View view) {

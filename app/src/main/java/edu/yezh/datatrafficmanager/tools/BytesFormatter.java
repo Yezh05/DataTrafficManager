@@ -7,15 +7,19 @@ public class BytesFormatter {
         long result;
         switch (type){
             case "字节":
+            case "B":
             case "Byte":
             case "Bytes":
             case "byte":
             case "bytes": result = Math.round(value); break;
+            case "K":
             case "KB" :
             case "kb": result =  Math.round(value*1024D) ;break;
+            case "M":
             case "MB":
             case "mb": result =  Math.round(value*1024D*1024D);break;
             case "GB":
+            case "G":
             case "gb": result =  Math.round(value*1024D*1024D*1024D);break;
             default: result =  0;break;
         }

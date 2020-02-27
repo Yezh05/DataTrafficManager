@@ -44,7 +44,7 @@ public class SMSTools {
         }
     }*/
 
-    public void sendSMS(String phoneNumber, String message, int SIM_NUM) {
+    public void sendSMS(String phoneNumber, String message, int subscriptionId) {
 
         String SENT_SMS_ACTION = "SENT_SMS_ACTION";
         Intent sentIntent = new Intent(SENT_SMS_ACTION);
@@ -106,20 +106,20 @@ public class SMSTools {
             }
         }, new IntentFilter(DELIVERED_SMS_ACTION));
 
-        SIM_NUM = SIM_NUM - 1;
+        //SIM_NUM = SIM_NUM - 1;
         SimTools simTools = new SimTools();
         List<SimInfo> simInfoList = simTools.getSubscriptionInfoList(context);
 
         //获取短信管理器   
         //android.telephony.SmsManager smsManager = android.telephony.SmsManager.getDefault();
-        android.telephony.SmsManager smsManager = android.telephony.SmsManager.getSmsManagerForSubscriptionId(simInfoList.get(SIM_NUM).getSubscriptionInfo().getSubscriptionId());
+        android.telephony.SmsManager smsManager = android.telephony.SmsManager.getSmsManagerForSubscriptionId(subscriptionId);
         //拆分短信内容（手机短信长度限制）    
         List<String> divideContents = smsManager.divideMessage(message);
         for (String text : divideContents) {
             smsManager.sendTextMessage(phoneNumber, null, text, sentPI, deliverPI);
         }
     }
-    //public List<Sms> getAllSms() {
+    /*//public List<Sms> getAllSms() {
     public Sms getAllSms(String simName) {
         String readAddress = getReadAddressBySimName(simName);
         List<Sms> lstSms = new ArrayList<Sms>();
@@ -168,6 +168,6 @@ public class SMSTools {
             default: address="";break;
         }
         return address;
-    }
+    }*/
 }
 

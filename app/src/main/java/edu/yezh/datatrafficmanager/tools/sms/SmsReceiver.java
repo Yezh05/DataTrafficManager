@@ -67,12 +67,25 @@ public class SmsReceiver extends BroadcastReceiver {
                     BytesFormatter bytesFormatter = new BytesFormatter();
                     long data =  bytesFormatter.convertValueToLong(value,type);
                     System.out.println(data);
+
+                    handle.handle(data);
+
+
                 } else {
                     System.out.println("Not found!");
+                    handle.handle(0);
                 }
 
 
             }
         }
+    }
+
+    private Handle handle;
+    public interface Handle{
+        public void handle(long s);
+    };
+    public void setHandle(Handle handle) {
+        this.handle = handle;
     }
 }

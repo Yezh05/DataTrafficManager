@@ -7,7 +7,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +29,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -129,66 +133,14 @@ public class MyFragment3 extends Fragment {
             }
         });
 
-        Button ButtonSENDSMS = view.findViewById(R.id.ButtonSENDSMS);
+        /*Button ButtonSENDSMS = view.findViewById(R.id.ButtonSENDSMS);
         ButtonSENDSMS.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 SMSTools smsTools = new SMSTools(context);
                 smsTools.sendSMS("10001","108",2);
             }
-        });
-
-        Button ButtonSENDSMS2 = view.findViewById(R.id.ButtonSENDSMS2);
-        ButtonSENDSMS2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SMSTools smsTools = new SMSTools(context);
-                smsTools.sendSMS("10086","CXLL",1);
-            }
-        });
-
-        Button ButtonREADSMS = view.findViewById(R.id.ButtonREADSMS);
-        ButtonREADSMS.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SMSTools smsTools = new SMSTools(context);
-                Sms sms = smsTools.getAllSms("中国移动");
-                //System.out.println(sms);
-
-                System.out.println("-----------------------");
-                String strContent = sms.getMsg().toString();
-                String flagStr = "使用";
-                int int_flag=strContent.indexOf(flagStr);
-                if (!(int_flag>0)){
-                    flagStr = "已用";
-                    int_flag=strContent.indexOf(flagStr);
-                }
-                strContent=strContent.substring(int_flag+2);
-                System.out.println(strContent);
-                System.out.println("-----------------------");
-
-                Pattern pattern = Pattern.compile("[A-Z]");
-                Matcher matcher = pattern.matcher(strContent);
-
-                if(matcher.find()) {
-                    //System.out.println(matcher.start());
-                    int_flag=strContent.indexOf(matcher.group());
-                    System.out.println("位置:"+int_flag);
-                    strContent=strContent.substring(0,int_flag+1);
-                    System.out.println(strContent);
-
-                    String type = strContent.substring(strContent.length()-1);
-                    Double value = Double.parseDouble(strContent.substring(0,strContent.length()-1));
-                    BytesFormatter bytesFormatter = new BytesFormatter();
-                    long data =  bytesFormatter.convertValueToLong(value,type);
-                    System.out.println(data);
-
-                } else {
-                    System.out.println("Not found!");
-                }
-
-            }
-        });
+        });*/
         return view;
 
 
@@ -213,7 +165,7 @@ public class MyFragment3 extends Fragment {
         builderAppsUnusualTrafficDataAmount.show();
     }
 
-    private void outputDataToFile(View view, Context context) {
+    private void outputDataToFile(View view, final Context context) {
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             //Calendar dayCal = Calendar.getInstance();
@@ -242,9 +194,28 @@ public class MyFragment3 extends Fragment {
                 wb.write(fos);
                 fos.flush();
                 fos.close();
-
+                final  String fpathString =pathString;
                 Snackbar.make(view, "导出成功", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                        .setAction("打开文件", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                try {
+                                    Intent intent = new Intent();
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    intent.setAction(Intent.ACTION_VIEW);
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+                                        StrictMode.setVmPolicy(builder.build());
+                                    }
+                                    intent.setDataAndType(Uri.fromFile(new File(fpathString)), "application/vnd.ms-excel");
+                                    context.startActivity(intent);
+                                    Intent.createChooser(intent, "请选择软件打开");
+                                } catch (Exception e) {
+                                    Toast.makeText(context, "文件不能打开", Toast.LENGTH_SHORT).show();
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).show();
             } catch (Exception e) {
                 Log.e("严重错误", e.toString());
             }

@@ -9,4 +9,13 @@
     <string name="title_activity_show_data_list">显示数据</string>
     <string name="title_activity_show_app_details">应用流量数据详情</string>
     <string name="title_activity_custom_query">自定义时间段流量数据查询</string>
+
+    <string name="china_mobile_SMS_number">10086</string>
+    <string name="china_mobile_SMS_text">CXLL</string>
+
+    <string name="china_tel_SMS_number">10001</string>
+    <string name="china_tel_SMS_text">108</string>
+
+    <string name="china_uni_SMS_number">10010</string>
+    <string name="china_uni_SMS_text">CXLL</string>
 </resources>

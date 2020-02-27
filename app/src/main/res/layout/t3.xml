@@ -70,7 +70,7 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:background="#009688" />
-        <Button
+        <!--<Button
             android:id="@+id/ButtonSENDSMS"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -84,6 +84,6 @@
             android:id="@+id/ButtonREADSMS"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="READ" />
+            android:text="READ" />-->
     </LinearLayout>
 </RelativeLayout>

@@ -15,6 +15,7 @@ import java.util.List;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.model.AppsInfo;
+import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.model.SimInfo;
 import edu.yezh.datatrafficmanager.model.TransInfo;
 
@@ -86,7 +87,7 @@ public class PoiTools {
             System.out.println("Now Line:"+rowLine);
             String subscriberID = oneSimInfo.getSubscriberId();
             SharedPreferences sp = context.getSharedPreferences("TrafficManager",MODE_PRIVATE);
-            Float dataPlan = sp.getFloat("dataPlan_"+subscriberID,-1);
+            long dataPlanLong = sp.getLong("dataPlan_"+subscriberID,-1);
             int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,1);
             int networkType=ConnectivityManager.TYPE_MOBILE;
 
@@ -105,9 +106,11 @@ public class PoiTools {
             cell.setCellValue(trafficDataOfThisMonth.getTotal());
             //rowLine++;
 
+            OutputTrafficData dataPlan = bytesFormatter.getPrintSizeByModel(dataPlanLong);
+
             TransInfo trafficDataFromStartDay =bucketDao.getTrafficDataFromStartDayToToday(context,subscriberID,dataPlanStartDay,networkType);
             rowLine++;
-            titles = new String[]{"月结日","套餐限额(GB)","从月结日起流量已使用(字节)"};
+            titles = new String[]{"月结日","套餐限额","从月结日起流量已使用(字节)"};
             row = sheet.createRow(rowLine);
             for (int j = 0;j<titles.length;j++){
                 cell = row.createCell(j);
@@ -119,7 +122,7 @@ public class PoiTools {
             cell = row.createCell(0);
             cell.setCellValue(dataPlanStartDay);
             cell = row.createCell(1);
-            cell.setCellValue(dataPlan);
+            cell.setCellValue(Math.round(Double.valueOf(dataPlan.getValue())) + dataPlan.getType());
             cell = row.createCell(2);
             cell.setCellValue(trafficDataFromStartDay.getTotal());
             rowLine++;rowLine++;rowLine++;

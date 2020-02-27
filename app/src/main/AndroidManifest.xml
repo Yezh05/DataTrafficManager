@@ -49,12 +49,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".tools.sms.SmsReceiver">
-            <intent-filter android:priority="100"> <!--优先级：-1000~1000，系统短信优先级为-1-->
-                <!--订阅广播事件类型-->
+        <!--<receiver android:name=".tools.sms.SmsReceiver">
+            <intent-filter android:priority="100"> &lt;!&ndash;优先级：-1000~1000，系统短信优先级为-1&ndash;&gt;
+                &lt;!&ndash;订阅广播事件类型&ndash;&gt;
                 <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
             </intent-filter>
-        </receiver>
+        </receiver>-->
     </application>
 
 </manifest>

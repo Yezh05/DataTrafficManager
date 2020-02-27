@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -21,7 +22,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -47,6 +47,7 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,10 +58,12 @@ import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.dao.db.AppPreferenceDao;
 import edu.yezh.datatrafficmanager.dao.db.DataTrafficRegulateDao;
+import edu.yezh.datatrafficmanager.dao.sp.NetworkPlanDao;
 import edu.yezh.datatrafficmanager.model.AppsInfo;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.model.SimInfo;
 import edu.yezh.datatrafficmanager.model.TransInfo;
+import edu.yezh.datatrafficmanager.model.sp.Sp_NetworkPlan;
 import edu.yezh.datatrafficmanager.model.tb.Tb_AppPreference;
 import edu.yezh.datatrafficmanager.model.tb.Tb_DataTrafficRegulate;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
@@ -69,15 +72,17 @@ import edu.yezh.datatrafficmanager.tools.NotificationTools;
 import edu.yezh.datatrafficmanager.tools.SimTools;
 import edu.yezh.datatrafficmanager.tools.chartTools.CustomMarkerView;
 import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
-
+import edu.yezh.datatrafficmanager.tools.sms.SMSTools;
+import edu.yezh.datatrafficmanager.tools.sms.SmsReceiver;
 
 
 import static android.content.Context.MODE_PRIVATE;
 
 public class MyFragment1 extends Fragment {
-    final int networkType = ConnectivityManager.TYPE_MOBILE;
-    int ACTIVE_SIM_PAGE_NO;
-    int dataPlanStartDay;
+    private final int networkType = ConnectivityManager.TYPE_MOBILE;
+    private int ACTIVE_SIM_PAGE_NO;
+    private int dataPlanStartDay;
+    private Button buttonRefresh;
     private Handler handler;
 
     public MyFragment1() {
@@ -118,6 +123,7 @@ public class MyFragment1 extends Fragment {
                 button_SIM1.setTextColor(Color.parseColor("#009688"));
                 button_SIM2.setTextColor(Color.BLACK);
                 ACTIVE_SIM_PAGE_NO = 1;
+                buttonRefresh = button_SIM1;
                 setTrafficDataView(view, simInfoList.get(0).getSubscriberId());
             }
         });
@@ -129,6 +135,7 @@ public class MyFragment1 extends Fragment {
                     button_SIM2.setTextColor(Color.parseColor("#009688"));
                     button_SIM1.setTextColor(Color.BLACK);
                     ACTIVE_SIM_PAGE_NO = 2;
+                    buttonRefresh = button_SIM2;
                     setTrafficDataView(view, simInfoList.get(1).getSubscriberId());
                 }
             });
@@ -136,7 +143,7 @@ public class MyFragment1 extends Fragment {
             button_SIM2.setVisibility(View.GONE);
         }
         button_SIM1.performClick();
-        handleToolBarItem(context, button_SIM1, button_SIM2, simInfoList );
+        handleToolBarItem(context,   simInfoList );
 
         return view;
     }
@@ -150,7 +157,7 @@ public class MyFragment1 extends Fragment {
             BytesFormatter bytesFormatter = new BytesFormatter();
             DateTools dateTools = new DateTools();
 
-            float dataPlan = showTextViewDataPlan(view, subscriberID);
+            long dataPlanLong = showTextViewDataPlan(view, subscriberID);
 
             long ThisMonthData = bucketDao.getTrafficDataOfThisMonth(context, subscriberID, networkType).getTotal();
 
@@ -185,7 +192,8 @@ public class MyFragment1 extends Fragment {
             TextView TextViewData4GStartDayToToday = view.findViewById(R.id.TextViewData4GStartDayToToday);
             TextViewData4GStartDayToToday.setText(Math.round(Double.valueOf(readableDataStartDayToToday.getValue()) * 100D) / 100D + readableDataStartDayToToday.getType());
 
-            float DataUseStatus = (realTotalBytesStartDayToToday / (dataPlan * 1024 * 1024 * 1024)) * 100;
+            float DataUseStatus = (float) ((double) realTotalBytesStartDayToToday / (double)dataPlanLong) * 100F;
+            System.out.println("realTotalBytesStartDayToToday="+realTotalBytesStartDayToToday+"\ndataPlanLong:"+dataPlanLong+"\n比例："+DataUseStatus);
             int PercentDataUseStatus = Math.round(DataUseStatus);
             String TextDataUseStatus = "";
             if (PercentDataUseStatus < 0) {
@@ -213,12 +221,13 @@ public class MyFragment1 extends Fragment {
             TextView TextViewData4GToday = view.findViewById(R.id.TextViewData4GToday);
             TextViewData4GToday.setText(Math.round(Double.valueOf(todayUsage.getValue()) * 100D) / 100D + todayUsage.getType());
 
-            OutputTrafficData restTrafficDataAmount = bytesFormatter.getPrintSizeByModel(Math.round(dataPlan * 1024D * 1024D * 1024D) - realTotalBytesStartDayToToday);
+            OutputTrafficData restTrafficDataAmount = bytesFormatter.getPrintSizeByModel(dataPlanLong - realTotalBytesStartDayToToday);
+            OutputTrafficData dataPlan = bytesFormatter.getPrintSizeByModel(dataPlanLong);
 
             NotificationTools.setNotification(context,
                     "今日 " + Math.round(Double.valueOf(todayUsage.getValue())) + todayUsage.getType() + "   "
                             + "剩余 " + Math.round(Double.valueOf(restTrafficDataAmount.getValue())) + restTrafficDataAmount.getType() + "   "
-                            + "总量 " + Math.round(dataPlan) + "GB"
+                            + "总量 " + Math.round(Double.valueOf(dataPlan.getValue())) + dataPlan.getType()
                     , TextDataUseStatus);
 
 
@@ -275,44 +284,81 @@ public class MyFragment1 extends Fragment {
         inputDataPlanStartDay.setHint("请输入套餐起始日");
         AlertDialog.Builder builderDataPlanStartDay = new AlertDialog.Builder(context);
         builderDataPlanStartDay.setTitle("设置套餐起始日").setIcon(R.mipmap.edit).setView(inputDataPlanStartDay).setNegativeButton("取消", null);
+
+
         builderDataPlanStartDay.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                final EditText inputDataPlan = new EditText(context);
-                inputDataPlan.setHint("请输入套餐流量额度(GB)");
-                AlertDialog.Builder builderDataPlan = new AlertDialog.Builder(context);
-                builderDataPlan.setTitle("设置套餐流量额度").setIcon(R.mipmap.edit).setView(inputDataPlan).setNegativeButton("取消", null);
-                builderDataPlan.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                final int dataPlanStartDay = Integer.valueOf(inputDataPlanStartDay.getText().toString());
+                if (dataPlanStartDay < 1 || dataPlanStartDay > 31) {
+                    Toast.makeText(context,"套餐起始日设置错误",Toast.LENGTH_LONG).show();
+                } else {
+                    /*final EditText inputDataPlan = new EditText(context);
+                    inputDataPlan.setHint("请输入套餐流量额度(GB)");*/
+                    final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.customer_dialog_data_input_view,null);
+                    TextView textViewHint = viewCustomerDialogDataInput.findViewById(R.id.TextViewHint);
+                    textViewHint.setText("请输入套餐流量额度");
+                    final EditText editText = viewCustomerDialogDataInput.findViewById(R.id.EditText_Traffic_Data_Value);
+                    final Spinner spinnerDataType = viewCustomerDialogDataInput.findViewById(R.id.Spinner_Traffic_Data_Type);
+                    spinnerDataType.setSelection(3);
 
-                    public void onClick(DialogInterface dialog, int which) {
-                        String inputData = inputDataPlan.getText().toString();
-                        Toast.makeText(getActivity(), inputData, Toast.LENGTH_LONG).show();
-                        SharedPreferences.Editor editor = context.getSharedPreferences("TrafficManager", Context.MODE_PRIVATE).edit();
-                        //Log.w("设置流量套餐信息", "dataPlan_" + subscriberID + " : " + Float.valueOf(inputData).toString());
-                        editor.putFloat("dataPlan_" + subscriberID, Float.valueOf(inputData));
-                        editor.putInt("dataPlanStartDay_" + subscriberID, Integer.valueOf(inputDataPlanStartDay.getText().toString()));
-                        editor.apply();
-                        showTextViewDataPlan(getView(), subscriberID);
-                    }
-                });
-                builderDataPlan.show();
+                    final AlertDialog builderDataPlanAlertDialog = new AlertDialog.Builder(context).create();
+                    builderDataPlanAlertDialog.setTitle("设置套餐流量额度");
+                    builderDataPlanAlertDialog.setView(viewCustomerDialogDataInput);
+                    Button btnCancel = viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogCancel);
+                    btnCancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            builderDataPlanAlertDialog.dismiss();
+                        }
+                    });
+                    Button btnConfirm= viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogConfirm);
+                    btnConfirm.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            BytesFormatter bytesFormatter = new BytesFormatter();
+                            String inputData = editText.getText().toString();
+                            long inputUse =  bytesFormatter.convertValueToLong( Double.valueOf(inputData),spinnerDataType.getSelectedItem().toString());
+                            Sp_NetworkPlan sp_networkPlan = new Sp_NetworkPlan(inputUse,dataPlanStartDay);
+                            NetworkPlanDao networkPlanDao = new NetworkPlanDao(context,subscriberID);
+                            networkPlanDao.setPlanData(sp_networkPlan);
+                            /*SharedPreferences.Editor editor = context.getSharedPreferences("TrafficManager", Context.MODE_PRIVATE).edit();
+                            editor.putLong("dataPlan_" + subscriberID, Long.valueOf(inputUse));
+                            editor.putInt("dataPlanStartDay_" + subscriberID, dataPlanStartDay);
+                            editor.apply();*/
+
+                            builderDataPlanAlertDialog.dismiss();
+                            showTextViewDataPlan(getView(), subscriberID);
+                            refresh();
+                        }
+                    });
+                    builderDataPlanAlertDialog.show();
+                }
             }
         });
         builderDataPlanStartDay.show();
     }
-
     /*获取并显示流量套餐限额*/
-    private Float showTextViewDataPlan(View view, String subscriberID) {
-        SharedPreferences sp = getActivity().getSharedPreferences("TrafficManager", MODE_PRIVATE);
-        Float dataPlan = sp.getFloat("dataPlan_" + subscriberID, -1);
-        int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID, 1);
-        Log.w("流量套餐限额", "dataPlan_" + subscriberID + " : " + dataPlan.toString());
+    private long showTextViewDataPlan(View view, String subscriberID) {
+        //SharedPreferences sp = getActivity().getSharedPreferences("TrafficManager", MODE_PRIVATE);
+
+        NetworkPlanDao networkPlanDao = new NetworkPlanDao(getContext(),subscriberID);
+        Sp_NetworkPlan sp_networkPlan = networkPlanDao.getPlanData();
+        long dataPlanLong = sp_networkPlan.getDataPlanLong();
+        int dataPlanStartDay = sp_networkPlan.getDataPlanStartDay();
+        //long dataPlanLong = sp.getLong("dataPlan_" + subscriberID, -1L);
+        //int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID, 1);
+        Log.w("流量套餐限额", "dataPlan_" + subscriberID + " : " + dataPlanLong);
         Log.w("流量套餐起始日", "dataPlanStartDay_" + subscriberID + " : " + dataPlanStartDay);
         TextView TextViewDataPlan = (TextView) view.findViewById(R.id.TextViewDataPlan);
-        TextViewDataPlan.setText(dataPlan.toString() + "GB");
+
+        BytesFormatter bytesFormatter = new BytesFormatter();
+        OutputTrafficData dataPlan = bytesFormatter.getPrintSizeByModel(dataPlanLong);
+        TextViewDataPlan.setText(Math.round(Double.valueOf(dataPlan.getValue())*100D)/100D + dataPlan.getType());
+
         TextView TextViewDataPlanStartDay = view.findViewById(R.id.TextViewDataPlanStartDay);
         TextViewDataPlanStartDay.setText("每月" + dataPlanStartDay + "日");
-        return dataPlan;
+        return dataPlanLong;
     }
 
     private void showChart(View view, int PercentDataUseStatus, List<TransInfo> valueDataList, List<Long> DaysNoList) {
@@ -514,21 +560,65 @@ public class MyFragment1 extends Fragment {
         }
     }
 
-    private void handleToolBarItem(final Context context, final Button button_SIM1, final Button button_SIM2, final List<SimInfo> simInfoList) {
+    private void handleToolBarItem(final Context context, final List<SimInfo> simInfoList) {
         Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_refresh: {
-                        if (ACTIVE_SIM_PAGE_NO == 1) {
-                            button_SIM1.performClick();
-                        } else {
-                            button_SIM2.performClick();
-                        }
+
+                            refresh();
+
                     }
                     break;
                     case R.id.action_regulate: {
+                        final SmsReceiver receiver=new SmsReceiver();
+                        SmsReceiver.Handle handle = new SmsReceiver.Handle() {
+                            @Override
+                            public void handle(long s) {
+                                final long realAmount = s;
+                                System.out.println("返回" + realAmount);
+                                OutputTrafficData data = new BytesFormatter().getPrintSizeByModel(realAmount);
+
+                                final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                                builder.setTitle("校正Sim"+(ACTIVE_SIM_PAGE_NO-1)+" "+simInfoList.get(ACTIVE_SIM_PAGE_NO-1).getSubscriptionInfo().getCarrierName()+"流量");
+                                builder.setMessage("校正已使用流量为"+ Math.round(Double.valueOf(data.getValue()) * 100D) / 100D+data.getType() );
+
+                                builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        String subscriberId = simInfoList.get(ACTIVE_SIM_PAGE_NO-1).getSubscriberId();
+                                        DataTrafficRegulateDao dataTrafficRegulateDao = new DataTrafficRegulateDao(context);
+                                        Tb_DataTrafficRegulate tb_dataTrafficRegulate = dataTrafficRegulateDao.find(subscriberId);
+                                        System.out.println(tb_dataTrafficRegulate);
+                                        if (tb_dataTrafficRegulate==null){
+                                            tb_dataTrafficRegulate = new Tb_DataTrafficRegulate(subscriberId,0,System.currentTimeMillis());
+                                            dataTrafficRegulateDao.add(tb_dataTrafficRegulate);
+                                    }
+
+                                        BucketDao bucketDao = new BucketDaoImpl();
+                                        long systemUse = bucketDao.getTrafficDataFromStartDayToToday(context,subscriberId,dataPlanStartDay,networkType).getTotal();
+                                        tb_dataTrafficRegulate.setValue(systemUse-realAmount);
+                                        tb_dataTrafficRegulate.setSettime(System.currentTimeMillis());
+                                        dataTrafficRegulateDao.update(tb_dataTrafficRegulate);
+
+                                        Toast.makeText(context, "确定校正", Toast.LENGTH_SHORT).show();
+                                        context.unregisterReceiver(receiver);
+                                    }
+                                });
+                                builder.setNegativeButton("取消",null);
+                                AlertDialog alertDialog = builder.create();
+                                alertDialog.show();
+                            }
+
+                        };
+
+                        IntentFilter intentFilter = new IntentFilter();
+                        intentFilter.addAction("android.provider.Telephony.SMS_RECEIVED");
+                        context.registerReceiver(receiver,intentFilter);
+                        receiver.setHandle(handle);
+
 
                         final String[] items = { "自动校正","手动校正" };
                         AlertDialog.Builder listDialog =  new AlertDialog.Builder(context);
@@ -538,7 +628,35 @@ public class MyFragment1 extends Fragment {
                             public void onClick(DialogInterface dialog, int which) {
                                 switch (which){
                                     case 0: {
-                                        Toast.makeText(context,"自动校正功能建造中",Toast.LENGTH_LONG).show();
+                                        Toast.makeText(context,"自动校正中",Toast.LENGTH_LONG).show();
+                                        SMSTools smsTools = new SMSTools(context);
+                                        String phoneNumber="",content="";
+                                        String carrierName=simInfoList.get(ACTIVE_SIM_PAGE_NO-1).getSubscriptionInfo().getCarrierName().toString();
+                                        int subscriptionId=simInfoList.get(ACTIVE_SIM_PAGE_NO-1).getSubscriptionInfo().getSubscriptionId();
+                                        switch (carrierName)
+                                        {
+                                            case "中国电信" : {
+                                                phoneNumber = getString(R.string.china_tel_SMS_number);
+                                                content = getString(R.string.china_tel_SMS_text);
+                                            }break;
+                                            case "中国移动" : {
+                                                phoneNumber = getString(R.string.china_mobile_SMS_number);
+                                                content = getString(R.string.china_mobile_SMS_text);
+                                            }break;
+                                            case "中国联通" : {
+                                                phoneNumber = getString(R.string.china_uni_SMS_number);
+                                                content = getString(R.string.china_uni_SMS_text);
+                                            }break;
+                                        }
+                                        if ((!phoneNumber.equals(""))&&(!content.equals(""))) {
+                                            smsTools.sendSMS(phoneNumber, content, subscriptionId);
+
+                                        }else {
+                                            Snackbar.make(getView(),"短信发送不成功",Snackbar.LENGTH_LONG).show();
+                                        }
+
+
+
                                     } break;
                                     case 1: {
                                         final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.customer_dialog_data_input_view,null);
@@ -580,7 +698,7 @@ public class MyFragment1 extends Fragment {
                                                 Toast.makeText(context,"数据：已使用"
                                                         +editText.getText()+""+spinnerDataType.getSelectedItem().toString(),Toast.LENGTH_LONG).show();
                                                 alertDialog.dismiss();
-
+                                                refresh();
                                             }
                                         });
                                         String title;
@@ -595,10 +713,7 @@ public class MyFragment1 extends Fragment {
                                         editText.setFocusableInTouchMode(true);
                                         editText.setFocusable(true);
                                         editText.requestFocus();
-                                        //getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-
                                         Toast.makeText(context, title, Toast.LENGTH_LONG).show();
-                                        //System.out.println(title);
                                     } break;
                                 }
                             }
@@ -612,5 +727,8 @@ public class MyFragment1 extends Fragment {
             }
         });
 
+    }
+    private void refresh(){
+        buttonRefresh.performClick();
     }
 }

@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -18,6 +20,9 @@ import com.google.android.material.tabs.TabLayout;
 
 import java.util.List;
 
+import edu.yezh.datatrafficmanager.model.OutputTrafficData;
+import edu.yezh.datatrafficmanager.tools.BytesFormatter;
+import edu.yezh.datatrafficmanager.tools.screen.ScreenBroadcastReceiver;
 import edu.yezh.datatrafficmanager.ui.main.SectionsPagerAdapter;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
@@ -81,6 +86,32 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         tabs.setupWithViewPager(viewPager);
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.inflateMenu(R.menu.main_menu);
+
+
+      final   Context context = this;
+        ScreenBroadcastReceiver.Handle handle = new ScreenBroadcastReceiver.Handle() {
+            @Override
+            public void handle(long s) {
+
+                final long receiveData=s;
+                if (receiveData>1024){
+                    OutputTrafficData data = new BytesFormatter().getPrintSizeByModel(receiveData);
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    builder.setTitle("锁屏流量提醒");
+                    builder.setMessage("锁屏期间消耗"+Math.round(Double.valueOf(data.getValue()) * 100D) / 100D+data.getType());
+                    builder.setNegativeButton("确定", null);
+                    builder.create();
+                    builder.show();
+                }
+            }
+        };
+        ScreenBroadcastReceiver screenBroadcastReceiver = new ScreenBroadcastReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_USER_PRESENT);
+        getApplicationContext().registerReceiver(screenBroadcastReceiver, filter);
+        screenBroadcastReceiver.setHandle(handle);
     }
     public void getPermission() {
         System.out.println("获取其他权限");

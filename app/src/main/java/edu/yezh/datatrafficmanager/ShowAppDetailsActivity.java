@@ -99,7 +99,15 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         BucketDao bucketDao = new BucketDaoImpl();
 
         TransInfo appThisMonthTrafficData = bucketDao.getAppTrafficData(this,subscriberID,networkType,dateTools.getTimesMonthMorning(),System.currentTimeMillis(),uid);
-        TransInfo appTodayTrafficData=bucketDao.getAppTrafficData(this,subscriberID,networkType,dateTools.getTimesTodayMorning(),System.currentTimeMillis(),uid);
+
+        System.out.println("subscriberID="+subscriberID);
+        System.out.println("networkType="+networkType);
+        System.out.println("getTimesTodayMorning="+dateTools.getTimesTodayMorning());
+        System.out.println("uid="+uid);
+
+        TransInfo appTodayTrafficData=bucketDao.getAppTrafficData(this,subscriberID,networkType,dateTools.getTimesTodayMorning(),dateTools.getTimesTodayEnd(),uid);
+
+        System.out.println(appTodayTrafficData);
 
         TextView TextViewAppThisMonthInfo = findViewById(R.id.TextViewAppThisMonthInfo);
         OutputTrafficData appThisMonthTrafficDataRx = bytesFormatter.getPrintSizeByModel(appThisMonthTrafficData.getRx());

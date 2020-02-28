@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content">
 
@@ -70,20 +72,35 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:background="#009688" />
+        <Button
+            android:id="@+id/ButtonTest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="T" />
         <!--<Button
-            android:id="@+id/ButtonSENDSMS"
+            android:id="@+id/ButtonCloseFloatWindow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="SendSMS-电信" />
-        <Button
-            android:id="@+id/ButtonSENDSMS2"
+            android:text="close float window" />-->
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="SendSMS-移动" />
-        <Button
-            android:id="@+id/ButtonREADSMS"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="READ" />-->
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/textViewFloatWindow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="网速悬浮窗"
+                android:textSize="20dp" />
+
+            <Switch
+                android:id="@+id/SwitchOpenFloatWindow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/textViewFloatWindow"
+                android:layout_marginLeft="10dp"/>
+        </RelativeLayout>
+
     </LinearLayout>
 </RelativeLayout>

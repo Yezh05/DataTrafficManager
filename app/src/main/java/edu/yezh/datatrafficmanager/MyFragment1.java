@@ -144,7 +144,7 @@ public class MyFragment1 extends Fragment {
         }
         button_SIM1.performClick();
         handleToolBarItem(context,   simInfoList );
-
+        System.out.println("网络类型："+networkType);
         return view;
     }
 
@@ -158,16 +158,13 @@ public class MyFragment1 extends Fragment {
             DateTools dateTools = new DateTools();
 
             long dataPlanLong = showTextViewDataPlan(view, subscriberID);
-
             long ThisMonthData = bucketDao.getTrafficDataOfThisMonth(context, subscriberID, networkType).getTotal();
-
 
             OutputTrafficData readableThisMonthData = bytesFormatter.getPrintSizeByModel(ThisMonthData);
             TextView TextViewData4GThisMonth = view.findViewById(R.id.TextViewData4GThisMonth);
             TextViewData4GThisMonth.setText(Math.round(Double.valueOf(readableThisMonthData.getValue()) * 100D) / 100D + readableThisMonthData.getType());
 
             dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID, 1);
-
 
             long ignoreTrafficDataThisMonth = statisticAppIgnoreTrafficData(context, subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay));
             long ignoreTrafficDataToday = statisticAppIgnoreTrafficData(context, subscriberID, dateTools.getTimesTodayMorning());
@@ -293,8 +290,6 @@ public class MyFragment1 extends Fragment {
                 if (dataPlanStartDay < 1 || dataPlanStartDay > 31) {
                     Toast.makeText(context,"套餐起始日设置错误",Toast.LENGTH_LONG).show();
                 } else {
-                    /*final EditText inputDataPlan = new EditText(context);
-                    inputDataPlan.setHint("请输入套餐流量额度(GB)");*/
                     final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.customer_dialog_data_input_view,null);
                     TextView textViewHint = viewCustomerDialogDataInput.findViewById(R.id.TextViewHint);
                     textViewHint.setText("请输入套餐流量额度");
@@ -319,14 +314,14 @@ public class MyFragment1 extends Fragment {
                             BytesFormatter bytesFormatter = new BytesFormatter();
                             String inputData = editText.getText().toString();
                             long inputUse =  bytesFormatter.convertValueToLong( Double.valueOf(inputData),spinnerDataType.getSelectedItem().toString());
+                            if (inputUse<=0){
+                                builderDataPlanAlertDialog.dismiss();
+                                Toast.makeText(context,"非法的数值",Toast.LENGTH_LONG).show();
+                                return;
+                            }
                             Sp_NetworkPlan sp_networkPlan = new Sp_NetworkPlan(inputUse,dataPlanStartDay);
                             NetworkPlanDao networkPlanDao = new NetworkPlanDao(context,subscriberID);
                             networkPlanDao.setPlanData(sp_networkPlan);
-                            /*SharedPreferences.Editor editor = context.getSharedPreferences("TrafficManager", Context.MODE_PRIVATE).edit();
-                            editor.putLong("dataPlan_" + subscriberID, Long.valueOf(inputUse));
-                            editor.putInt("dataPlanStartDay_" + subscriberID, dataPlanStartDay);
-                            editor.apply();*/
-
                             builderDataPlanAlertDialog.dismiss();
                             showTextViewDataPlan(getView(), subscriberID);
                             refresh();
@@ -340,14 +335,10 @@ public class MyFragment1 extends Fragment {
     }
     /*获取并显示流量套餐限额*/
     private long showTextViewDataPlan(View view, String subscriberID) {
-        //SharedPreferences sp = getActivity().getSharedPreferences("TrafficManager", MODE_PRIVATE);
-
         NetworkPlanDao networkPlanDao = new NetworkPlanDao(getContext(),subscriberID);
         Sp_NetworkPlan sp_networkPlan = networkPlanDao.getPlanData();
         long dataPlanLong = sp_networkPlan.getDataPlanLong();
         int dataPlanStartDay = sp_networkPlan.getDataPlanStartDay();
-        //long dataPlanLong = sp.getLong("dataPlan_" + subscriberID, -1L);
-        //int dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID, 1);
         Log.w("流量套餐限额", "dataPlan_" + subscriberID + " : " + dataPlanLong);
         Log.w("流量套餐起始日", "dataPlanStartDay_" + subscriberID + " : " + dataPlanStartDay);
         TextView TextViewDataPlan = (TextView) view.findViewById(R.id.TextViewDataPlan);
@@ -392,7 +383,6 @@ public class MyFragment1 extends Fragment {
         pieChart.invalidate();
         pieChart.animateXY(2000, 2000);
 
-
         LineChart lineChart = view.findViewById(R.id.LineChartLastSevenDaysTrafficData);
         final ArrayList<Entry> values = new ArrayList<>();
         /*values.add(new Entry(100, 30));*/
@@ -425,7 +415,6 @@ public class MyFragment1 extends Fragment {
         lineDataSet.setDrawCircleHole(false);
         //lineDataSet.setHighlightEnabled(false);
         lineDataSet.setDrawHighlightIndicators(false);
-        //lineDataSet.set
 
         dataSets.add(lineDataSet);
         LineData data1 = new LineData(dataSets);
@@ -467,7 +456,6 @@ public class MyFragment1 extends Fragment {
         final TextView textViewRealTimeRxSpeed = view.findViewById(R.id.TextViewRealTimeRxSpeed);
         Runnable runnable = new Runnable() {
             int firstTimeShow = 0;
-
             @Override
             public void run() {
                 if (firstTimeShow != 0) {
@@ -481,6 +469,7 @@ public class MyFragment1 extends Fragment {
                     textViewRealTimeRxSpeed.setText(Math.round(Double.valueOf(dataRealTimeRxSpeed.getValue())) + dataRealTimeRxSpeed.getType() + "/s");
                     RXOld[0] = overTxTraffic;
                     RXOld[1] = overRxTraffic;
+
                 } else {
                     long overTxTraffic = TrafficStats.getTotalTxBytes();
                     long overRxTraffic = TrafficStats.getTotalRxBytes();
@@ -496,9 +485,12 @@ public class MyFragment1 extends Fragment {
     }
 
     private void showAppTrafficDataWarning(Context context, View view, String subscriberID) {
-        int appsMAXTraffic = -1;
+
+
+
+        long appsMAXTraffic = -1L;
         SharedPreferences sp = context.getSharedPreferences("TrafficManager", MODE_PRIVATE);
-        appsMAXTraffic = sp.getInt("AppsMAXTraffic", -1);
+        appsMAXTraffic = sp.getLong("AppsMAXTraffic", -1L);
         //System.out.println("每日应用流量限额："+appsMAXTraffic+"MB");
         TextView TextViewAppTrafficDataWarning = view.findViewById(R.id.TextViewAppTrafficDataWarning);
         String textViewString = "你还没设置APP每日使用限额";
@@ -506,15 +498,17 @@ public class MyFragment1 extends Fragment {
             textViewString = "";
             final BytesFormatter bytesFormatter = new BytesFormatter();
             BucketDao bucketDao = new BucketDaoImpl();
-            List<AppsInfo> installedAppsTodayTrafficDataList = bucketDao.getAllInstalledAppsTrafficData(context, subscriberID, networkType, new DateTools().getTimesTodayMorning(), System.currentTimeMillis());
+            List<AppsInfo> installedAppsTodayTrafficDataList = bucketDao.getAllInstalledAppsTrafficData(context, subscriberID, networkType, new DateTools().getTimesTodayMorning(), new DateTools().getTimesTodayEnd());
             int flag = 0;
+            System.out.println("APP每日使用限额列表："+installedAppsTodayTrafficDataList.size());
             for (int k = 0; k < installedAppsTodayTrafficDataList.size(); k++) {
                 AppsInfo i = installedAppsTodayTrafficDataList.get(k);
                 String name = i.getName();
                 long rxBytes = i.getTrans().getRx();
                 long txBytes = i.getTrans().getTx();
                 long allBytes = rxBytes + txBytes;
-                if (allBytes >= (appsMAXTraffic * 1024 * 1024)) {
+                System.out.println("App使用："+name+":"+allBytes);
+                if (allBytes >= (appsMAXTraffic)) {
                     if (flag != 0) {
                         textViewString += "\n";
                     }
@@ -567,9 +561,7 @@ public class MyFragment1 extends Fragment {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_refresh: {
-
                             refresh();
-
                     }
                     break;
                     case R.id.action_regulate: {
@@ -619,7 +611,6 @@ public class MyFragment1 extends Fragment {
                         context.registerReceiver(receiver,intentFilter);
                         receiver.setHandle(handle);
 
-
                         final String[] items = { "自动校正","手动校正" };
                         AlertDialog.Builder listDialog =  new AlertDialog.Builder(context);
                         listDialog.setTitle("流量校正");
@@ -654,9 +645,6 @@ public class MyFragment1 extends Fragment {
                                         }else {
                                             Snackbar.make(getView(),"短信发送不成功",Snackbar.LENGTH_LONG).show();
                                         }
-
-
-
                                     } break;
                                     case 1: {
                                         final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.customer_dialog_data_input_view,null);

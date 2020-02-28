@@ -11,12 +11,17 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
@@ -48,6 +53,7 @@ import edu.yezh.datatrafficmanager.model.Sms;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.FtpFileTool;
 import edu.yezh.datatrafficmanager.tools.PoiTools;
+import edu.yezh.datatrafficmanager.tools.floatWindowTools.FloatingService;
 import edu.yezh.datatrafficmanager.tools.sms.SMSTools;
 
 
@@ -76,14 +82,6 @@ public class MyFragment3 extends Fragment {
             ActivityCompat.requestPermissions(this.getActivity(), new String[]{"android.permission.READ_PHONE_STATE"}, 1);
         }
 
-
-        /*Button buttonSHowAppsTrafficData = view.findViewById(R.id.ButtonSHowAppsTrafficData);
-        buttonSHowAppsTrafficData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bucketDao.getAllInstalledAppsTrafficData(context,"",1, ConnectivityManager.TYPE_WIFI);
-            }
-        });*/
         Button buttonSetAppsUnusualTrafficDataAmount = view.findViewById(R.id.ButtonSetAppsUnusualTrafficDataAmount);
         buttonSetAppsUnusualTrafficDataAmount.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,25 +131,72 @@ public class MyFragment3 extends Fragment {
             }
         });
 
-        /*Button ButtonSENDSMS = view.findViewById(R.id.ButtonSENDSMS);
-        ButtonSENDSMS.setOnClickListener(new View.OnClickListener() {
+        final Intent serviceIntend = new Intent(getActivity(), FloatingService.class);
+        Switch switchOpenFloatWindow = view.findViewById(R.id.SwitchOpenFloatWindow);
+        switchOpenFloatWindow.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
+                    if (FloatingService.isStarted) {
+                        return;
+                    }
+                    if (!Settings.canDrawOverlays(context)) {
+                        System.out.println("无权限");
+                        Toast.makeText(context, "当前无权限，请授权", Toast.LENGTH_SHORT);
+                        startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName())), 0);
+                    } else {
+                        System.out.println("开启Service");
+                        try {
+
+                            getActivity().startService(serviceIntend);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }else {
+                    if (FloatingService.isStarted) {
+                        getActivity().stopService(serviceIntend);
+                    }
+                }
+            }
+        });
+
+        Button ButtonTest = view.findViewById(R.id.ButtonTest);
+        ButtonTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SMSTools smsTools = new SMSTools(context);
-                smsTools.sendSMS("10001","108",2);
+               System.out.println(
+              bucketDao.getAppTrafficData(context,"460002911566405",0,1582819200000L,System.currentTimeMillis(),10162)
+                 );
             }
-        });*/
+        });
+
         return view;
+    }
 
-
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 0) {
+            if (!Settings.canDrawOverlays(getContext())) {
+                Toast.makeText(getContext(), "授权失败", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "授权成功", Toast.LENGTH_SHORT).show();
+                getActivity().startService(new Intent(getActivity(), FloatingService.class));
+            }
+        }
     }
 
     private void openEditViewAlert(View view) {
         final Context context = view.getContext();
-        final EditText editTextInputAppsUnusualTrafficDataAmount = new EditText(context);
-        editTextInputAppsUnusualTrafficDataAmount.setHint("请输入APP每日流量使用提醒阀值(MB)");
-        AlertDialog.Builder builderAppsUnusualTrafficDataAmount = new AlertDialog.Builder(context);
-        builderAppsUnusualTrafficDataAmount.setTitle("APP每日流量使用提醒阀值").setIcon(R.mipmap.edit).setView(editTextInputAppsUnusualTrafficDataAmount).setNegativeButton("取消", null);
+
+        /*final EditText editTextInputAppsUnusualTrafficDataAmount = new EditText(context);
+        editTextInputAppsUnusualTrafficDataAmount.setHint("请输入APP每日流量使用提醒阀值(MB)");*/
+
+        /*AlertDialog.Builder builderAppsUnusualTrafficDataAmount = new AlertDialog.Builder(context);*/
+
+        /*builderAppsUnusualTrafficDataAmount.setTitle("APP每日流量使用提醒阀值").setIcon(R.mipmap.edit).setView(editTextInputAppsUnusualTrafficDataAmount).setNegativeButton("取消", null);
         builderAppsUnusualTrafficDataAmount.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 String inputData = editTextInputAppsUnusualTrafficDataAmount.getText().toString();
@@ -162,19 +207,57 @@ public class MyFragment3 extends Fragment {
                 editor.commit();
             }
         });
-        builderAppsUnusualTrafficDataAmount.show();
+        builderAppsUnusualTrafficDataAmount.show();*/
+
+
+        final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.customer_dialog_data_input_view,null);
+        TextView textViewHint = viewCustomerDialogDataInput.findViewById(R.id.TextViewHint);
+        textViewHint.setText("请输入APP流量限额");
+        final EditText editText = viewCustomerDialogDataInput.findViewById(R.id.EditText_Traffic_Data_Value);
+        final Spinner spinnerDataType = viewCustomerDialogDataInput.findViewById(R.id.Spinner_Traffic_Data_Type);
+        spinnerDataType.setSelection(3);
+        final AlertDialog builderDataPlanAlertDialog = new AlertDialog.Builder(context).create();
+        builderDataPlanAlertDialog.setTitle("设置APP流量限额");
+        builderDataPlanAlertDialog.setView(viewCustomerDialogDataInput);
+        Button btnCancel = viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogCancel);
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                builderDataPlanAlertDialog.dismiss();
+            }
+        });
+        Button btnConfirm= viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogConfirm);
+        btnConfirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BytesFormatter bytesFormatter = new BytesFormatter();
+                String inputData = editText.getText().toString();
+                long inputUse =  bytesFormatter.convertValueToLong( Double.valueOf(inputData),spinnerDataType.getSelectedItem().toString());
+                if (inputUse<=0){
+                    builderDataPlanAlertDialog.dismiss();
+                    Toast.makeText(context,"非法的数值",Toast.LENGTH_LONG).show();
+                    return;
+                }
+                SharedPreferences.Editor editor = context.getSharedPreferences("TrafficManager", Context.MODE_PRIVATE).edit();
+                //Log.w("设置流量套餐信息", "dataPlan_" + subscriberID + " : " + Float.valueOf(inputData).toString());
+                editor.putLong("AppsMAXTraffic", (inputUse));
+                editor.commit();
+                builderDataPlanAlertDialog.dismiss();
+            }
+        });
+        builderDataPlanAlertDialog.show();
+
+
     }
 
     private void outputDataToFile(View view, final Context context) {
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            //Calendar dayCal = Calendar.getInstance();
-            //String nowtime = "" + dayCal.get(Calendar.YEAR) + (dayCal.get(Calendar.MONTH) + 1) + dayCal.get(Calendar.DATE) + dayCal.get(Calendar.HOUR_OF_DAY) + dayCal.get(Calendar.MINUTE) + dayCal.get(Calendar.SECOND);
             Date date = new Date();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-            String nowtime = formatter.format(date);
+            String nowTime = formatter.format(date);
 
-            String pathString = context.getExternalFilesDir("").getAbsolutePath() + "/TrafficData_" + nowtime + ".xls";
+            String pathString = context.getExternalFilesDir("").getAbsolutePath() + "/TrafficData_" + nowTime + ".xls";
             Path path = Paths.get(pathString);
             //创建文件
             if (!Files.exists(path)) {
@@ -223,43 +306,17 @@ public class MyFragment3 extends Fragment {
     }
 
     private void outputDataToFTP(View view, Context context) {
-
-        //if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-        //Calendar dayCal = Calendar.getInstance();
-        //String nowtime = "" + dayCal.get(Calendar.YEAR) + (dayCal.get(Calendar.MONTH) + 1) + dayCal.get(Calendar.DATE) + dayCal.get(Calendar.HOUR_OF_DAY) + dayCal.get(Calendar.MINUTE) + dayCal.get(Calendar.SECOND);
         Date date = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-        String nowtime = formatter.format(date);
-
-            /*String pathString = context.getExternalFilesDir("").getAbsolutePath() + "/TrafficData_" + nowtime + ".xls";
-            Path path = Paths.get(pathString);
-            //创建文件
-            if (!Files.exists(path)) {
-                try {
-                    Files.createFile(path);
-                } catch (Exception e) {
-                    Log.e("严重错误", e.toString());
-                }
-            }*/
+        String nowTime = formatter.format(date);
         try {
-            //FileOutputStream fos = new FileOutputStream(pathString,false);
-            //OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
-                /*byte bytes[] = "DIU1".getBytes();
-                Files.write(path,bytes);*/
-
             final HSSFWorkbook wb = PoiTools.getHSSFWorkbook(null, context);
-                /*wb.write(fos);
-                fos.flush();
-                fos.close();*/
-
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             wb.write(bos);
             bos.flush();
             InputStream inputStream = new ByteArrayInputStream(bos.toByteArray());
             bos.close();
-
-            boolean flag = FtpFileTool.uploadFile("119.3.181.85", 21, "Administrator", "Yezhonghan43", "/TrafficManagerData/", "TD_" + nowtime + ".xls", inputStream);
-
+            boolean flag = FtpFileTool.uploadFile("119.3.181.85", 21, "Administrator", "Yezhonghan43", "/TrafficManagerData/", "TD_" + nowTime + ".xls", inputStream);
             System.out.println("FTP上传状态:" + (flag));
             if (flag == true) {
                 Snackbar.make(view, "导出成功", Snackbar.LENGTH_LONG)
@@ -273,7 +330,7 @@ public class MyFragment3 extends Fragment {
         }
     }
 
-    //}
+
     private void handleCustomQuery( Context context) {
         Intent intent = new Intent(context,CustomQueryActivity.class);
         startActivity(intent);

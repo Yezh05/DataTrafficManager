@@ -116,7 +116,7 @@ public class BucketDaoImpl implements BucketDao {
         List<AppsInfo> allInstalledAppsTrafficData = new ArrayList<>();
         InstalledAppsInfoTools installedAppsInfoTools = new InstalledAppsInfoTools();
         List<AppsInfo> allInstalledAppsInfo = installedAppsInfoTools.getAllInstalledAppsInfo(context);
-        //System.out.println("安装应用信息列表长度:"+allInstalledAppsInfo.size());
+        System.out.println("安装应用信息列表长度:"+allInstalledAppsInfo.size());
         for (int i = 0; i < allInstalledAppsInfo.size(); i++) {
             AppsInfo singleInstalledAppsInfo = allInstalledAppsInfo.get(i);
             TransInfo data = new TransInfo(0, 0);

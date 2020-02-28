@@ -16,7 +16,14 @@ public class DateTools {
         dayCal.set(Calendar.MILLISECOND, 0);
         return dayCal.getTimeInMillis();
     }
-
+    public long getTimesTodayEnd(){
+        Calendar dayCal = Calendar.getInstance();
+        dayCal.set(Calendar.HOUR_OF_DAY, 23);
+        dayCal.set(Calendar.MINUTE, 59);
+        dayCal.set(Calendar.SECOND, 59);
+        dayCal.set(Calendar.MILLISECOND, 999);
+        return dayCal.getTimeInMillis();
+    }
     public Long getTimesMonthMorning() {
         Calendar cal = Calendar.getInstance();
         cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);

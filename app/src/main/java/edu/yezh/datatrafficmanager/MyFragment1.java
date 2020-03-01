@@ -144,7 +144,7 @@ public class MyFragment1 extends Fragment {
         }
         button_SIM1.performClick();
         handleToolBarItem(context,   simInfoList );
-        System.out.println("网络类型："+networkType);
+        //System.out.println("网络类型："+networkType);
         return view;
     }
 
@@ -190,7 +190,7 @@ public class MyFragment1 extends Fragment {
             TextViewData4GStartDayToToday.setText(Math.round(Double.valueOf(readableDataStartDayToToday.getValue()) * 100D) / 100D + readableDataStartDayToToday.getType());
 
             float DataUseStatus = (float) ((double) realTotalBytesStartDayToToday / (double)dataPlanLong) * 100F;
-            System.out.println("realTotalBytesStartDayToToday="+realTotalBytesStartDayToToday+"\ndataPlanLong:"+dataPlanLong+"\n比例："+DataUseStatus);
+            //System.out.println("realTotalBytesStartDayToToday="+realTotalBytesStartDayToToday+"\ndataPlanLong:"+dataPlanLong+"\n比例："+DataUseStatus);
             int PercentDataUseStatus = Math.round(DataUseStatus);
             String TextDataUseStatus = "";
             if (PercentDataUseStatus < 0) {

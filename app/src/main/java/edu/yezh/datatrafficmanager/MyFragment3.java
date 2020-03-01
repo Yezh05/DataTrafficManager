@@ -10,6 +10,8 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.StrictMode;
 import android.provider.Settings;
 import android.util.Log;
@@ -19,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -52,6 +55,7 @@ import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.model.Sms;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.FtpFileTool;
+import edu.yezh.datatrafficmanager.tools.NetWorkSpeedTestTools;
 import edu.yezh.datatrafficmanager.tools.PoiTools;
 import edu.yezh.datatrafficmanager.tools.floatWindowTools.FloatingService;
 import edu.yezh.datatrafficmanager.tools.sms.SMSTools;
@@ -61,7 +65,6 @@ public class MyFragment3 extends Fragment {
     public MyFragment3() {
     }
 
-    int i = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -162,15 +165,50 @@ public class MyFragment3 extends Fragment {
             }
         });
 
-        Button ButtonTest = view.findViewById(R.id.ButtonTest);
-        ButtonTest.setOnClickListener(new View.OnClickListener() {
+        Button ButtonNetworkSpeedTest = view.findViewById(R.id.ButtonNetworkSpeedTest);
+        ButtonNetworkSpeedTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               System.out.println(
-              bucketDao.getAppTrafficData(context,"460002911566405",0,1582819200000L,System.currentTimeMillis(),10162)
-                 );
+
+             AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("网速测试");
+                builder.setMessage("网速测试功能\n测试大约需要10秒，可能会消耗流量");
+
+                builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                      new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Looper.prepare();
+                                NetWorkSpeedTestTools netWorkSpeedTestTools= new NetWorkSpeedTestTools();
+                                 long  speed = netWorkSpeedTestTools.checkNetSpeed(context.getExternalFilesDir("").getAbsolutePath()+"/","http://cgdl.qihucdn.com/wot/official/WoT.0.9.22.15069hd_install-1.bin");
+                                System.out.println("下载速度："+speed);
+                                //ProgressBar progressBar = new ProgressBar(context);
+                                final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                                builder.setTitle("网速测试");
+                                //builder.setView(progressBar);
+                                builder.setMessage("网速测试中");
+
+                                OutputTrafficData data = new BytesFormatter().getPrintSizeByModel(speed);
+
+                                builder.setMessage("当前网络环境网速约为"+Math.round(Double.valueOf(data.getValue())* 100D) / 100D+ data.getType() + "/s");
+                                builder.setNegativeButton("确定", null);
+                                builder.show();
+                                Looper.loop();
+                            }
+                        }).start();
+
+                    }
+                });
+
+             builder.setNegativeButton("取消",null);
+             builder.show();
+
             }
         });
+
 
         return view;
     }

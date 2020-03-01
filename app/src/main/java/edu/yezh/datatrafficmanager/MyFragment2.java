@@ -71,7 +71,7 @@ public class MyFragment2 extends Fragment {
                 return false;
             }
         });*/
-        System.out.println("网络类型："+networkType);
+        //System.out.println("网络类型："+networkType);
         return view;
     }
 

@@ -83,11 +83,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="网速测试" />
-        <!--<Button
-            android:id="@+id/ButtonStopNetworkSpeedTest"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Stop网速测试" />-->
+
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"
@@ -119,5 +115,10 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:background="#009688" />
+        <!--<Button
+            android:id="@+id/ButtonT"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="T" />-->
     </LinearLayout>
 </RelativeLayout>

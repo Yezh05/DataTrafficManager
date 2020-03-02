@@ -2,7 +2,7 @@ package edu.yezh.datatrafficmanager;
 
 
 import android.Manifest;
-import android.app.AlertDialog;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,11 +21,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -48,6 +50,7 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -275,59 +278,68 @@ public class MyFragment1 extends Fragment {
 
 
     /*流量套餐限额设置框*/
+
+    @SuppressLint("RestrictedApi")
     private void openDataPlanEditDialog(final String subscriberID) {
         final Context context = this.getContext();
-        final EditText inputDataPlanStartDay = new EditText(context);
-        inputDataPlanStartDay.setHint("请输入套餐起始日");
-        AlertDialog.Builder builderDataPlanStartDay = new AlertDialog.Builder(context);
-        builderDataPlanStartDay.setTitle("设置套餐起始日").setIcon(R.mipmap.edit).setView(inputDataPlanStartDay).setNegativeButton("取消", null);
+        final EditText editTextDataPlanStartDay = new EditText(context);
 
+        TextInputLayout textInputLayout = new TextInputLayout(context);
+        textInputLayout.addView(editTextDataPlanStartDay);
+        textInputLayout.setHint("请输入套餐起始日");
+        AlertDialog.Builder builderDataPlanStartDay = new AlertDialog.Builder(context);
+        builderDataPlanStartDay.setTitle("设置套餐起始日").setView(textInputLayout,55,50,55,50).setNegativeButton("取消", null);
 
         builderDataPlanStartDay.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                final int dataPlanStartDay = Integer.valueOf(inputDataPlanStartDay.getText().toString());
-                if (dataPlanStartDay < 1 || dataPlanStartDay > 31) {
-                    Toast.makeText(context,"套餐起始日设置错误",Toast.LENGTH_LONG).show();
-                } else {
-                    final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.customer_dialog_data_input_view,null);
-                    TextView textViewHint = viewCustomerDialogDataInput.findViewById(R.id.TextViewHint);
-                    textViewHint.setText("请输入套餐流量额度");
-                    final EditText editText = viewCustomerDialogDataInput.findViewById(R.id.EditText_Traffic_Data_Value);
-                    final Spinner spinnerDataType = viewCustomerDialogDataInput.findViewById(R.id.Spinner_Traffic_Data_Type);
-                    spinnerDataType.setSelection(3);
 
-                    final AlertDialog builderDataPlanAlertDialog = new AlertDialog.Builder(context).create();
-                    builderDataPlanAlertDialog.setTitle("设置套餐流量额度");
-                    builderDataPlanAlertDialog.setView(viewCustomerDialogDataInput);
-                    Button btnCancel = viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogCancel);
-                    btnCancel.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            builderDataPlanAlertDialog.dismiss();
-                        }
-                    });
-                    Button btnConfirm= viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogConfirm);
-                    btnConfirm.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            BytesFormatter bytesFormatter = new BytesFormatter();
-                            String inputData = editText.getText().toString();
-                            long inputUse =  bytesFormatter.convertValueToLong( Double.valueOf(inputData),spinnerDataType.getSelectedItem().toString());
-                            if (inputUse<=0){
+                if (editTextDataPlanStartDay.getText().toString().equals("")) {
+                    Toast.makeText(context, "套餐起始日设置错误", Toast.LENGTH_LONG).show();
+                } else {
+                    final int dataPlanStartDay = Integer.valueOf(editTextDataPlanStartDay.getText().toString());
+                    if (dataPlanStartDay < 1 || dataPlanStartDay > 31) {
+                        Toast.makeText(context, "套餐起始日设置错误", Toast.LENGTH_LONG).show();
+                    } else {
+                        final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.customer_dialog_data_input_view, null);
+                        TextView textViewHint = viewCustomerDialogDataInput.findViewById(R.id.TextViewHint);
+                        textViewHint.setText("请输入套餐流量额度");
+                        final EditText editText = viewCustomerDialogDataInput.findViewById(R.id.EditText_Traffic_Data_Value);
+                        final Spinner spinnerDataType = viewCustomerDialogDataInput.findViewById(R.id.Spinner_Traffic_Data_Type);
+                        spinnerDataType.setSelection(3);
+
+                        final AlertDialog builderDataPlanAlertDialog = new AlertDialog.Builder(context).create();
+                        builderDataPlanAlertDialog.setTitle("设置套餐流量额度");
+                        builderDataPlanAlertDialog.setView(viewCustomerDialogDataInput);
+                        Button btnCancel = viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogCancel);
+                        btnCancel.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
                                 builderDataPlanAlertDialog.dismiss();
-                                Toast.makeText(context,"非法的数值",Toast.LENGTH_LONG).show();
-                                return;
                             }
-                            Sp_NetworkPlan sp_networkPlan = new Sp_NetworkPlan(inputUse,dataPlanStartDay);
-                            NetworkPlanDao networkPlanDao = new NetworkPlanDao(context,subscriberID);
-                            networkPlanDao.setPlanData(sp_networkPlan);
-                            builderDataPlanAlertDialog.dismiss();
-                            showTextViewDataPlan(getView(), subscriberID);
-                            refresh();
-                        }
-                    });
-                    builderDataPlanAlertDialog.show();
+                        });
+                        Button btnConfirm = viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogConfirm);
+                        btnConfirm.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                BytesFormatter bytesFormatter = new BytesFormatter();
+                                String inputData = editText.getText().toString();
+                                long inputUse = bytesFormatter.convertValueToLong(Double.valueOf(inputData), spinnerDataType.getSelectedItem().toString());
+                                if (inputUse <= 0) {
+                                    builderDataPlanAlertDialog.dismiss();
+                                    Toast.makeText(context, "非法的数值", Toast.LENGTH_LONG).show();
+                                    return;
+                                }
+                                Sp_NetworkPlan sp_networkPlan = new Sp_NetworkPlan(inputUse, dataPlanStartDay);
+                                NetworkPlanDao networkPlanDao = new NetworkPlanDao(context, subscriberID);
+                                networkPlanDao.setPlanData(sp_networkPlan);
+                                builderDataPlanAlertDialog.dismiss();
+                                showTextViewDataPlan(getView(), subscriberID);
+                                refresh();
+                            }
+                        });
+                        builderDataPlanAlertDialog.show();
+                    }
                 }
             }
         });
@@ -353,6 +365,11 @@ public class MyFragment1 extends Fragment {
     }
 
     private void showChart(View view, int PercentDataUseStatus, List<TransInfo> valueDataList, List<Long> DaysNoList) {
+
+        if (PercentDataUseStatus>100){
+            PercentDataUseStatus=100;
+        }
+
         BytesFormatter bytesFormatter = new BytesFormatter();
         PieChart pieChart = (PieChart) view.findViewById(R.id.Chart1);
         List yVals = new ArrayList<>();

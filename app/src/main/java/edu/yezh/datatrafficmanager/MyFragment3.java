@@ -32,6 +32,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.tencent.mm.opensdk.modelbiz.SubscribeMessage;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
@@ -45,6 +46,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -209,6 +211,18 @@ public class MyFragment3 extends Fragment {
             }
         });
 
+        /*Button ButtonT = view.findViewById(R.id.ButtonT);
+        ButtonT.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Random random = new Random();
+                int scene = random.nextInt(10000);
+                SubscribeMessage.Req req = new SubscribeMessage.Req();
+                req.scene = scene;
+                req.templateID = templateID;
+                req.reserved = reserved;
+            }
+        });*/
 
         return view;
     }

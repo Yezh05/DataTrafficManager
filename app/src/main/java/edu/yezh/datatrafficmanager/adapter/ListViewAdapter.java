@@ -101,15 +101,15 @@ public class ListViewAdapter extends BaseAdapter {
             textViewCol1.setText(col1String);
 
             OutputTrafficData DataRx = bytesFormatter.getPrintSizeByModel(dataBytes.getRx());
-            String col3String = Math.round(Double.valueOf(DataRx.getValue()) * 100D) / 100D + DataRx.getType();
+            String col3String = DataRx.getValueWithTwoDecimalPoint() + DataRx.getType();
             textViewCol3.setText(col3String);
 
             OutputTrafficData DataTx = bytesFormatter.getPrintSizeByModel(dataBytes.getTx());
-            String col2String = Math.round(Double.valueOf(DataTx.getValue()) * 100D) / 100D + DataTx.getType();
+            String col2String = DataTx.getValueWithTwoDecimalPoint() + DataTx.getType();
             textViewCol2.setText(col2String);
 
             OutputTrafficData DataTotal = bytesFormatter.getPrintSizeByModel(dataBytes.getTotal());
-            String col4String = Math.round(Double.valueOf(DataTotal.getValue()) * 100D) / 100D + DataTotal.getType();
+            String col4String = DataTotal.getValueWithTwoDecimalPoint() + DataTotal.getType();
             textViewCol4.setText(col4String);
 
             convertView.setOnClickListener(new View.OnClickListener() {

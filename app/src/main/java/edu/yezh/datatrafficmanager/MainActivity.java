@@ -29,7 +29,6 @@ import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks{
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,13 +91,12 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         ScreenBroadcastReceiver.Handle handle = new ScreenBroadcastReceiver.Handle() {
             @Override
             public void handle(long s) {
-
                 final long receiveData=s;
                 if (receiveData>1024){
                     OutputTrafficData data = new BytesFormatter().getPrintSizeByModel(receiveData);
                     final AlertDialog.Builder builder = new AlertDialog.Builder(context);
                     builder.setTitle("锁屏流量提醒");
-                    builder.setMessage("锁屏期间消耗"+Math.round(Double.valueOf(data.getValue()) * 100D) / 100D+data.getType());
+                    builder.setMessage("锁屏期间消耗"+data.getValueWithTwoDecimalPoint()+data.getType());
                     builder.setNegativeButton("确定", null);
                     builder.create();
                     builder.show();
@@ -119,10 +117,10 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         int PERMISSION_STORAGE_CODE = 10001;
         String[] PERMS = {Manifest.permission.READ_PHONE_STATE,Manifest.permission.INTERNET,Manifest.permission.SEND_SMS,Manifest.permission.READ_SMS,Manifest.permission.RECEIVE_SMS};
         if (EasyPermissions.hasPermissions(this, PERMS)) {
-            // 已经申请过权限，做想做的事
+            // 已经申请过权限
             initial();
         } else {
-            // 没有申请过权限，现在去申请
+            // 没有申请过权限，现在去申请权限
             /**
              *@param host Context对象
              *@param rationale  权限弹窗上的提示语。

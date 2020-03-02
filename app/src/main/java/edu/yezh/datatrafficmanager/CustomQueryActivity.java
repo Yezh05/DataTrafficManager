@@ -106,8 +106,6 @@ public class CustomQueryActivity extends AppCompatActivity {
                 Toast.makeText(context,"设置开始时间",Toast.LENGTH_SHORT).show();
                 showDateTimeDialog(context,R.id.ButtonCustomQuerySetStartTime);
                 //System.out.println("cal:"+cal.toString());
-                //TextView TextViewCustomQueryStartTime = findViewById(R.id.TextViewCustomQueryStartTime);
-                //TextViewCustomQueryStartTime.setText(""+calStartTime.getTime());
             }
         });
         buttonCustomQuerySetEndTime.setOnClickListener(new View.OnClickListener() {
@@ -157,16 +155,6 @@ public class CustomQueryActivity extends AppCompatActivity {
 
             }
         });
-
-
-        /*if (id==simInfoList.size()){
-                    subscriberID="";
-                    networkType = ConnectivityManager.TYPE_WIFI;
-                }else
-                {
-                    subscriberID = simInfoList.get( Integer.parseInt(String.valueOf(id)) ).getSubscriberId();
-                    networkType = ConnectivityManager.TYPE_MOBILE;
-                }*/
     }
     private  void showDateTimeDialog(final Context context, final int flag){
         //final Cal cal[] = new Cal[1];
@@ -220,16 +208,15 @@ public class CustomQueryActivity extends AppCompatActivity {
 
                 OutputTrafficData customQueryDataTotal = bytesFormatter.getPrintSizeByModel(customQueryData.getTotal());
                 TextView TextViewCustomQueryTotal = findViewById(R.id.TextViewCustomQueryTotal);
-                TextViewCustomQueryTotal.setText(Math.round(Double.valueOf(customQueryDataTotal.getValue()) * 100D) / 100D + customQueryDataTotal.getType());
-                //System.out.println("总量："+Math.round(Double.valueOf(customQueryDataTotal.getValue())*100D)/100D + customQueryDataTotal.getType());
+                TextViewCustomQueryTotal.setText(customQueryDataTotal.getValueWithTwoDecimalPoint() + customQueryDataTotal.getType());
 
                 OutputTrafficData customQueryDataRx = bytesFormatter.getPrintSizeByModel(customQueryData.getRx());
                 TextView TextViewCustomQueryRx = findViewById(R.id.TextViewCustomQueryRx);
-                TextViewCustomQueryRx.setText(Math.round(Double.valueOf(customQueryDataRx.getValue()) * 100D) / 100D + customQueryDataRx.getType());
+                TextViewCustomQueryRx.setText(customQueryDataRx.getValueWithTwoDecimalPoint() + customQueryDataRx.getType());
 
                 OutputTrafficData customQueryDataTx = bytesFormatter.getPrintSizeByModel(customQueryData.getTx());
                 TextView TextViewCustomQueryTx = findViewById(R.id.TextViewCustomQueryTx);
-                TextViewCustomQueryTx.setText(Math.round(Double.valueOf(customQueryDataTx.getValue()) * 100D) / 100D + customQueryDataTx.getType());
+                TextViewCustomQueryTx.setText(customQueryDataTx.getValueWithTwoDecimalPoint() + customQueryDataTx.getType());
 
                 RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getAllInstalledAppsTrafficData(context, subscriberID, networkType, calStartTime.getTimeInMillis(), calEndTime.getTimeInMillis()), context, subscriberID, networkType);
                 RecyclerView RecyclerViewAppsTrafficData = findViewById(R.id.RecyclerViewAppsTrafficData);

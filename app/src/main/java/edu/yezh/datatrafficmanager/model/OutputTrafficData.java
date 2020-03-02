@@ -12,6 +12,12 @@ public class OutputTrafficData {
     this.value = value;
     this.type = type;
   }
+  public double getValueWithTwoDecimalPoint(){
+    return Math.round(Double.valueOf(this.getValue()) * 100D) / 100D;
+  }
+  public long getValueWithNoDecimalPoint(){
+    return Math.round(Double.valueOf(this.getValue()));
+  }
 
   public String getValue() {
     return value;

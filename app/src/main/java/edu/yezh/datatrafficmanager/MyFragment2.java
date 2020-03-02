@@ -41,37 +41,15 @@ import edu.yezh.datatrafficmanager.tools.chartTools.CustomMarkerView;
 import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 
 public class MyFragment2 extends Fragment {
-    final int networkType = ConnectivityManager.TYPE_WIFI;
+    private final int networkType = ConnectivityManager.TYPE_WIFI;
     public MyFragment2() {
     }
-
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.t2, container, false);
-        //TextView txt_content = (TextView) view.findViewById(R.id.txt_content);
-        //      txt_content.setText("第一个Fragment");
         Log.e("Fragment", "WLAN页面");
         Context context = this.getContext();
-
         initialPage(view,context);
-
-        /*Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.action_refresh:
-                        // Toast.makeText(context,"asdsadsada",Toast.LENGTH_LONG).show();
-                       initialPage(view,context);
-                        break;
-
-                }
-                return false;
-            }
-        });*/
-        //System.out.println("网络类型："+networkType);
         return view;
     }
 
@@ -86,28 +64,28 @@ public class MyFragment2 extends Fragment {
             TransInfo ThisMonthUsageData = bucketDao.getTrafficDataOfThisMonth(context,subscriberID,networkType);
             OutputTrafficData ThisMonthUsageDataRx = bytesFormatter.getPrintSizeByModel(ThisMonthUsageData.getRx());
             TextView textViewDataWLANThisMonthRx = view.findViewById(R.id.DataWLANThisMonthRx);
-            textViewDataWLANThisMonthRx.setText(Math.round(Double.valueOf(ThisMonthUsageDataRx.getValue())*100D)/100D + ThisMonthUsageDataRx.getType());
+            textViewDataWLANThisMonthRx.setText(ThisMonthUsageDataRx.getValueWithTwoDecimalPoint() + ThisMonthUsageDataRx.getType());
 
             OutputTrafficData ThisMonthUsageDataTx = bytesFormatter.getPrintSizeByModel(ThisMonthUsageData.getTx());
             TextView textViewDataWLANThisMonthTx = view.findViewById(R.id.DataWLANThisMonthTx);
-            textViewDataWLANThisMonthTx.setText(Math.round(Double.valueOf(ThisMonthUsageDataTx.getValue())*100D)/100D + ThisMonthUsageDataTx.getType());
+            textViewDataWLANThisMonthTx.setText(ThisMonthUsageDataTx.getValueWithTwoDecimalPoint() + ThisMonthUsageDataTx.getType());
 
             OutputTrafficData ThisMonthUsageDataTotal = bytesFormatter.getPrintSizeByModel(ThisMonthUsageData.getTotal());
             TextView textViewDataWLANThisMonthTotal = view.findViewById(R.id.DataWLANThisMonthTotal);
-            textViewDataWLANThisMonthTotal.setText(Math.round(Double.valueOf(ThisMonthUsageDataTotal.getValue())*100D)/100D + ThisMonthUsageDataTotal.getType());
+            textViewDataWLANThisMonthTotal.setText(ThisMonthUsageDataTotal.getValueWithTwoDecimalPoint() + ThisMonthUsageDataTotal.getType());
 
             TransInfo TodayUsageData = bucketDao.getTrafficDataOfToday(context,subscriberID,networkType);
             OutputTrafficData TodayUsageDataRx = bytesFormatter.getPrintSizeByModel(TodayUsageData.getRx());
             TextView textViewDataWLANTodayRx = view.findViewById(R.id.DataWLANTodayRx);
-            textViewDataWLANTodayRx.setText(Math.round(Double.valueOf(TodayUsageDataRx.getValue())*100D)/100D + TodayUsageDataRx.getType());
+            textViewDataWLANTodayRx.setText(TodayUsageDataRx.getValueWithTwoDecimalPoint() + TodayUsageDataRx.getType());
 
             OutputTrafficData TodayUsageDataTx = bytesFormatter.getPrintSizeByModel(TodayUsageData.getTx());
             TextView textViewDataWLANTodayTx = view.findViewById(R.id.DataWLANTodayTx);
-            textViewDataWLANTodayTx.setText(Math.round(Double.valueOf(TodayUsageDataTx.getValue())*100D)/100D + TodayUsageDataTx.getType());
+            textViewDataWLANTodayTx.setText(TodayUsageDataTx.getValueWithTwoDecimalPoint() + TodayUsageDataTx.getType());
 
             OutputTrafficData TodayUsageDataTotal = bytesFormatter.getPrintSizeByModel(TodayUsageData.getTotal());
             TextView textViewDataWLANTodayTotal = view.findViewById(R.id.DataWLANTodayTotal);
-            textViewDataWLANTodayTotal.setText(Math.round(Double.valueOf(TodayUsageDataTotal.getValue())*100D)/100D + TodayUsageDataTotal.getType());
+            textViewDataWLANTodayTotal.setText(TodayUsageDataTotal.getValueWithTwoDecimalPoint() + TodayUsageDataTotal.getType());
 
         } catch (Exception e) {
             Log.e("严重错误", e.toString() );
@@ -117,7 +95,7 @@ public class MyFragment2 extends Fragment {
         myFragment1.showRealTimeNetSpeed(view);
 
         RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getAllInstalledAppsTrafficData(context,subscriberID,networkType,dateTools.getTimesStartDayMorning(dataPlanStartDay),System.currentTimeMillis()),context,subscriberID,networkType);
-        RecyclerView RecyclerViewAppsTrafficData = (RecyclerView) view.findViewById(R.id.RecyclerViewAppsTrafficData);
+        RecyclerView RecyclerViewAppsTrafficData = view.findViewById(R.id.RecyclerViewAppsTrafficData);
         RecyclerViewAppsTrafficData.setAdapter(recyclerViewAppsTrafficDataAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -130,7 +108,7 @@ public class MyFragment2 extends Fragment {
         Collections.reverse(DaysNoList);
         showChart(view, lastSevenDaysTrafficData,DaysNoList);
 
-        Button buttonShowLastSixMonthTrafficData = (Button) view.findViewById(R.id.ButtonShowLastSixMonthTrafficData);
+        Button buttonShowLastSixMonthTrafficData =  view.findViewById(R.id.ButtonShowLastSixMonthTrafficData);
         buttonShowLastSixMonthTrafficData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

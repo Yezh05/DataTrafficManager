@@ -32,7 +32,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.tencent.mm.opensdk.modelbiz.SubscribeMessage;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
@@ -195,7 +194,7 @@ public class MyFragment3 extends Fragment {
 
                                 OutputTrafficData data = new BytesFormatter().getPrintSizeByModel(speed);
 
-                                builder.setMessage("当前网络环境网速约为"+Math.round(Double.valueOf(data.getValue())* 100D) / 100D+ data.getType() + "/s");
+                                builder.setMessage("当前网络环境网速约为"+data.getValueWithTwoDecimalPoint()+ data.getType() + "/s");
                                 builder.setNegativeButton("确定", null);
                                 builder.show();
                                 Looper.loop();
@@ -242,26 +241,6 @@ public class MyFragment3 extends Fragment {
 
     private void openEditViewAlert(View view) {
         final Context context = view.getContext();
-
-        /*final EditText editTextInputAppsUnusualTrafficDataAmount = new EditText(context);
-        editTextInputAppsUnusualTrafficDataAmount.setHint("请输入APP每日流量使用提醒阀值(MB)");*/
-
-        /*AlertDialog.Builder builderAppsUnusualTrafficDataAmount = new AlertDialog.Builder(context);*/
-
-        /*builderAppsUnusualTrafficDataAmount.setTitle("APP每日流量使用提醒阀值").setIcon(R.mipmap.edit).setView(editTextInputAppsUnusualTrafficDataAmount).setNegativeButton("取消", null);
-        builderAppsUnusualTrafficDataAmount.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                String inputData = editTextInputAppsUnusualTrafficDataAmount.getText().toString();
-                Toast.makeText(getActivity(), inputData, Toast.LENGTH_LONG).show();
-                SharedPreferences.Editor editor = context.getSharedPreferences("TrafficManager", Context.MODE_PRIVATE).edit();
-                //Log.w("设置流量套餐信息", "dataPlan_" + subscriberID + " : " + Float.valueOf(inputData).toString());
-                editor.putInt("AppsMAXTraffic", Integer.valueOf(inputData));
-                editor.commit();
-            }
-        });
-        builderAppsUnusualTrafficDataAmount.show();*/
-
-
         final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.customer_dialog_data_input_view,null);
         TextView textViewHint = viewCustomerDialogDataInput.findViewById(R.id.TextViewHint);
         textViewHint.setText("请输入APP流量限额");
@@ -321,10 +300,6 @@ public class MyFragment3 extends Fragment {
             }
             try {
                 FileOutputStream fos = new FileOutputStream(pathString, false);
-                //OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
-                /*byte bytes[] = "DIU1".getBytes();
-                Files.write(path,bytes);*/
-
                 final HSSFWorkbook wb = PoiTools.getHSSFWorkbook(null, context);
                 wb.write(fos);
                 fos.flush();

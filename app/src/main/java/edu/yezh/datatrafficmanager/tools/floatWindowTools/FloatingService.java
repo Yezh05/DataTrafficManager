@@ -113,8 +113,8 @@ public class FloatingService extends Service {
                                 long currentRxDataRate = overRxTraffic - RXOld[1];
                                 OutputTrafficData dataRealTimeTxSpeed = bytesFormatter.getPrintSizeByModel(currentTxDataRate);
                                 OutputTrafficData dataRealTimeRxSpeed = bytesFormatter.getPrintSizeByModel(currentRxDataRate);
-                                textView.setText("上传速度:"+Math.round(Double.valueOf(dataRealTimeTxSpeed.getValue())) + dataRealTimeTxSpeed.getType() + "/s"+"\n"
-                                        +"下载速度:"+Math.round(Double.valueOf(dataRealTimeRxSpeed.getValue())) + dataRealTimeRxSpeed.getType() + "/s");
+                                textView.setText("上传速度:"+dataRealTimeTxSpeed.getValueWithNoDecimalPoint() + dataRealTimeTxSpeed.getType() + "/s"+"\n"
+                                        +"下载速度:"+dataRealTimeRxSpeed.getValueWithNoDecimalPoint() + dataRealTimeRxSpeed.getType() + "/s");
                                 RXOld[0] = overTxTraffic;
                                 RXOld[1] = overRxTraffic;
 

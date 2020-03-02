@@ -57,12 +57,12 @@ public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<Rec
             final AppsInfo OneInstalledAppsTrafficData = InstalledAppsTrafficData.get(nowPosition);
             holder.TextViewColAppName.setText(OneInstalledAppsTrafficData.getName());
             OutputTrafficData dataAppRX = bytesFormatter.getPrintSizeByModel(OneInstalledAppsTrafficData.getTrans().getRx());
-            holder.TextViewColAppRX.setText(Math.round(Double.valueOf(dataAppRX.getValue())*100D)/100D + dataAppRX.getType());
+            holder.TextViewColAppRX.setText(dataAppRX.getValueWithTwoDecimalPoint() + dataAppRX.getType());
             OutputTrafficData dataAppTX = bytesFormatter.getPrintSizeByModel(OneInstalledAppsTrafficData.getTrans().getTx());
-            holder.TextViewColAppTX.setText(Math.round(Double.valueOf(dataAppTX.getValue())*100D)/100D + dataAppTX.getType());
+            holder.TextViewColAppTX.setText(dataAppTX.getValueWithTwoDecimalPoint() + dataAppTX.getType());
             holder.ImageViewColAppIcon.setImageDrawable(OneInstalledAppsTrafficData.getAppIcon());
             OutputTrafficData dataAppTotal = bytesFormatter.getPrintSizeByModel(OneInstalledAppsTrafficData.getTrans().getTotal());
-            holder.TextViewColAppTotal.setText(Math.round(Double.valueOf(dataAppTotal.getValue())*100D)/100D + dataAppTotal.getType());
+            holder.TextViewColAppTotal.setText(dataAppTotal.getValueWithTwoDecimalPoint() + dataAppTotal.getType());
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -85,7 +85,6 @@ public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<Rec
 
     @Override
     public int getItemCount() {
-        //return this.InstalledAppsTrafficData.size()+1;
         return this.InstalledAppsTrafficData.size()+1;
     }
 

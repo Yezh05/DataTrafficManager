@@ -27,8 +27,8 @@ public class CustomMarkerView extends MarkerView {
   @Override
   public void refreshContent(Entry e, Highlight highlight) {
     // tvContent.setText("" + e.getVal()); // set the entry-value as the display text
-    OutputTrafficData data = new BytesFormatter(  ).getPrintSizeByModel(Math.round( e.getY() ));
-    String showText = ""+Math.round(Double.valueOf(data.getValue())*100D)/100D+data.getType();
+    OutputTrafficData data = new BytesFormatter(  ).getPrintSizeByModel(Math.round(e.getY()));
+    String showText = ""+data.getValueWithTwoDecimalPoint()+data.getType();
     tvContent.setText(showText);
     //tvContent.getLayoutParams().width = showText.length()*12+100;
 

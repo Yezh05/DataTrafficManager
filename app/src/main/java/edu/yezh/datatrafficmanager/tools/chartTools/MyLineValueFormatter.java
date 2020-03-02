@@ -11,11 +11,9 @@ public class MyLineValueFormatter implements IValueFormatter {
   @Override
   public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
     BytesFormatter bytesFormatter = new BytesFormatter();
-
     OutputTrafficData data = bytesFormatter.getPrintSizeByModel(Math.round(value));
     //System.out.println((Double.valueOf(data.get("values"))));
-    String afterformat = Math.round( (Double.valueOf(data.getValue()))*100D )/100D+data.getType();
-    data=null;
-    return afterformat;
+    String afterFormat = data.getValueWithTwoDecimalPoint()+data.getType();
+    return afterFormat;
   }
 }

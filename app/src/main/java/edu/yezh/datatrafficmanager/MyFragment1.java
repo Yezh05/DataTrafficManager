@@ -86,7 +86,7 @@ public class MyFragment1 extends Fragment {
     private int ACTIVE_SIM_PAGE_NO;
     private int dataPlanStartDay;
     private Button buttonRefresh;
-    private Handler handler;
+    //private Handler handler;
 
     public MyFragment1() {
     }
@@ -165,7 +165,7 @@ public class MyFragment1 extends Fragment {
 
             OutputTrafficData readableThisMonthData = bytesFormatter.getPrintSizeByModel(ThisMonthData);
             TextView TextViewData4GThisMonth = view.findViewById(R.id.TextViewData4GThisMonth);
-            TextViewData4GThisMonth.setText(Math.round(Double.valueOf(readableThisMonthData.getValue()) * 100D) / 100D + readableThisMonthData.getType());
+            TextViewData4GThisMonth.setText(readableThisMonthData.getValueWithTwoDecimalPoint() + readableThisMonthData.getType());
 
             dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID, 1);
 
@@ -190,7 +190,7 @@ public class MyFragment1 extends Fragment {
 
             OutputTrafficData readableDataStartDayToToday = bytesFormatter.getPrintSizeByModel(realTotalBytesStartDayToToday);
             TextView TextViewData4GStartDayToToday = view.findViewById(R.id.TextViewData4GStartDayToToday);
-            TextViewData4GStartDayToToday.setText(Math.round(Double.valueOf(readableDataStartDayToToday.getValue()) * 100D) / 100D + readableDataStartDayToToday.getType());
+            TextViewData4GStartDayToToday.setText(readableDataStartDayToToday.getValueWithTwoDecimalPoint() + readableDataStartDayToToday.getType());
 
             float DataUseStatus = (float) ((double) realTotalBytesStartDayToToday / (double)dataPlanLong) * 100F;
             //System.out.println("realTotalBytesStartDayToToday="+realTotalBytesStartDayToToday+"\ndataPlanLong:"+dataPlanLong+"\n比例："+DataUseStatus);
@@ -212,22 +212,22 @@ public class MyFragment1 extends Fragment {
             } else if (PercentDataUseStatus >= 100) {
                 TextDataUseStatus = "流量使用量\n已超过套餐限额\n敬请留意";
             }
-            TextView TextViewDataUseStatus = (TextView) view.findViewById(R.id.TextViewDataUseStatus);
-            TextViewDataUseStatus.setText(String.valueOf(PercentDataUseStatus) + "%\n" + TextDataUseStatus);
+            TextView TextViewDataUseStatus =  view.findViewById(R.id.TextViewDataUseStatus);
+            TextViewDataUseStatus.setText((PercentDataUseStatus) + "%\n" + TextDataUseStatus);
 
             List<TransInfo> lastThirtyDaysTrafficData = bucketDao.getTrafficDataOfLastThirtyDays(context, subscriberID, networkType);
             OutputTrafficData todayUsage = bytesFormatter.getPrintSizeByModel(lastThirtyDaysTrafficData.get(0).getTotal() - ignoreTrafficDataToday);
 
             TextView TextViewData4GToday = view.findViewById(R.id.TextViewData4GToday);
-            TextViewData4GToday.setText(Math.round(Double.valueOf(todayUsage.getValue()) * 100D) / 100D + todayUsage.getType());
+            TextViewData4GToday.setText(todayUsage.getValueWithTwoDecimalPoint()+ todayUsage.getType());
 
             OutputTrafficData restTrafficDataAmount = bytesFormatter.getPrintSizeByModel(dataPlanLong - realTotalBytesStartDayToToday);
             OutputTrafficData dataPlan = bytesFormatter.getPrintSizeByModel(dataPlanLong);
 
             NotificationTools.setNotification(context,
-                    "今日 " + Math.round(Double.valueOf(todayUsage.getValue())) + todayUsage.getType() + "   "
-                            + "剩余 " + Math.round(Double.valueOf(restTrafficDataAmount.getValue())) + restTrafficDataAmount.getType() + "   "
-                            + "总量 " + Math.round(Double.valueOf(dataPlan.getValue())) + dataPlan.getType()
+                    "今日 " + todayUsage.getValueWithNoDecimalPoint() + todayUsage.getType() + "   "
+                            + "剩余 " + restTrafficDataAmount.getValueWithNoDecimalPoint() + restTrafficDataAmount.getType() + "   "
+                            + "总量 " + dataPlan.getValueWithNoDecimalPoint() + dataPlan.getType()
                     , TextDataUseStatus);
 
 
@@ -357,7 +357,7 @@ public class MyFragment1 extends Fragment {
 
         BytesFormatter bytesFormatter = new BytesFormatter();
         OutputTrafficData dataPlan = bytesFormatter.getPrintSizeByModel(dataPlanLong);
-        TextViewDataPlan.setText(Math.round(Double.valueOf(dataPlan.getValue())*100D)/100D + dataPlan.getType());
+        TextViewDataPlan.setText(dataPlan.getValueWithTwoDecimalPoint() + dataPlan.getType());
 
         TextView TextViewDataPlanStartDay = view.findViewById(R.id.TextViewDataPlanStartDay);
         TextViewDataPlanStartDay.setText("每月" + dataPlanStartDay + "日");
@@ -365,13 +365,10 @@ public class MyFragment1 extends Fragment {
     }
 
     private void showChart(View view, int PercentDataUseStatus, List<TransInfo> valueDataList, List<Long> DaysNoList) {
-
         if (PercentDataUseStatus>100){
             PercentDataUseStatus=100;
         }
-
-        BytesFormatter bytesFormatter = new BytesFormatter();
-        PieChart pieChart = (PieChart) view.findViewById(R.id.Chart1);
+        PieChart pieChart = view.findViewById(R.id.Chart1);
         List yVals = new ArrayList<>();
         yVals.add(new PieEntry(100 - PercentDataUseStatus, 100 - PercentDataUseStatus + "%未使用"));
         yVals.add(new PieEntry(PercentDataUseStatus, PercentDataUseStatus + "%已使用"));
@@ -404,16 +401,16 @@ public class MyFragment1 extends Fragment {
         final ArrayList<Entry> values = new ArrayList<>();
         /*values.add(new Entry(100, 30));*/
 
-        final String[] Xvalues = new String[DaysNoList.size()];
+        final String[] XValues = new String[DaysNoList.size()];
         for (int i = 0; i < DaysNoList.size(); i++) {
             values.add(new Entry(i, valueDataList.get(i).getTotal()));
-            Xvalues[i] = DaysNoList.get(i) + "日";
+            XValues[i] = DaysNoList.get(i) + "日";
         }
 
         IAxisValueFormatter formatter = new IAxisValueFormatter() {
             @Override
             public String getFormattedValue(float xvalue, AxisBase axis) {
-                return Xvalues[(int) xvalue];
+                return XValues[(int) xvalue];
             }
 
         };
@@ -429,7 +426,8 @@ public class MyFragment1 extends Fragment {
         lineDataSet.setValueTextSize(13);
         lineDataSet.setLineWidth(2);
         lineDataSet.setCircleColor(Color.parseColor("#2F4F4F"));
-        lineDataSet.setDrawCircleHole(false);
+        lineDataSet.setDrawCircleHole(true);
+        lineDataSet.setCircleColorHole(Color.parseColor("#FFFFFF"));
         //lineDataSet.setHighlightEnabled(false);
         lineDataSet.setDrawHighlightIndicators(false);
 
@@ -468,7 +466,7 @@ public class MyFragment1 extends Fragment {
     public void showRealTimeNetSpeed(View view) {
         final BytesFormatter bytesFormatter = new BytesFormatter();
         final long[] RXOld = new long[2];
-        handler = new Handler();
+        final Handler  handler = new Handler();
         final TextView textViewRealTimeTxSpeed = view.findViewById(R.id.TextViewRealTimeTxSpeed);
         final TextView textViewRealTimeRxSpeed = view.findViewById(R.id.TextViewRealTimeRxSpeed);
         Runnable runnable = new Runnable() {
@@ -482,8 +480,8 @@ public class MyFragment1 extends Fragment {
                     long currentRxDataRate = overRxTraffic - RXOld[1];
                     OutputTrafficData dataRealTimeTxSpeed = bytesFormatter.getPrintSizeByModel(currentTxDataRate);
                     OutputTrafficData dataRealTimeRxSpeed = bytesFormatter.getPrintSizeByModel(currentRxDataRate);
-                    textViewRealTimeTxSpeed.setText(Math.round(Double.valueOf(dataRealTimeTxSpeed.getValue())) + dataRealTimeTxSpeed.getType() + "/s");
-                    textViewRealTimeRxSpeed.setText(Math.round(Double.valueOf(dataRealTimeRxSpeed.getValue())) + dataRealTimeRxSpeed.getType() + "/s");
+                    textViewRealTimeTxSpeed.setText(dataRealTimeTxSpeed.getValueWithNoDecimalPoint() + dataRealTimeTxSpeed.getType() + "/s");
+                    textViewRealTimeRxSpeed.setText(dataRealTimeRxSpeed.getValueWithNoDecimalPoint() + dataRealTimeRxSpeed.getType() + "/s");
                     RXOld[0] = overTxTraffic;
                     RXOld[1] = overRxTraffic;
 
@@ -530,8 +528,8 @@ public class MyFragment1 extends Fragment {
                         textViewString += "\n";
                     }
                     flag++;
-                    OutputTrafficData dataAppTodayUseageOutofLimit = bytesFormatter.getPrintSizeByModel(allBytes);
-                    textViewString += name + " 使用了" + Math.round(Double.valueOf(dataAppTodayUseageOutofLimit.getValue()) * 100D) / 100D + dataAppTodayUseageOutofLimit.getType() + " 超过了设置阀值";
+                    OutputTrafficData dataAppTodayUsageOutOfLimit = bytesFormatter.getPrintSizeByModel(allBytes);
+                    textViewString += name + " 使用了" + dataAppTodayUsageOutOfLimit.getValueWithTwoDecimalPoint() + dataAppTodayUsageOutOfLimit.getType() + " 超过了设置阀值";
                 }
             }
             if (flag == 0) {
@@ -592,7 +590,7 @@ public class MyFragment1 extends Fragment {
 
                                 final AlertDialog.Builder builder = new AlertDialog.Builder(context);
                                 builder.setTitle("校正Sim"+(ACTIVE_SIM_PAGE_NO-1)+" "+simInfoList.get(ACTIVE_SIM_PAGE_NO-1).getSubscriptionInfo().getCarrierName()+"流量");
-                                builder.setMessage("校正已使用流量为"+ Math.round(Double.valueOf(data.getValue()) * 100D) / 100D+data.getType() );
+                                builder.setMessage("校正已使用流量为"+ data.getValueWithTwoDecimalPoint()+data.getType() );
 
                                 builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                     @Override

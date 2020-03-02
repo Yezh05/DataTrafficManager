@@ -122,7 +122,7 @@ public class PoiTools {
             cell = row.createCell(0);
             cell.setCellValue(dataPlanStartDay);
             cell = row.createCell(1);
-            cell.setCellValue(Math.round(Double.valueOf(dataPlan.getValue())) + dataPlan.getType());
+            cell.setCellValue(dataPlan.getValueWithNoDecimalPoint() + dataPlan.getType());
             cell = row.createCell(2);
             cell.setCellValue(trafficDataFromStartDay.getTotal());
             rowLine++;rowLine++;rowLine++;

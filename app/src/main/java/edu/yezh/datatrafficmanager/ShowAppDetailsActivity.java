@@ -113,17 +113,17 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         OutputTrafficData appThisMonthTrafficDataRx = bytesFormatter.getPrintSizeByModel(appThisMonthTrafficData.getRx());
         OutputTrafficData appThisMonthTrafficDataTx = bytesFormatter.getPrintSizeByModel(appThisMonthTrafficData.getTx());
         OutputTrafficData appThisMonthTrafficDataTotal = bytesFormatter.getPrintSizeByModel(appThisMonthTrafficData.getTotal());
-        TextViewAppThisMonthInfo.setText("上传流量:" +Math.round(Double.valueOf(appThisMonthTrafficDataTx.getValue())*100D )/100D+appThisMonthTrafficDataTx.getType()+
-                "  下载流量:" +Math.round(Double.valueOf(appThisMonthTrafficDataRx.getValue())*100D )/100D+appThisMonthTrafficDataRx.getType()+
-                "  总量:"+Math.round(Double.valueOf(appThisMonthTrafficDataTotal.getValue())*100D )/100D+appThisMonthTrafficDataTotal.getType());
+        TextViewAppThisMonthInfo.setText("上传流量:" +appThisMonthTrafficDataTx.getValueWithTwoDecimalPoint()+appThisMonthTrafficDataTx.getType()+
+                "  下载流量:" +appThisMonthTrafficDataRx.getValueWithTwoDecimalPoint()+appThisMonthTrafficDataRx.getType()+
+                "  总量:"+appThisMonthTrafficDataTotal.getValueWithTwoDecimalPoint()+appThisMonthTrafficDataTotal.getType());
 
         TextView TextViewAppTodayInfo = findViewById(R.id.TextViewAppTodayInfo);
         OutputTrafficData appTodayTrafficDataRx = bytesFormatter.getPrintSizeByModel(appTodayTrafficData.getRx());
         OutputTrafficData appTodayTrafficDataTx = bytesFormatter.getPrintSizeByModel(appTodayTrafficData.getTx());
         OutputTrafficData appTodayTrafficDataTotal = bytesFormatter.getPrintSizeByModel(appTodayTrafficData.getTotal());
-        TextViewAppTodayInfo.setText("上传流量:" +Math.round(Double.valueOf(appTodayTrafficDataTx.getValue())*100D )/100D+appTodayTrafficDataTx.getType()+
-                "  下载流量:" +Math.round(Double.valueOf(appTodayTrafficDataRx.getValue())*100D )/100D+appTodayTrafficDataRx.getType()+
-                "  总量:"+Math.round(Double.valueOf(appTodayTrafficDataTotal.getValue())*100D )/100D+appTodayTrafficDataTotal.getType());
+        TextViewAppTodayInfo.setText("上传流量:" +appTodayTrafficDataTx.getValueWithTwoDecimalPoint()+appTodayTrafficDataTx.getType()+
+                "  下载流量:" +appTodayTrafficDataRx.getValueWithTwoDecimalPoint()+appTodayTrafficDataRx.getType()+
+                "  总量:"+appTodayTrafficDataTotal.getValueWithTwoDecimalPoint()+appTodayTrafficDataTotal.getType());
 
         Map<String,List<Long>> LastThirtyDaysMap = dateTools. getLastThirtyDaysMap();
         List<TransInfo> lastThirtyDaysTrafficData = bucketDao.getAppTrafficDataOfPeriod(this,subscriberID,networkType,LastThirtyDaysMap,uid);

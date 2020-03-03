@@ -5,14 +5,20 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -95,7 +101,7 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
                 linearLayoutSetBarSIM2Ignore.setVisibility(View.GONE);
             }
         }
-        setIgnoreSwitch( view, String.valueOf(uid),packageName);
+        setSwitches( view, String.valueOf(uid),packageName);
 
         DateTools dateTools =  new DateTools();
         BytesFormatter bytesFormatter = new BytesFormatter();
@@ -103,14 +109,14 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
 
         TransInfo appThisMonthTrafficData = bucketDao.getAppTrafficData(this,subscriberID,networkType,dateTools.getTimesMonthMorning(),System.currentTimeMillis(),uid);
 
-        System.out.println("subscriberID="+subscriberID);
+        /*System.out.println("subscriberID="+subscriberID);
         System.out.println("networkType="+networkType);
         System.out.println("getTimesTodayMorning="+dateTools.getTimesTodayMorning());
-        System.out.println("uid="+uid);
+        System.out.println("uid="+uid);*/
 
         TransInfo appTodayTrafficData=bucketDao.getAppTrafficData(this,subscriberID,networkType,dateTools.getTimesTodayMorning(),dateTools.getTimesTodayEnd(),uid);
 
-        System.out.println(appTodayTrafficData);
+        //System.out.println(appTodayTrafficData);
 
         TextView TextViewAppThisMonthInfo = findViewById(R.id.TextViewAppThisMonthInfo);
         OutputTrafficData appThisMonthTrafficDataRx = bytesFormatter.getPrintSizeByModel(appThisMonthTrafficData.getRx());
@@ -214,7 +220,8 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
 
         lineChart.invalidate();
     }
-    private void setIgnoreSwitch(View view,String uid,String packageName){
+
+    private void setSwitches(final View view, String uid, String packageName){
         AppBaseInfoDao appBaseInfoDao = new AppBaseInfoDao(view.getContext());
         Tb_AppBaseInfo appBaseInfo = appBaseInfoDao.find(uid);
         if (appBaseInfo==null){
@@ -273,6 +280,68 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         }catch (Exception e){
             System.out.println("严重错误："+e.toString());
         }
+
+        final Switch switchWarningLimit = view.findViewById(R.id.SwitchSetAppWarningLimit);
+        if (tbAppPreference.getWarningLimit()<0){
+            TextView textView = view.findViewById(R.id.TextViewAppWarningPrompt);
+            textView.setText("依照全局设置");
+        }else {
+            switchWarningLimit.setChecked(true);
+            BytesFormatter bytesFormatter = new BytesFormatter();
+            OutputTrafficData data = bytesFormatter.getPrintSizeByModel(tbAppPreference.getWarningLimit());
+            TextView textView = view.findViewById(R.id.TextViewAppWarningPrompt);
+            textView.setText("限额:"+data.getValueWithTwoDecimalPoint()+data.getType());
+        }
+        switchWarningLimit.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked == true){
+                    final View viewCustomerDialogDataInput = LayoutInflater.from(view.getContext()).inflate(R.layout.view_customer_dialog_data_input, null);
+                    TextView textViewHint = viewCustomerDialogDataInput.findViewById(R.id.TextViewHint);
+                    textViewHint.setText("请输入APP流量告警限额");
+                    final EditText editText = viewCustomerDialogDataInput.findViewById(R.id.EditText_Traffic_Data_Value);
+                    final Spinner spinnerDataType = viewCustomerDialogDataInput.findViewById(R.id.Spinner_Traffic_Data_Type);
+                    spinnerDataType.setSelection(2);
+                    final AlertDialog builderDataPlanAlertDialog = new AlertDialog.Builder(view.getContext()).create();
+                    builderDataPlanAlertDialog.setTitle("设置套餐流量额度");
+                    builderDataPlanAlertDialog.setView(viewCustomerDialogDataInput);
+                    Button btnCancel = viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogCancel);
+                    btnCancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            switchWarningLimit.setChecked(false);
+                            builderDataPlanAlertDialog.dismiss();
+                        }
+                    });
+                    Button btnConfirm = viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogConfirm);
+                    btnConfirm.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            BytesFormatter bytesFormatter = new BytesFormatter();
+                            String inputData = editText.getText().toString();
+                            long inputUse = bytesFormatter.convertValueToLong(Double.valueOf(inputData), spinnerDataType.getSelectedItem().toString());
+                            if (inputUse <= 0) {
+                                builderDataPlanAlertDialog.dismiss();
+                                Toast.makeText(view.getContext(), "非法的数值", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                            tbAppPreference.setWarningLimit(inputUse);
+                            appPreferenceDao.update(tbAppPreference);
+                            OutputTrafficData data = bytesFormatter.getPrintSizeByModel(inputUse);
+                            TextView textView = view.findViewById(R.id.TextViewAppWarningPrompt);
+                            textView.setText("限额:"+data.getValueWithTwoDecimalPoint()+data.getType());
+                            builderDataPlanAlertDialog.dismiss();
+                        }
+                    });
+                    builderDataPlanAlertDialog.show();
+                }else {
+                    tbAppPreference.setWarningLimit(-1L);
+                    appPreferenceDao.update(tbAppPreference);
+                    TextView textView = view.findViewById(R.id.TextViewAppWarningPrompt);
+                    textView.setText("依照全局设置");
+                }
+            }
+        });
 
     }
 }

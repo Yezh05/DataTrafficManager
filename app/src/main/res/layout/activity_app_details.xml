@@ -77,12 +77,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="自定义应用告警阀值"
+                    android:text="自定义应用每日使用告警阀值"
                     android:textSize="10dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal">
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -105,12 +106,13 @@
                             android:textOn="开" />
                     </LinearLayout>
                     <TextView
+                        android:id="@+id/TextViewAppWarningPrompt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:layout_weight="1"
                         android:text="未开启"
-                        android:textSize="20dp" />
+                        android:textSize="15dp" />
                 </LinearLayout>
                 <LinearLayout
                     android:id="@+id/LinearLayoutSetSIMIgnore"

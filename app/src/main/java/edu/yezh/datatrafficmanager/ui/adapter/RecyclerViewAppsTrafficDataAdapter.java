@@ -1,4 +1,4 @@
-package edu.yezh.datatrafficmanager.adapter;
+package edu.yezh.datatrafficmanager.ui.adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -26,7 +26,6 @@ public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<Rec
     Context context;
     String subscriberID;
     int networkType;
-
     public RecyclerViewAppsTrafficDataAdapter(List<AppsInfo> allInstalledAppsTrafficData, Context context,String subscriberID,int networkType) {
         this.InstalledAppsTrafficData = allInstalledAppsTrafficData;
         this.context = context;

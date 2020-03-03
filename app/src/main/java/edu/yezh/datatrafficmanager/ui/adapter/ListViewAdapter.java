@@ -1,4 +1,4 @@
-package edu.yezh.datatrafficmanager.adapter;
+package edu.yezh.datatrafficmanager.ui.adapter;
 
 import android.content.Context;
 import android.content.Intent;

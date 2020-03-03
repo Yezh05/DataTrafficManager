@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.yezh.datatrafficmanager.model.tb.Tb_AppBaseInfo;
 import edu.yezh.datatrafficmanager.model.tb.Tb_AppPreference;
 
 public class AppPreferenceDao {

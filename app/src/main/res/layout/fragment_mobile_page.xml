@@ -342,7 +342,6 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:background="@drawable/btn_shape1"
-
                     android:gravity="center"
                     android:text="显示最近12个月流量数据" />
                 <!--<Button
@@ -357,13 +356,30 @@
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
                     android:background="#009688" />
-
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="每日APP流量告警"
+                    android:textColor="#0096BF"
+                    android:textStyle="italic"
+                    android:textSize="15dp" />
                 <TextView
                     android:id="@+id/TextViewAppTrafficDataWarning"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:descendantFocusability="blocksDescendants">
 
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/RecyclerViewAppTrafficDataWarning"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </RelativeLayout>
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="2dp"

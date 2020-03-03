@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import edu.yezh.datatrafficmanager.R;
-import edu.yezh.datatrafficmanager.adapter.ListViewAdapter;
+import edu.yezh.datatrafficmanager.ui.adapter.ListViewAdapter;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 

@@ -56,9 +56,10 @@ import java.util.Collections;
 import java.util.List;
 
 import edu.yezh.datatrafficmanager.R;
-import edu.yezh.datatrafficmanager.adapter.RecyclerViewAppsTrafficDataAdapter;
+import edu.yezh.datatrafficmanager.ui.adapter.RecyclerViewAppsTrafficDataAdapter;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
+import edu.yezh.datatrafficmanager.dao.db.AppBaseInfoDao;
 import edu.yezh.datatrafficmanager.dao.db.AppPreferenceDao;
 import edu.yezh.datatrafficmanager.dao.db.DataTrafficRegulateDao;
 import edu.yezh.datatrafficmanager.dao.sp.NetworkPlanDao;
@@ -67,6 +68,7 @@ import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.model.SimInfo;
 import edu.yezh.datatrafficmanager.model.TransInfo;
 import edu.yezh.datatrafficmanager.model.sp.Sp_NetworkPlan;
+import edu.yezh.datatrafficmanager.model.tb.Tb_AppBaseInfo;
 import edu.yezh.datatrafficmanager.model.tb.Tb_AppPreference;
 import edu.yezh.datatrafficmanager.model.tb.Tb_DataTrafficRegulate;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
@@ -77,6 +79,7 @@ import edu.yezh.datatrafficmanager.tools.chartTools.CustomMarkerView;
 import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 import edu.yezh.datatrafficmanager.tools.sms.SMSTools;
 import edu.yezh.datatrafficmanager.tools.sms.SmsReceiver;
+import edu.yezh.datatrafficmanager.ui.adapter.RecyclerViewAppsWarningAdapter;
 
 
 import static android.content.Context.MODE_PRIVATE;
@@ -501,16 +504,17 @@ public class MyFragmentMobilePage extends Fragment {
 
     private void showAppTrafficDataWarning(Context context, View view, String subscriberID) {
 
-
-
-        long appsMAXTraffic = -1L;
+        long globalAppsMAXTraffic = -1L;
         SharedPreferences sp = context.getSharedPreferences("TrafficManager", MODE_PRIVATE);
-        appsMAXTraffic = sp.getLong("AppsMAXTraffic", -1L);
+        globalAppsMAXTraffic = sp.getLong("AppsMAXTraffic", -1L);
         //System.out.println("每日应用流量限额："+appsMAXTraffic+"MB");
         TextView TextViewAppTrafficDataWarning = view.findViewById(R.id.TextViewAppTrafficDataWarning);
         String textViewString = "你还没设置APP每日使用限额";
-        if (appsMAXTraffic != -1) {
-            textViewString = "";
+        if (globalAppsMAXTraffic != -1) {
+
+            List<String> APP_NAME_LIST = new ArrayList<>(),APP_USAGE_LIST = new ArrayList<>();
+            List<String> APP_INFO_LIST = new ArrayList<>();
+            //textViewString = "";
             final BytesFormatter bytesFormatter = new BytesFormatter();
             BucketDao bucketDao = new BucketDaoImpl();
             List<AppsInfo> installedAppsTodayTrafficDataList = bucketDao.getAllInstalledAppsTrafficData(context, subscriberID, networkType, new DateTools().getTimesTodayMorning(), new DateTools().getTimesTodayEnd());
@@ -519,23 +523,67 @@ public class MyFragmentMobilePage extends Fragment {
             for (int k = 0; k < installedAppsTodayTrafficDataList.size(); k++) {
                 AppsInfo i = installedAppsTodayTrafficDataList.get(k);
                 String name = i.getName();
-                long rxBytes = i.getTrans().getRx();
-                long txBytes = i.getTrans().getTx();
-                long allBytes = rxBytes + txBytes;
+                long allBytes = i.getTrans().getTotal();
                 System.out.println("App使用："+name+":"+allBytes);
-                if (allBytes >= (appsMAXTraffic)) {
-                    if (flag != 0) {
-                        textViewString += "\n";
+                //RecyclerViewAppTrafficDataWarning
+                AppBaseInfoDao appBaseInfoDao = new AppBaseInfoDao(view.getContext());
+                Tb_AppBaseInfo appBaseInfo = appBaseInfoDao.find(i.getUid());
+                if (appBaseInfo==null){
+                    appBaseInfo = new Tb_AppBaseInfo(i.getUid(),i.getPackageName());
+                    appBaseInfoDao.add(appBaseInfo);
+                }
+                AppPreferenceDao appPreferenceDao = new AppPreferenceDao(view.getContext());
+                Tb_AppPreference tempTbAppPreference = appPreferenceDao.find(i.getUid());
+                Tb_AppPreference tbAppPreference;
+                if (tempTbAppPreference ==null){
+                    tbAppPreference = new Tb_AppPreference(appBaseInfo,0,0,-1L);
+                    appPreferenceDao.add(tbAppPreference);
+                }else{
+                    tbAppPreference = tempTbAppPreference;
+                }
+                if (tbAppPreference.getWarningLimit()>-1L) {
+                    if (allBytes >= tbAppPreference.getWarningLimit()) {
+                        /*if (flag != 0) {
+                            textViewString += "\n";
+                        }*/
+                        flag++;
+                        OutputTrafficData dataAppTodayUsageOutOfLimit = bytesFormatter.getPrintSizeByModel(allBytes);
+                        //textViewString += name + " 使用了" + dataAppTodayUsageOutOfLimit.getValueWithTwoDecimalPoint() + dataAppTodayUsageOutOfLimit.getType() + " 超过了APP设置阀值";
+                        APP_NAME_LIST.add(name);
+                        APP_USAGE_LIST.add(dataAppTodayUsageOutOfLimit.getValueWithTwoDecimalPoint() + dataAppTodayUsageOutOfLimit.getType());
+                        APP_INFO_LIST.add("超过了APP设置阀值");
+                        continue;
+                    }else {
+                        continue;
                     }
+                }
+                if (allBytes >= (globalAppsMAXTraffic)) {
+                    /*if (flag != 0) {
+                        textViewString += "\n";
+                    }*/
                     flag++;
                     OutputTrafficData dataAppTodayUsageOutOfLimit = bytesFormatter.getPrintSizeByModel(allBytes);
-                    textViewString += name + " 使用了" + dataAppTodayUsageOutOfLimit.getValueWithTwoDecimalPoint() + dataAppTodayUsageOutOfLimit.getType() + " 超过了设置阀值";
+                    //textViewString += name + " 使用了" + dataAppTodayUsageOutOfLimit.getValueWithTwoDecimalPoint() + dataAppTodayUsageOutOfLimit.getType() + " 超过了全局设置阀值";
+                    APP_NAME_LIST.add(name);
+                    APP_USAGE_LIST.add(dataAppTodayUsageOutOfLimit.getValueWithTwoDecimalPoint() + dataAppTodayUsageOutOfLimit.getType());
+                    APP_INFO_LIST.add("超过了全局设置阀值");
                 }
             }
+
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
+            RecyclerView mRecyclerView = view.findViewById(R.id.RecyclerViewAppTrafficDataWarning);
+            mRecyclerView.setLayoutManager(linearLayoutManager);
+            mRecyclerView.setAdapter(new RecyclerViewAppsWarningAdapter(context,APP_NAME_LIST,APP_USAGE_LIST,APP_INFO_LIST));
+            //mRecyclerView.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
+            mRecyclerView.setVisibility(View.VISIBLE);
+            TextViewAppTrafficDataWarning.setVisibility(View.VISIBLE);
             if (flag == 0) {
+                mRecyclerView.setVisibility(View.GONE);
                 textViewString = "今日没有程序流量超过阀值";
+                TextViewAppTrafficDataWarning.setText(textViewString);
+            }else {
+            TextViewAppTrafficDataWarning.setVisibility(View.GONE);
             }
-            TextViewAppTrafficDataWarning.setText(textViewString);
         } else {
             TextViewAppTrafficDataWarning.setText(textViewString);
         }

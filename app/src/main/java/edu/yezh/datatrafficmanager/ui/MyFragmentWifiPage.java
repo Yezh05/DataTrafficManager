@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 import edu.yezh.datatrafficmanager.R;
-import edu.yezh.datatrafficmanager.adapter.RecyclerViewAppsTrafficDataAdapter;
+import edu.yezh.datatrafficmanager.ui.adapter.RecyclerViewAppsTrafficDataAdapter;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;

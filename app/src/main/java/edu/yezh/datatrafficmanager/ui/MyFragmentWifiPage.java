@@ -1,4 +1,4 @@
-package edu.yezh.datatrafficmanager;
+package edu.yezh.datatrafficmanager.ui;
 
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import edu.yezh.datatrafficmanager.R;
 import edu.yezh.datatrafficmanager.adapter.RecyclerViewAppsTrafficDataAdapter;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
@@ -40,13 +41,13 @@ import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.chartTools.CustomMarkerView;
 import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 
-public class MyFragment2 extends Fragment {
+public class MyFragmentWifiPage extends Fragment {
     private final int networkType = ConnectivityManager.TYPE_WIFI;
-    public MyFragment2() {
+    public MyFragmentWifiPage() {
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.t2, container, false);
+        View view = inflater.inflate(R.layout.fragment_wifi_page, container, false);
         Log.e("Fragment", "WLAN页面");
         Context context = this.getContext();
         initialPage(view,context);
@@ -91,8 +92,8 @@ public class MyFragment2 extends Fragment {
             Log.e("严重错误", e.toString() );
         }
 
-        MyFragment1 myFragment1 = new MyFragment1();
-        myFragment1.showRealTimeNetSpeed(view);
+        MyFragmentMobilePage myFragmentMobilePage = new MyFragmentMobilePage();
+        myFragmentMobilePage.showRealTimeNetSpeed(view);
 
         RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getAllInstalledAppsTrafficData(context,subscriberID,networkType,dateTools.getTimesStartDayMorning(dataPlanStartDay),System.currentTimeMillis()),context,subscriberID,networkType);
         RecyclerView RecyclerViewAppsTrafficData = view.findViewById(R.id.RecyclerViewAppsTrafficData);
@@ -112,7 +113,7 @@ public class MyFragment2 extends Fragment {
         buttonShowLastSixMonthTrafficData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context,ShowDataListActivity.class);
+                Intent intent = new Intent(context, ShowDataListActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("subscriberID",subscriberID);
                 bundle.putInt("dataPlanStartDay",dataPlanStartDay);
@@ -176,7 +177,7 @@ public class MyFragment2 extends Fragment {
         lineChart.getDescription().setEnabled(false);
 
         CustomMarkerView mv = new CustomMarkerView(getContext(),
-                R.layout.customer_marker_view);
+                R.layout.view_customer_marker);
         lineChart.setMarkerView(mv);
 
         lineChart.invalidate();

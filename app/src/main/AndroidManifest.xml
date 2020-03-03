@@ -31,19 +31,19 @@
         android:fullBackupContent="@xml/backup_descriptor"
         android:usesCleartextTraffic="true"
         >
-        <activity android:name=".CustomQueryActivity"
+        <activity android:name=".ui.CustomQueryActivity"
             android:label="@string/title_activity_custom_query"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
-            android:name=".ShowDataListActivity"
+            android:name=".ui.ShowDataListActivity"
             android:label="@string/title_activity_show_data_list"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ShowAppDetailsActivity"
+            android:name=".ui.ShowAppDetailsActivity"
             android:label="@string/title_activity_show_app_details"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>

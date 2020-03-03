@@ -143,7 +143,7 @@ public class DateTools {
         return lastThirtyDaysMap;
     }
 
-    public Map<String,List<Long>> getLastTwentyFourHoursPerTwoHourMap(){
+    public Map<String,List<Long>> getLastTwentyFourHoursPerThreeHourMap(){
         List<Long> lastTwentyFourHoursStartTimeInMillis=new ArrayList<>();
         List<Long> lastTwentyFourHoursNo = new ArrayList<>();
         Calendar dayCal = Calendar.getInstance();
@@ -183,7 +183,7 @@ public class DateTools {
         /*System.out.println("StartTimeList.size"+lastTwentyFourHoursStartTimeInMillis.size());
         System.out.println("EndTimeList.size"+lastTwentyFourHoursEndTimeInMillis.size());
         System.out.println("DaysNo.size"+lastTwentyFourHoursNo.size());*/
-        //System.out.println(lastTwentyFourHoursMap);
+        System.out.println(lastTwentyFourHoursMap);
         return lastTwentyFourHoursMap;
     }
 

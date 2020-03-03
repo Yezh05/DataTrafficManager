@@ -1,14 +1,14 @@
-package edu.yezh.datatrafficmanager;
+package edu.yezh.datatrafficmanager.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import edu.yezh.datatrafficmanager.R;
 import edu.yezh.datatrafficmanager.adapter.ListViewAdapter;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;

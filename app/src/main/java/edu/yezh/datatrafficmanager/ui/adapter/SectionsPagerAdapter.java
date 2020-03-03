@@ -1,4 +1,4 @@
-package edu.yezh.datatrafficmanager.ui.main;
+package edu.yezh.datatrafficmanager.ui.adapter;
 
 import android.content.Context;
 import android.view.ViewGroup;
@@ -10,9 +10,9 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import java.io.PrintStream;
 
-import edu.yezh.datatrafficmanager.MyFragment1;
-import edu.yezh.datatrafficmanager.MyFragment2;
-import edu.yezh.datatrafficmanager.MyFragment3;
+import edu.yezh.datatrafficmanager.ui.MyFragmentMobilePage;
+import edu.yezh.datatrafficmanager.ui.MyFragmentWifiPage;
+import edu.yezh.datatrafficmanager.ui.MyFragmentToolsPage;
 import edu.yezh.datatrafficmanager.R;
 
 /**
@@ -26,11 +26,11 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     private final Context mContext;
     private final int PAGER_COUNT = 3;
 
-    private MyFragment1 myFragment1 = null;
+    private MyFragmentMobilePage myFragmentMobilePage = null;
 
-    private MyFragment2 myFragment2 = null;
+    private MyFragmentWifiPage myFragmentWifiPage = null;
 
-    private MyFragment3 myFragment3 = null;
+    private MyFragmentToolsPage myFragmentToolsPage = null;
 
     /*public SectionsPagerAdapter(Context context, FragmentManager fm) {
         super(fm);
@@ -52,9 +52,9 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     public SectionsPagerAdapter(FragmentManager paramFragmentManager, Context paramContext) {
         super(paramFragmentManager);
-        this.myFragment1 = new MyFragment1();
-        this.myFragment2 = new MyFragment2();
-        this.myFragment3 = new MyFragment3();
+        this.myFragmentMobilePage = new MyFragmentMobilePage();
+        this.myFragmentWifiPage = new MyFragmentWifiPage();
+        this.myFragmentToolsPage = new MyFragmentToolsPage();
         this.mContext = paramContext;
     }
 
@@ -73,13 +73,13 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         switch (paramInt) {
             case 0:
-                fragment = myFragment1;
+                fragment = myFragmentMobilePage;
                 break;
             case 1:
-                fragment = myFragment2;
+                fragment = myFragmentWifiPage;
                 break;
             case 2:
-                fragment = myFragment3;
+                fragment = myFragmentToolsPage;
                 break;
         }
 

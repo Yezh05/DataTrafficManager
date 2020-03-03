@@ -1,4 +1,4 @@
-package edu.yezh.datatrafficmanager;
+package edu.yezh.datatrafficmanager.ui;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -30,11 +30,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import edu.yezh.datatrafficmanager.R;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
+import edu.yezh.datatrafficmanager.dao.db.AppBaseInfoDao;
 import edu.yezh.datatrafficmanager.dao.db.AppPreferenceDao;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.model.TransInfo;
+import edu.yezh.datatrafficmanager.model.tb.Tb_AppBaseInfo;
 import edu.yezh.datatrafficmanager.model.tb.Tb_AppPreference;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
@@ -77,8 +80,8 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         Drawable appIcon = new InstalledAppsInfoTools().getAppIconByPackageName(this,packageName);
         TextView appDetailsName =  findViewById(R.id.AppDetailsName);
         appDetailsName.setText(name);
-        TextView appDetailsPackageName =  findViewById(R.id.AppDetailsPackageName);
-        appDetailsPackageName.setText(packageName);
+        /*TextView appDetailsPackageName =  findViewById(R.id.AppDetailsPackageName);
+        appDetailsPackageName.setText(packageName);*/
         ImageView ImageViewDetailAppIcon = findViewById(R.id.ImageViewDetailAppIcon);
         ImageViewDetailAppIcon.setImageDrawable(appIcon);
 
@@ -132,7 +135,7 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         Collections.reverse(lastThirtyDaysTrafficData);
         showChart(view, lastThirtyDaysTrafficData, LastThirtyDaysNoList,R.id.LineChartAppLastThirtyDaysTrafficData,"日");
 
-        Map<String,List<Long>> LastTwentyFourHoursMap = dateTools. getLastTwentyFourHoursPerTwoHourMap();
+        Map<String,List<Long>> LastTwentyFourHoursMap = dateTools.getLastTwentyFourHoursPerThreeHourMap();
         List<TransInfo> lastTwentyFourHoursTrafficData = bucketDao.getAppTrafficDataOfPeriod(this,subscriberID,networkType,LastTwentyFourHoursMap,uid);
         List<Long> LastTwentyFourHoursNoList = LastTwentyFourHoursMap.get("No");
         Collections.reverse(lastTwentyFourHoursTrafficData);
@@ -141,9 +144,7 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         showChart(view, lastTwentyFourHoursTrafficData, LastTwentyFourHoursNoList,R.id.LineChartAppLastTwentyFourHoursTrafficData,"时");
     }
     private void showChart(View view, List<TransInfo> valueDataList, List<Long> xLineNoList,int chartId,String unit){
-        BytesFormatter bytesFormatter = new BytesFormatter();
 
-       //LineChart lineChart = view.findViewById(R.id.LineChartAppLastThirtyDaysTrafficData);
         LineChart lineChart = view.findViewById(chartId);
         final ArrayList<Entry> values = new ArrayList<>();
         /*values.add(new Entry(100, 30));*/
@@ -151,11 +152,11 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         final String[] Xvalues = new String[xLineNoList.size()];
         for (int i=0;i<xLineNoList.size();i++){
             values.add(new Entry(i,valueDataList.get(i).getTotal()));
-            /*if (unit.equals("时")){
-                Xvalues[i]= xLineNoList.get(i) +unit +"-"+(xLineNoList.get(i)+2) +unit;
-            }else {*/
-            Xvalues[i]= xLineNoList.get(i) +unit ;
-            //}
+            if (unit.equals("时")){
+                Xvalues[i]= xLineNoList.get(i) +"-"+(xLineNoList.get(i)+3) +unit;
+            }else {
+            Xvalues[i]= xLineNoList.get(i) +unit;
+            }
         }
 
         IAxisValueFormatter formatter = new IAxisValueFormatter() {
@@ -207,18 +208,23 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         lineChart.getDescription().setEnabled(false);
 
         CustomMarkerView mv = new CustomMarkerView(view.getContext(),
-                R.layout.customer_marker_view);
+                R.layout.view_customer_marker);
         lineChart.setMarkerView(mv);
 
 
         lineChart.invalidate();
     }
     private void setIgnoreSwitch(View view,String uid,String packageName){
+        AppBaseInfoDao appBaseInfoDao = new AppBaseInfoDao(view.getContext());
+        Tb_AppBaseInfo appBaseInfo = appBaseInfoDao.find(uid);
+        if (appBaseInfo==null){
+            appBaseInfoDao.add(new Tb_AppBaseInfo(uid,packageName));
+        }
         final AppPreferenceDao appPreferenceDao = new AppPreferenceDao(view.getContext());
         Tb_AppPreference tempTbAppPreference = appPreferenceDao.find(uid);
         final Tb_AppPreference tbAppPreference;
         if (tempTbAppPreference ==null){
-            tbAppPreference = new Tb_AppPreference(uid,packageName,0,0);
+            tbAppPreference = new Tb_AppPreference(uid,packageName,0,0,-1L);
             appPreferenceDao.add(tbAppPreference);
         }else{
             tbAppPreference = tempTbAppPreference;

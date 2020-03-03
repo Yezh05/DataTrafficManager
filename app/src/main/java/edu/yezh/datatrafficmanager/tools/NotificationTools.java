@@ -10,7 +10,7 @@ import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
 
-import edu.yezh.datatrafficmanager.MainActivity;
+import edu.yezh.datatrafficmanager.ui.MainActivity;
 import edu.yezh.datatrafficmanager.R;
 
 import static android.content.Context.NOTIFICATION_SERVICE;

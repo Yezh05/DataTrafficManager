@@ -1,4 +1,4 @@
-package edu.yezh.datatrafficmanager;
+package edu.yezh.datatrafficmanager.ui;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -20,10 +20,11 @@ import com.google.android.material.tabs.TabLayout;
 
 import java.util.List;
 
+import edu.yezh.datatrafficmanager.R;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.screen.ScreenBroadcastReceiver;
-import edu.yezh.datatrafficmanager.ui.main.SectionsPagerAdapter;
+import edu.yezh.datatrafficmanager.ui.adapter.SectionsPagerAdapter;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;

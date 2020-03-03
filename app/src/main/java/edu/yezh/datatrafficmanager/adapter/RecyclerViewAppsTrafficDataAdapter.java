@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import edu.yezh.datatrafficmanager.R;
-import edu.yezh.datatrafficmanager.ShowAppDetailsActivity;
+import edu.yezh.datatrafficmanager.ui.ShowAppDetailsActivity;
 import edu.yezh.datatrafficmanager.model.AppsInfo;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
@@ -37,7 +37,7 @@ public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<Rec
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.apps_traffic_data_item,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_apps_traffic_data_item,parent,false);
         ViewHolder holder = new ViewHolder(view);
         return holder;
     }

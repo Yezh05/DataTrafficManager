@@ -8,11 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
-import edu.yezh.datatrafficmanager.CustomQueryActivity;
+import edu.yezh.datatrafficmanager.ui.CustomQueryActivity;
 import edu.yezh.datatrafficmanager.R;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.model.TransInfo;
@@ -74,7 +73,7 @@ public class ListViewAdapter extends BaseAdapter {
             // 通过LayoutInflater 类的 from 方法 再 使用 inflate()方法得到指定的布局
             // 得到ListView中要显示的条目的布局
             LayoutInflater from = LayoutInflater.from(context);
-            convertView = from.inflate(R.layout.listview_item, null);
+            convertView = from.inflate(R.layout.view_listview_item, null);
             // 从要显示的条目布局中 获得指定的组件
             textViewCol1 = (TextView) convertView.findViewById(R.id.TextViewCol1);
             textViewCol2 = (TextView) convertView.findViewById(R.id.TextViewCol2);

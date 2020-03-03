@@ -1,4 +1,4 @@
-package edu.yezh.datatrafficmanager;
+package edu.yezh.datatrafficmanager.ui;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.StrictMode;
 import android.provider.Settings;
@@ -21,7 +20,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -45,31 +43,27 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import edu.yezh.datatrafficmanager.R;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.dao.db.DataTrafficRegulateDao;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
-import edu.yezh.datatrafficmanager.model.Sms;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.FtpFileTool;
 import edu.yezh.datatrafficmanager.tools.NetWorkSpeedTestTools;
 import edu.yezh.datatrafficmanager.tools.PoiTools;
 import edu.yezh.datatrafficmanager.tools.floatWindowTools.FloatingService;
-import edu.yezh.datatrafficmanager.tools.sms.SMSTools;
 
 
-public class MyFragment3 extends Fragment {
-    public MyFragment3() {
+public class MyFragmentToolsPage extends Fragment {
+    public MyFragmentToolsPage() {
     }
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.t3, container, false);
+        final View view = inflater.inflate(R.layout.fragment_tools_page, container, false);
         Log.e("Fragment", "工具页");
 
         final BucketDao bucketDao = new BucketDaoImpl();
@@ -241,7 +235,7 @@ public class MyFragment3 extends Fragment {
 
     private void openEditViewAlert(View view) {
         final Context context = view.getContext();
-        final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.customer_dialog_data_input_view,null);
+        final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.view_customer_dialog_data_input,null);
         TextView textViewHint = viewCustomerDialogDataInput.findViewById(R.id.TextViewHint);
         textViewHint.setText("请输入APP流量限额");
         final EditText editText = viewCustomerDialogDataInput.findViewById(R.id.EditText_Traffic_Data_Value);
@@ -359,7 +353,7 @@ public class MyFragment3 extends Fragment {
 
 
     private void handleCustomQuery( Context context) {
-        Intent intent = new Intent(context,CustomQueryActivity.class);
+        Intent intent = new Intent(context, CustomQueryActivity.class);
         startActivity(intent);
     }
 

@@ -40,7 +40,7 @@
             android:id="@+id/ButtonSetAppsUnusualTrafficDataAmount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="设置应用异常流量阀值" />
+            android:text="设置全局应用异常流量阀值" />
 
         <Button
             android:id="@+id/ButtonResetTrafficDataRegulate"

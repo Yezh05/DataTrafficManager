@@ -17,34 +17,36 @@ public class AppPreferenceDao {
         db = helper.getWritableDatabase();
     }
     public void add(Tb_AppPreference tbAppPreference){
-        db.execSQL("insert into tb_apppreference(uid,pkgname,sim1IgnoreFlag,sim2IgnoreFlag) values (?,?,?,?)"
-                ,new Object[]{tbAppPreference.getUid(), tbAppPreference.getPkgName(), tbAppPreference.getSim1IgnoreFlag(), tbAppPreference.getSim2IgnoreFlag()});
+        db.execSQL("insert into tb_apppreference(uid,sim1IgnoreFlag,sim2IgnoreFlag,warningLimit) values (?,?,?,?)"
+                ,new Object[]{tbAppPreference.getUid(),  tbAppPreference.getSim1IgnoreFlag(), tbAppPreference.getSim2IgnoreFlag(),tbAppPreference.getWarningLimit()});
     }
     public void update(Tb_AppPreference tbAppPreference){
-        db.execSQL("update tb_apppreference set pkgname = ?,sim1IgnoreFlag =?,sim2IgnoreFlag =? where uid = ?"
-                ,new Object[]{tbAppPreference.getPkgName(), tbAppPreference.getSim1IgnoreFlag(), tbAppPreference.getSim2IgnoreFlag(), tbAppPreference.getUid()});
+        db.execSQL("update tb_apppreference set sim1IgnoreFlag =?,sim2IgnoreFlag =? ,warningLimit=? where uid = ?"
+                ,new Object[]{tbAppPreference.getSim1IgnoreFlag(), tbAppPreference.getSim2IgnoreFlag(),tbAppPreference.getWarningLimit(), tbAppPreference.getUid()});
     }
     public Tb_AppPreference find(String uid){
-        Cursor cursor = db.rawQuery("select uid,pkgname,sim1IgnoreFlag,sim2IgnoreFlag from tb_apppreference where uid = ?",new String[]{uid});
+        Cursor cursor = db.rawQuery("select tb_apppreference.uid,tb_appbaseinfo.pkgName,tb_apppreference.sim1IgnoreFlag,tb_apppreference.sim2IgnoreFlag,tb_apppreference.warningLimit from tb_apppreference,tb_appbaseinfo where tb_apppreference.uid = tb_appbaseinfo.uid and tb_apppreference.uid= ?"
+                ,new String[]{uid});
         if (cursor.moveToNext()){
             return new Tb_AppPreference( cursor.getString(cursor.getColumnIndex("uid")),
-                    cursor.getString(cursor.getColumnIndex("pkgname")),
+                    cursor.getString(cursor.getColumnIndex("pkgName")),
                     cursor.getInt(cursor.getColumnIndex("sim1IgnoreFlag")),
-                    cursor.getInt(cursor.getColumnIndex("sim2IgnoreFlag"))
-                    );
+                    cursor.getInt(cursor.getColumnIndex("sim2IgnoreFlag")),
+                    cursor.getLong(cursor.getColumnIndex("warningLimit")));
         }
         cursor.close();
         return null;
     }
     public List<Tb_AppPreference> find(){
-        Cursor cursor = db.rawQuery("select * from tb_apppreference",null);
+        Cursor cursor = db.rawQuery("select tb_apppreference.uid,tb_appbaseinfo.pkgName,tb_apppreference.sim1IgnoreFlag,tb_apppreference.sim2IgnoreFlag,tb_apppreference.warningLimit from tb_apppreference,tb_appbaseinfo where tb_apppreference.uid = tb_appbaseinfo.uid",null);
         List<Tb_AppPreference> tbAppPreferenceList = new ArrayList<>();
         if (cursor.moveToFirst()){
             while (!cursor.isAfterLast()){
                 tbAppPreferenceList.add(new Tb_AppPreference( cursor.getString(cursor.getColumnIndex("uid")),
-                        cursor.getString(cursor.getColumnIndex("pkgname")),
+                        cursor.getString(cursor.getColumnIndex("pkgName")),
                         cursor.getInt(cursor.getColumnIndex("sim1IgnoreFlag")),
-                        cursor.getInt(cursor.getColumnIndex("sim2IgnoreFlag"))
+                        cursor.getInt(cursor.getColumnIndex("sim2IgnoreFlag")),
+                        cursor.getLong(cursor.getColumnIndex("warningLimit"))
                 ));
                 cursor.moveToNext();
             }

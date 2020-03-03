@@ -1,4 +1,4 @@
-package edu.yezh.datatrafficmanager;
+package edu.yezh.datatrafficmanager.ui;
 
 
 import android.Manifest;
@@ -21,7 +21,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import edu.yezh.datatrafficmanager.R;
 import edu.yezh.datatrafficmanager.adapter.RecyclerViewAppsTrafficDataAdapter;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
@@ -81,20 +81,20 @@ import edu.yezh.datatrafficmanager.tools.sms.SmsReceiver;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class MyFragment1 extends Fragment {
+public class MyFragmentMobilePage extends Fragment {
     private final int networkType = ConnectivityManager.TYPE_MOBILE;
     private int ACTIVE_SIM_PAGE_NO;
     private int dataPlanStartDay;
     private Button buttonRefresh;
     //private Handler handler;
 
-    public MyFragment1() {
+    public MyFragmentMobilePage() {
     }
 
     //public String subscriberID;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.t1, container, false);
+        final View view = inflater.inflate(R.layout.fragment_mobile_page, container, false);
         final View mainview = inflater.inflate(R.layout.activity_main, container, false);
         Log.e("标签页", "移动网络页面");
 
@@ -301,7 +301,7 @@ public class MyFragment1 extends Fragment {
                     if (dataPlanStartDay < 1 || dataPlanStartDay > 31) {
                         Toast.makeText(context, "套餐起始日设置错误", Toast.LENGTH_LONG).show();
                     } else {
-                        final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.customer_dialog_data_input_view, null);
+                        final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.view_customer_dialog_data_input, null);
                         TextView textViewHint = viewCustomerDialogDataInput.findViewById(R.id.TextViewHint);
                         textViewHint.setText("请输入套餐流量额度");
                         final EditText editText = viewCustomerDialogDataInput.findViewById(R.id.EditText_Traffic_Data_Value);
@@ -454,7 +454,7 @@ public class MyFragment1 extends Fragment {
 
 
         CustomMarkerView mv = new CustomMarkerView(getContext(),
-                R.layout.customer_marker_view);
+                R.layout.view_customer_marker);
         lineChart.setMarkerView(mv);
 
         lineChart.invalidate();
@@ -662,7 +662,7 @@ public class MyFragment1 extends Fragment {
                                         }
                                     } break;
                                     case 1: {
-                                        final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.customer_dialog_data_input_view,null);
+                                        final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.view_customer_dialog_data_input,null);
                                         final AlertDialog alertDialog = new AlertDialog.Builder(context).create();
                                         alertDialog.setView(viewCustomerDialogDataInput);
                                         final EditText editText = viewCustomerDialogDataInput.findViewById(R.id.EditText_Traffic_Data_Value);

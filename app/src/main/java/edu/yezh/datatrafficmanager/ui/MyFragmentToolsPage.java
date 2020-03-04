@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -49,7 +50,9 @@ import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.dao.db.DataTrafficRegulateDao;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
+import edu.yezh.datatrafficmanager.model.TransInfo;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
+import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.FtpFileTool;
 import edu.yezh.datatrafficmanager.tools.NetWorkSpeedTestTools;
 import edu.yezh.datatrafficmanager.tools.PoiTools;
@@ -204,18 +207,18 @@ public class MyFragmentToolsPage extends Fragment {
             }
         });
 
-        /*Button ButtonT = view.findViewById(R.id.ButtonT);
+        Button ButtonT = view.findViewById(R.id.ButtonT);
         ButtonT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Random random = new Random();
-                int scene = random.nextInt(10000);
-                SubscribeMessage.Req req = new SubscribeMessage.Req();
-                req.scene = scene;
-                req.templateID = templateID;
-                req.reserved = reserved;
+                DateTools dateTools = new DateTools();
+                TransInfo transInfo = bucketDao.getAppTrafficData(context,"460002911566405", ConnectivityManager.TYPE_MOBILE,
+                        1583308800000L,System.currentTimeMillis(),10162);
+                System.out.println(transInfo);
+
+
             }
-        });*/
+        });
 
         return view;
     }
@@ -298,7 +301,7 @@ public class MyFragmentToolsPage extends Fragment {
                 wb.write(fos);
                 fos.flush();
                 fos.close();
-                final  String fpathString =pathString;
+                final  String fPathString =pathString;
                 Snackbar.make(view, "导出成功", Snackbar.LENGTH_LONG)
                         .setAction("打开文件", new View.OnClickListener() {
                             @Override
@@ -311,7 +314,7 @@ public class MyFragmentToolsPage extends Fragment {
                                         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
                                         StrictMode.setVmPolicy(builder.build());
                                     }
-                                    intent.setDataAndType(Uri.fromFile(new File(fpathString)), "application/vnd.ms-excel");
+                                    intent.setDataAndType(Uri.fromFile(new File(fPathString)), "application/vnd.ms-excel");
                                     context.startActivity(intent);
                                     Intent.createChooser(intent, "请选择软件打开");
                                 } catch (Exception e) {

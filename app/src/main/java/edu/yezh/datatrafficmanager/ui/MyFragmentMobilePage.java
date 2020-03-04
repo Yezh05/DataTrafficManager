@@ -354,8 +354,8 @@ public class MyFragmentMobilePage extends Fragment {
         Sp_NetworkPlan sp_networkPlan = networkPlanDao.getPlanData();
         long dataPlanLong = sp_networkPlan.getDataPlanLong();
         int dataPlanStartDay = sp_networkPlan.getDataPlanStartDay();
-        Log.w("流量套餐限额", "dataPlan_" + subscriberID + " : " + dataPlanLong);
-        Log.w("流量套餐起始日", "dataPlanStartDay_" + subscriberID + " : " + dataPlanStartDay);
+        System.out.println("流量套餐限额"+ "dataPlan_" + subscriberID + " : " + dataPlanLong);
+        System.out.println("流量套餐起始日"+"dataPlanStartDay_" + subscriberID + " : " + dataPlanStartDay);
         TextView TextViewDataPlan = (TextView) view.findViewById(R.id.TextViewDataPlan);
 
         BytesFormatter bytesFormatter = new BytesFormatter();

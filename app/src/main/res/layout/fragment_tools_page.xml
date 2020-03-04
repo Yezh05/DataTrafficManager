@@ -115,10 +115,10 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:background="#009688" />
-        <!--<Button
+        <Button
             android:id="@+id/ButtonT"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="T" />-->
+            android:text="T" />
     </LinearLayout>
 </RelativeLayout>

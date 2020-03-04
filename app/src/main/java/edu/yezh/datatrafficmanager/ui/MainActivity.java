@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
@@ -112,6 +113,16 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         getApplicationContext().registerReceiver(screenBroadcastReceiver, filter);
         screenBroadcastReceiver.setHandle(handle);
     }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+            moveTaskToBack(true);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
     public void getPermission() {
         System.out.println("获取其他权限");
         String PERMISSION_STORAGE_MSG = "请授予权限，否则影响部分使用功能";

@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.KeyEvent;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -44,25 +45,37 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    if (hasPermission()) {
-                        System.out.println("权限情况:"+"挡下了确定按钮");
-                    System.out.println("权限情况:"+hasPermission());
-                    Toast.makeText(MainActivity.this, "确定", Toast.LENGTH_SHORT).show();
-                    getPermission();
-                    //initial();
-                    }else {
-                        final AlertDialog.Builder dialog1 = new AlertDialog.Builder(MainActivity.this);
-                        dialog1.setTitle("似乎没有成功获取权限");
-                        dialog1.setMessage("");
-                        dialog1.setCancelable(false);
-                        dialog1.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                               finish();
+                    Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                    startActivity(intent);
+                    AlertDialog.Builder dialog2 = new AlertDialog.Builder(MainActivity.this);
+                    dialog2.setTitle("需要一些必要权限");
+                    dialog2.setMessage("您已经同意了吗？");
+                    dialog2.setCancelable(false);
+                    dialog2.setPositiveButton("确定",new  DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            if (hasPermission()) {
+                                System.out.println("权限情况:" + "挡下了确定按钮");
+                                System.out.println("权限情况:" + hasPermission());
+                                Toast.makeText(MainActivity.this, "确定", Toast.LENGTH_SHORT).show();
+                                getPermission();
+                                //initial();
+                            } else {
+                                final AlertDialog.Builder dialog1 = new AlertDialog.Builder(MainActivity.this);
+                                dialog1.setTitle("似乎没有成功获取权限");
+                                dialog1.setMessage("");
+                                dialog1.setCancelable(false);
+                                dialog1.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        finish();
+                                    }
+                                });
+                                dialog1.show();
                             }
-                        });
-                        dialog1.show();
-                    }
+
+                        }} );dialog2.show();
                 }
             });
             dialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {

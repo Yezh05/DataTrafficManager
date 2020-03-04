@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.List;
 
 import edu.yezh.datatrafficmanager.R;
+import edu.yezh.datatrafficmanager.tools.widget.DesktopWidget;
 import edu.yezh.datatrafficmanager.ui.adapter.RecyclerViewAppsTrafficDataAdapter;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
@@ -98,13 +99,9 @@ public class MyFragmentMobilePage extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_mobile_page, container, false);
-        final View mainview = inflater.inflate(R.layout.activity_main, container, false);
         Log.e("标签页", "移动网络页面");
-
         final Context context = this.getContext();
-
         SimTools simTools = new SimTools();
-
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             //  Consider calling
             //    Activity#requestPermissions
@@ -115,7 +112,6 @@ public class MyFragmentMobilePage extends Fragment {
             // for Activity#requestPermissions for more details.
             ActivityCompat.requestPermissions(this.getActivity(), new String[]{"android.permission.READ_PHONE_STATE"}, 1);
         }
-
         final List<SimInfo> simInfoList = simTools.getSubscriptionInfoList(context);
 
         showRealTimeNetSpeed(view);
@@ -170,7 +166,11 @@ public class MyFragmentMobilePage extends Fragment {
             TextView TextViewData4GThisMonth = view.findViewById(R.id.TextViewData4GThisMonth);
             TextViewData4GThisMonth.setText(readableThisMonthData.getValueWithTwoDecimalPoint() + readableThisMonthData.getType());
 
-            dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID, 1);
+            dataPlanStartDay = sp.getInt("dataPlanStartDay_" + subscriberID,-1);
+
+            if (dataPlanStartDay<1){
+                openDataPlanEditDialog(subscriberID,false);
+            }
 
             long ignoreTrafficDataThisMonth = statisticAppIgnoreTrafficData(context, subscriberID, dateTools.getTimesStartDayMorning(dataPlanStartDay));
             long ignoreTrafficDataToday = statisticAppIgnoreTrafficData(context, subscriberID, dateTools.getTimesTodayMorning());
@@ -233,6 +233,9 @@ public class MyFragmentMobilePage extends Fragment {
                             + "总量 " + dataPlan.getValueWithNoDecimalPoint() + dataPlan.getType()
                     , TextDataUseStatus);
 
+            DesktopWidget.updateAppWidget(context,"今日" + todayUsage.getValueWithNoDecimalPoint() + todayUsage.getType() + " "
+                    + "剩余" + restTrafficDataAmount.getValueWithNoDecimalPoint() + restTrafficDataAmount.getType() + " "
+                    + "总量" + dataPlan.getValueWithNoDecimalPoint() + dataPlan.getType(),TextDataUseStatus.replaceAll("\r|\n", " "));
 
             List<Long> DaysNoList = dateTools.getLastThirtyDaysMap().get("No");
             Collections.reverse(lastThirtyDaysTrafficData);
@@ -256,7 +259,7 @@ public class MyFragmentMobilePage extends Fragment {
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    openDataPlanEditDialog(subscriberID);
+                    openDataPlanEditDialog(subscriberID,true);
                 }
             });
             Button buttonShowLastSixMonthTrafficData = view.findViewById(R.id.ButtonShowLastSixMonthTrafficData);
@@ -281,55 +284,62 @@ public class MyFragmentMobilePage extends Fragment {
 
 
     /*流量套餐限额设置框*/
-
     @SuppressLint("RestrictedApi")
-    private void openDataPlanEditDialog(final String subscriberID) {
+    private void openDataPlanEditDialog(final String subscriberID, final boolean isHaveData) {
         final Context context = this.getContext();
         final EditText editTextDataPlanStartDay = new EditText(context);
 
         TextInputLayout textInputLayout = new TextInputLayout(context);
         textInputLayout.addView(editTextDataPlanStartDay);
         textInputLayout.setHint("请输入套餐起始日");
-        AlertDialog.Builder builderDataPlanStartDay = new AlertDialog.Builder(context);
-        builderDataPlanStartDay.setTitle("设置套餐起始日").setView(textInputLayout,55,50,55,50).setNegativeButton("取消", null);
-
+        final AlertDialog.Builder builderDataPlanStartDay = new AlertDialog.Builder(context);
+        builderDataPlanStartDay.setTitle("设置套餐起始日").setView(textInputLayout,55,50,55,50);
+        if (isHaveData) {
+            builderDataPlanStartDay.setNegativeButton("取消", null);
+        }
+        builderDataPlanStartDay.setCancelable(false);
         builderDataPlanStartDay.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-
                 if (editTextDataPlanStartDay.getText().toString().equals("")) {
-                    Toast.makeText(context, "套餐起始日设置错误", Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, "非法数值", Toast.LENGTH_LONG).show();
+                    //dialog.cancel();
+                     openDataPlanEditDialog( subscriberID, isHaveData);
                 } else {
                     final int dataPlanStartDay = Integer.valueOf(editTextDataPlanStartDay.getText().toString());
                     if (dataPlanStartDay < 1 || dataPlanStartDay > 31) {
-                        Toast.makeText(context, "套餐起始日设置错误", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "非法数值", Toast.LENGTH_LONG).show();
+                        //dialog.cancel();
+                         openDataPlanEditDialog(  subscriberID,   isHaveData);
                     } else {
+                        dialog.dismiss();
                         final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.view_customer_dialog_data_input, null);
                         TextView textViewHint = viewCustomerDialogDataInput.findViewById(R.id.TextViewHint);
                         textViewHint.setText("请输入套餐流量额度");
                         final EditText editText = viewCustomerDialogDataInput.findViewById(R.id.EditText_Traffic_Data_Value);
                         final Spinner spinnerDataType = viewCustomerDialogDataInput.findViewById(R.id.Spinner_Traffic_Data_Type);
                         spinnerDataType.setSelection(3);
-
                         final AlertDialog builderDataPlanAlertDialog = new AlertDialog.Builder(context).create();
                         builderDataPlanAlertDialog.setTitle("设置套餐流量额度");
                         builderDataPlanAlertDialog.setView(viewCustomerDialogDataInput);
+                        builderDataPlanAlertDialog.setCancelable(false);
                         Button btnCancel = viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogCancel);
-                        btnCancel.setOnClickListener(new View.OnClickListener() {
+                        if (isHaveData) {
+                            btnCancel.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 builderDataPlanAlertDialog.dismiss();
                             }
-                        });
+                        });}
                         Button btnConfirm = viewCustomerDialogDataInput.findViewById(R.id.ButtonCustomDialogConfirm);
                         btnConfirm.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 BytesFormatter bytesFormatter = new BytesFormatter();
                                 String inputData = editText.getText().toString();
+
                                 long inputUse = bytesFormatter.convertValueToLong(Double.valueOf(inputData), spinnerDataType.getSelectedItem().toString());
                                 if (inputUse <= 0) {
-                                    builderDataPlanAlertDialog.dismiss();
+                                    //builderDataPlanAlertDialog.dismiss();
                                     Toast.makeText(context, "非法的数值", Toast.LENGTH_LONG).show();
                                     return;
                                 }

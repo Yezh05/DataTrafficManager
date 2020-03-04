@@ -30,16 +30,18 @@
         android:layout_height="1dp"
         android:background="#E7E7E7"/>
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20dp"
-        android:text="测试"
-        />
-    <TextView
+        android:id="@+id/TextViewWidgetRow1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="15dp"
-        android:text="测试22"
+        android:text="没有数据"
+        />
+    <TextView
+        android:id="@+id/TextViewWidgetRow2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12dp"
+        android:text="没有数据"
         android:textColor="#CCCCCC"
         />
 </LinearLayout>

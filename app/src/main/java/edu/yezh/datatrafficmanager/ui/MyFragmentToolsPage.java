@@ -1,6 +1,7 @@
 package edu.yezh.datatrafficmanager.ui;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -44,6 +45,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import edu.yezh.datatrafficmanager.R;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
@@ -215,8 +217,6 @@ public class MyFragmentToolsPage extends Fragment {
                 TransInfo transInfo = bucketDao.getAppTrafficData(context,"460002911566405", ConnectivityManager.TYPE_MOBILE,
                         1583308800000L,System.currentTimeMillis(),10162);
                 System.out.println(transInfo);
-
-
             }
         });
 

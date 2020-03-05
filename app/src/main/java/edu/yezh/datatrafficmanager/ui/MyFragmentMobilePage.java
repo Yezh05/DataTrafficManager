@@ -147,6 +147,23 @@ public class MyFragmentMobilePage extends Fragment {
         button_SIM1.performClick();
         handleToolBarItem(context,   simInfoList );
         //System.out.println("网络类型："+networkType);
+
+        final Handler handlerRefresh = new Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    refresh();
+                    handlerRefresh.postDelayed(this,300000);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    handlerRefresh.postDelayed(this,1000);
+                }
+            }
+        };
+        handlerRefresh.postDelayed(runnable,300000);
+
+
         return view;
     }
 
@@ -647,7 +664,7 @@ public class MyFragmentMobilePage extends Fragment {
                                 OutputTrafficData data = new BytesFormatter().getPrintSizeByModel(realAmount);
 
                                 final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                                builder.setTitle("校正Sim"+(ACTIVE_SIM_PAGE_NO-1)+" "+simInfoList.get(ACTIVE_SIM_PAGE_NO-1).getSubscriptionInfo().getCarrierName()+"流量");
+                                builder.setTitle("校正Sim"+(ACTIVE_SIM_PAGE_NO)+" "+simInfoList.get(ACTIVE_SIM_PAGE_NO-1).getSubscriptionInfo().getCarrierName()+"流量");
                                 builder.setMessage("校正已使用流量为"+ data.getValueWithTwoDecimalPoint()+data.getType() );
 
                                 builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -670,6 +687,7 @@ public class MyFragmentMobilePage extends Fragment {
 
                                         Toast.makeText(context, "确定校正", Toast.LENGTH_SHORT).show();
                                         context.unregisterReceiver(receiver);
+                                        refresh();
                                     }
                                 });
                                 builder.setNegativeButton("取消",null);

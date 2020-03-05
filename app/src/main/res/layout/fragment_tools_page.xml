@@ -8,10 +8,11 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:gravity="center"
         android:orientation="vertical">
 
-        <TextView
+        <!--<TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -23,7 +24,7 @@
             android:layout_height="2dp"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
-            android:background="#009688" />
+            android:background="#009688" />-->
         <!--<Button
             android:id="@+id/ButtonSHowAppsTrafficData"
             android:layout_width="match_parent"
@@ -34,18 +35,27 @@
             android:id="@+id/ButtonCustomQuery"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/btn_shape2"
+            android:layout_margin="5dp"
+            android:gravity="left"
             android:text="自定义流量数据查询" />
 
         <Button
             android:id="@+id/ButtonSetAppsUnusualTrafficDataAmount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="设置全局应用异常流量阀值" />
+            android:background="@drawable/btn_shape2"
+            android:layout_margin="5dp"
+            android:gravity="left"
+            android:text="设置全局应用流量提醒阀值" />
 
         <Button
             android:id="@+id/ButtonResetTrafficDataRegulate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/btn_shape2"
+            android:layout_margin="5dp"
+            android:gravity="left"
             android:text="重置流量校正" />
 
         <View
@@ -59,12 +69,18 @@
             android:id="@+id/ButtonOutputDataToFile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/btn_shape2"
+            android:layout_margin="5dp"
+            android:gravity="left"
             android:text="导出使用数据到文件" />
 
         <Button
             android:id="@+id/ButtonOutputDataToFTP"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/btn_shape2"
+            android:layout_margin="5dp"
+            android:gravity="left"
             android:text="导出使用数据到服务器" />
         <View
             android:layout_width="match_parent"
@@ -82,6 +98,9 @@
             android:id="@+id/ButtonNetworkSpeedTest"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/btn_shape2"
+            android:layout_margin="5dp"
+            android:gravity="left"
             android:text="网速测试" />
 
         <View
@@ -90,25 +109,27 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:background="#009688" />
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center">
+            android:background="@drawable/btn_shape2"
+            android:layout_margin="5dp"
+            android:gravity="center_vertical">
 
             <TextView
-                android:id="@+id/textViewFloatWindow"
+                android:id="@+id/TextViewFloatWindow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="网速悬浮窗"
-                android:textSize="20dp" />
+                android:textColor="#000000"/>
 
             <Switch
                 android:id="@+id/SwitchOpenFloatWindow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/textViewFloatWindow"
-                android:layout_marginLeft="10dp"/>
-        </RelativeLayout>
+                android:layout_marginLeft="20dp"/>
+        </LinearLayout>
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"
@@ -119,6 +140,9 @@
             android:id="@+id/ButtonT"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="T" />
+            android:background="@drawable/btn_shape2"
+            android:layout_margin="5dp"
+            android:gravity="left"
+            android:text="TA" />
     </LinearLayout>
 </RelativeLayout>

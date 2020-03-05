@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class NetWorkSpeedTestTools {
@@ -18,10 +20,10 @@ public class NetWorkSpeedTestTools {
      * @param NET_TEST_URL 远程下载路径
      * @return
      */
-    public long checkNetSpeed(String NET_TEST_PATH , String NET_TEST_URL) {
+    public List<Long> checkNetSpeed(String NET_TEST_PATH , String NET_TEST_URL) {
         System.out.println("------------------------------------");
         long testSpeed = 0;
-        int fileLength = 0;
+        long fileLength = 0;
         long startTime = 0;
         long endTime = 0;
         long middleTime = 0;
@@ -41,7 +43,7 @@ public class NetWorkSpeedTestTools {
                 fileLength = conn.getContentLength();
                 if (fileLength <= 0) {
                     System.out.println( "fileLength <= 0");
-                    return 0;
+                    return null;
                 }
                 startTime = SystemClock.uptimeMillis() / 1000;
                 //startTime = System.currentTimeMillis() / 1000;
@@ -51,7 +53,7 @@ public class NetWorkSpeedTestTools {
                 conn.connect();
                 if (conn.getResponseCode() >= 400) {
                     System.out.println( "conn.getResponseCode() = " + conn.getResponseCode());
-                    return 0;
+                    return null;
                 } else {
                     while (true) {
                         if (is != null) {
@@ -111,6 +113,11 @@ public class NetWorkSpeedTestTools {
             testSpeed = 0;
         }
 
-        return testSpeed;
+        List<Long> list = new ArrayList<>();
+        list.add(0,testSpeed);
+        list.add(1,(endTime - startTime));
+        list.add(2,downLength);
+        list.add(3,fileLength);
+        return list;
     }
 }

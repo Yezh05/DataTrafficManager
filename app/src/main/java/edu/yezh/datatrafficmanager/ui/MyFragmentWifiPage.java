@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,10 +48,26 @@ public class MyFragmentWifiPage extends Fragment {
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_wifi_page, container, false);
+        final View view = inflater.inflate(R.layout.fragment_wifi_page, container, false);
         Log.e("Fragment", "WLAN页面");
-        Context context = this.getContext();
-        initialPage(view,context);
+        final Context context = this.getContext();
+
+
+
+        final Handler handlerRefresh = new Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    initialPage(view,context);
+                    handlerRefresh.postDelayed(this,300000);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    handlerRefresh.postDelayed(this,1000);
+                }
+            }
+        };
+        handlerRefresh.postDelayed(runnable,00000);
         return view;
     }
 

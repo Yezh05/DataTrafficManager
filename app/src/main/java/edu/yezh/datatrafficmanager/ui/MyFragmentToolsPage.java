@@ -1,7 +1,6 @@
 package edu.yezh.datatrafficmanager.ui;
 
 import android.Manifest;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,12 +8,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.StrictMode;
 import android.provider.Settings;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,6 +60,7 @@ import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.FtpFileTool;
 import edu.yezh.datatrafficmanager.tools.NetWorkSpeedTestTools;
+import edu.yezh.datatrafficmanager.tools.NowProcess;
 import edu.yezh.datatrafficmanager.tools.PoiTools;
 import edu.yezh.datatrafficmanager.tools.floatWindowTools.FloatingService;
 
@@ -86,6 +90,7 @@ public class MyFragmentToolsPage extends Fragment {
         }
 
         Button buttonSetAppsUnusualTrafficDataAmount = view.findViewById(R.id.ButtonSetAppsUnusualTrafficDataAmount);
+        buttonSetAppsUnusualTrafficDataAmount.append(Html.fromHtml("<br><i><font color='#AAAAAA'>设置一个全局的应用流量使用量告警阀值</i>"));
         buttonSetAppsUnusualTrafficDataAmount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -94,6 +99,7 @@ public class MyFragmentToolsPage extends Fragment {
         });
 
         Button buttonOutputDataToFile = view.findViewById(R.id.ButtonOutputDataToFile);
+        buttonOutputDataToFile.append(Html.fromHtml("<br><i><font color='#AAAAAA'>将流量统计为Excel文件并保存在手机</i>"));
         buttonOutputDataToFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -101,8 +107,9 @@ public class MyFragmentToolsPage extends Fragment {
             }
         });
 
-        Button buttonClose4G = view.findViewById(R.id.ButtonOutputDataToFTP);
-        buttonClose4G.setOnClickListener(new View.OnClickListener() {
+        Button ButtonOutputDataToFTP = view.findViewById(R.id.ButtonOutputDataToFTP);
+        ButtonOutputDataToFTP.append(Html.fromHtml("<br><i><font color='#AAAAAA'>将流量统计为Excel文件并上传到FTP服务器</i>"));
+        ButtonOutputDataToFTP.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //outputDataToFTP(view,context);
@@ -116,6 +123,7 @@ public class MyFragmentToolsPage extends Fragment {
         });
 
         Button ButtonCustomQuery = view.findViewById(R.id.ButtonCustomQuery);
+        ButtonCustomQuery.append(Html.fromHtml("<br><i><font color='#AAAAAA'>查询一个时间段内全局或应用的流量使用量</i>"));
         ButtonCustomQuery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,6 +132,7 @@ public class MyFragmentToolsPage extends Fragment {
         });
 
         Button ButtonResetTrafficDataRegulate = view.findViewById(R.id.ButtonResetTrafficDataRegulate);
+        ButtonResetTrafficDataRegulate.append(Html.fromHtml("<br><i><font color='#AAAAAA'>重置流量校正,恢复为本机统计数据</i>"));
         ButtonResetTrafficDataRegulate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -133,7 +142,8 @@ public class MyFragmentToolsPage extends Fragment {
                         .setAction("Action", null).show();
             }
         });
-
+        TextView TextViewFloatWindow = view.findViewById(R.id.TextViewFloatWindow);
+        TextViewFloatWindow.setText(Html.fromHtml("网速悬浮窗<br/><i><font color='#AAAAAA'>开关一个用于显示实时网速的悬浮窗</i>"));
         final Intent serviceIntend = new Intent(getActivity(), FloatingService.class);
         Switch switchOpenFloatWindow = view.findViewById(R.id.SwitchOpenFloatWindow);
         switchOpenFloatWindow.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -166,46 +176,11 @@ public class MyFragmentToolsPage extends Fragment {
         });
 
         Button ButtonNetworkSpeedTest = view.findViewById(R.id.ButtonNetworkSpeedTest);
+        ButtonNetworkSpeedTest.append(Html.fromHtml("<br><i><font color='#AAAAAA'>测试当前网络的下载速度</i>"));
         ButtonNetworkSpeedTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-             AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle("网速测试");
-                builder.setMessage("网速测试功能\n测试大约需要10秒，可能会消耗流量");
-
-                builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                      new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Looper.prepare();
-                                NetWorkSpeedTestTools netWorkSpeedTestTools= new NetWorkSpeedTestTools();
-                                 long  speed = netWorkSpeedTestTools.checkNetSpeed(context.getExternalFilesDir("").getAbsolutePath()+"/","http://cgdl.qihucdn.com/wot/official/WoT.0.9.22.15069hd_install-1.bin");
-                                System.out.println("下载速度："+speed);
-                                //ProgressBar progressBar = new ProgressBar(context);
-                                final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                                builder.setTitle("网速测试");
-                                //builder.setView(progressBar);
-                                builder.setMessage("网速测试中");
-
-                                OutputTrafficData data = new BytesFormatter().getPrintSizeByModel(speed);
-
-                                builder.setMessage("当前网络环境网速约为"+data.getValueWithTwoDecimalPoint()+ data.getType() + "/s");
-                                builder.setNegativeButton("确定", null);
-                                builder.show();
-                                Looper.loop();
-                            }
-                        }).start();
-
-                    }
-                });
-
-             builder.setNegativeButton("取消",null);
-             builder.show();
-
+                handleNetSpeedTest(context);
             }
         });
 
@@ -213,10 +188,33 @@ public class MyFragmentToolsPage extends Fragment {
         ButtonT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DateTools dateTools = new DateTools();
-                TransInfo transInfo = bucketDao.getAppTrafficData(context,"460002911566405", ConnectivityManager.TYPE_MOBILE,
-                        1583308800000L,System.currentTimeMillis(),10162);
-                System.out.println(transInfo);
+           final      DateTools dateTools = new DateTools();
+                //long bfRX = TrafficStats.getUidRxBytes(10162);
+                try {
+                   /*final TransInfo transInfo1 = bucketDao.getAppTrafficData(context,"460002911566405", ConnectivityManager.TYPE_WIFI,
+                            0,dateTools.getTimesTodayEnd(),10162);
+                    System.out.println("前："+ (transInfo1));*/
+                    final Handler handler = new Handler();
+                    Runnable runnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            /*TransInfo transInfo2 = bucketDao.getAppTrafficData(context,"460002911566405", ConnectivityManager.TYPE_WIFI,
+                                    0,dateTools.getTimesTodayEnd(),10162);
+                            System.out.println("后："+ (transInfo2));
+                            System.out.println("前后："+ (transInfo2.getTotal()-transInfo1.getTotal()));*/
+                           //System.out.println( NowProcess.getForegroundApp(context));
+                            NowProcess.hdddd(context);
+                            //System.out.println(NowProcess.hdddd(context));
+                                    handler.postDelayed(this,3000);
+                        }
+                    } ;
+                    handler.postDelayed(runnable,0);
+
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
             }
         });
 
@@ -235,7 +233,60 @@ public class MyFragmentToolsPage extends Fragment {
             }
         }
     }
+    private void handleNetSpeedTest(final Context context){
 
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        String msg = "网速测试功能<br/>测试大约需要10秒";
+
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("网速测试");
+        if (networkInfo==null) {
+            msg = "当前未连接网络";
+        } else {
+
+            if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+                msg += "<br/>当前网络为<i><font color='#DB7093'>Wifi</font></i>网络";
+            }else if (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE){
+                msg += "<br/>当前网络为<i><font color='#7B68EE'>移动</font></i>网络,需消耗网络流量";
+            }
+            builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Looper.prepare();
+                            NetWorkSpeedTestTools netWorkSpeedTestTools = new NetWorkSpeedTestTools();
+                            List<Long> list = netWorkSpeedTestTools.checkNetSpeed(context.getExternalFilesDir("").getAbsolutePath() + "/", "http://cgdl.qihucdn.com/wot/official/WoT.0.9.22.15069hd_install-1.bin");
+                            long speed = list.get(0);
+                            long time = list.get(1);
+                            long downlength = list.get(2);
+                            System.out.println("下载速度：" + speed);
+                            //ProgressBar progressBar = new ProgressBar(context);
+                            final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                            builder.setTitle("网速测试");
+                            //builder.setView(progressBar);
+                            builder.setMessage("网速测试中");
+                            OutputTrafficData data = new BytesFormatter().getPrintSizeByModel(speed);
+                            OutputTrafficData downdata = new BytesFormatter().getPrintSizeByModel(downlength);
+                            builder.setMessage("当前网络环境网速约为" + data.getValueWithTwoDecimalPoint() + data.getType() + "/s\n下载量消耗约为"
+                                    +downdata.getValueWithTwoDecimalPoint()+downdata.getType());
+                            builder.setNegativeButton("确定", null);
+                            builder.show();
+                            Looper.loop();
+                        }
+                    }).start();
+
+                }
+            });
+        }
+        builder.setMessage(Html.fromHtml(msg));
+        builder.setNegativeButton("取消",null);
+        builder.show();
+    }
     private void openEditViewAlert(View view) {
         final Context context = view.getContext();
         final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.view_customer_dialog_data_input,null);

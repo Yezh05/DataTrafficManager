@@ -79,7 +79,7 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         long txBytes=bundle.getLong("tx");*/
         String subscriberID = bundle.getString("subscriberID");
         int networkType =bundle.getInt("networkType");
-
+        System.out.println("name="+name+",uid="+uid);
         init(view,uid,name,packageName,subscriberID,networkType);
     }
     private void init(View view,int uid,String name,String packageName,String subscriberID,int networkType){

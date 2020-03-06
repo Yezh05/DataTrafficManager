@@ -1,12 +1,16 @@
 package edu.yezh.datatrafficmanager.tools;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import java.lang.reflect.Method;
@@ -18,6 +22,33 @@ import edu.yezh.datatrafficmanager.model.SimInfo;
 import static android.content.Context.TELEPHONY_SERVICE;
 
 public class SimTools {
+    public static int getNowActiveNetWorkType(Context context){
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        if (networkInfo==null) {
+            return -1000;
+        }
+        return networkInfo.getType();
+    }
+    public static String getNowActiveSubscriberId(Context context) {
+        TelephonyManager mTelephonyMgr = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        if (context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    Activity#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for Activity#requestPermissions for more details.
+            ActivityCompat.requestPermissions((Activity)context, new String[]{"android.permission.READ_PHONE_STATE"}, 1);
+        }
+        String imsi = mTelephonyMgr.getSubscriberId();
+        if (getNowActiveNetWorkType(context)==ConnectivityManager.TYPE_WIFI){
+            return "";
+        }
+        return  imsi;
+    }
+
     /*
      * 获取Sim信息列表
      */

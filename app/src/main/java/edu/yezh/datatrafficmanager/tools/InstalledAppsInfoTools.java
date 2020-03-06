@@ -18,7 +18,6 @@ import edu.yezh.datatrafficmanager.model.AppsInfo;
 public class InstalledAppsInfoTools {
     public List<AppsInfo> getAllInstalledAppsInfo(Context context) {
         List<AppsInfo> allInstalledAppsInfo = new ArrayList<>();
-
         //List<String> uidList = new ArrayList<String>();
         PackageManager pm = context.getPackageManager();
         List<PackageInfo> packinfos = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_PERMISSIONS);
@@ -33,7 +32,6 @@ public class InstalledAppsInfoTools {
                             continue;
                         }
                         AppsInfo singleAppInfo = new AppsInfo();
-
                         singleAppInfo.setUid(String.valueOf(uid));
                         singleAppInfo.setPackageName(packageName);
                         //System.out.println("uid = " + uid);

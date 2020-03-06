@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -55,14 +54,15 @@ import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
 import edu.yezh.datatrafficmanager.dao.db.DataTrafficRegulateDao;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
-import edu.yezh.datatrafficmanager.model.TransInfo;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.FtpFileTool;
 import edu.yezh.datatrafficmanager.tools.NetWorkSpeedTestTools;
 import edu.yezh.datatrafficmanager.tools.NowProcess;
 import edu.yezh.datatrafficmanager.tools.PoiTools;
-import edu.yezh.datatrafficmanager.tools.floatWindowTools.FloatingService;
+import edu.yezh.datatrafficmanager.tools.SimTools;
+import edu.yezh.datatrafficmanager.tools.floatWindowTools.FloatingWindowAppMonitorService;
+import edu.yezh.datatrafficmanager.tools.floatWindowTools.FloatingWindowNetWorkSpeedService;
 
 
 public class MyFragmentToolsPage extends Fragment {
@@ -144,13 +144,13 @@ public class MyFragmentToolsPage extends Fragment {
         });
         TextView TextViewFloatWindow = view.findViewById(R.id.TextViewFloatWindow);
         TextViewFloatWindow.setText(Html.fromHtml("网速悬浮窗<br/><i><font color='#AAAAAA'>开关一个用于显示实时网速的悬浮窗</i>"));
-        final Intent serviceIntend = new Intent(getActivity(), FloatingService.class);
+        final Intent serviceIntend = new Intent(getActivity(), FloatingWindowNetWorkSpeedService.class);
         Switch switchOpenFloatWindow = view.findViewById(R.id.SwitchOpenFloatWindow);
         switchOpenFloatWindow.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked){
-                    if (FloatingService.isStarted) {
+                    if (FloatingWindowNetWorkSpeedService.isStarted) {
                         return;
                     }
                     if (!Settings.canDrawOverlays(context)) {
@@ -168,7 +168,7 @@ public class MyFragmentToolsPage extends Fragment {
 
                     }
                 }else {
-                    if (FloatingService.isStarted) {
+                    if (FloatingWindowNetWorkSpeedService.isStarted) {
                         getActivity().stopService(serviceIntend);
                     }
                 }
@@ -183,7 +183,7 @@ public class MyFragmentToolsPage extends Fragment {
                 handleNetSpeedTest(context);
             }
         });
-
+        final Intent serviceIntend2 = new Intent(getActivity(), FloatingWindowAppMonitorService.class);
         Button ButtonT = view.findViewById(R.id.ButtonT);
         ButtonT.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -194,21 +194,47 @@ public class MyFragmentToolsPage extends Fragment {
                    /*final TransInfo transInfo1 = bucketDao.getAppTrafficData(context,"460002911566405", ConnectivityManager.TYPE_WIFI,
                             0,dateTools.getTimesTodayEnd(),10162);
                     System.out.println("前："+ (transInfo1));*/
-                    final Handler handler = new Handler();
+
+                   /* final Handler handler = new Handler();
                     Runnable runnable = new Runnable() {
                         @Override
-                        public void run() {
+                        public void run() {*/
+
                             /*TransInfo transInfo2 = bucketDao.getAppTrafficData(context,"460002911566405", ConnectivityManager.TYPE_WIFI,
                                     0,dateTools.getTimesTodayEnd(),10162);
                             System.out.println("后："+ (transInfo2));
                             System.out.println("前后："+ (transInfo2.getTotal()-transInfo1.getTotal()));*/
                            //System.out.println( NowProcess.getForegroundApp(context));
+
                             NowProcess.hdddd(context);
+System.out.println(NowProcess.getForegroundApp(context));
+                    if (FloatingWindowAppMonitorService.isStarted) {
+                        try {
+
+                            getActivity().stopService(serviceIntend2);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                        return;
+                    }
+                    if (!Settings.canDrawOverlays(context)) {
+                        System.out.println("无权限");
+                        Toast.makeText(context, "当前无权限，请授权", Toast.LENGTH_SHORT);
+                        startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName())), 0);
+                    } else {
+                        System.out.println("开启Service");
+                        try {
+                            getActivity().startService(serviceIntend2);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    }
                             //System.out.println(NowProcess.hdddd(context));
-                                    handler.postDelayed(this,3000);
+                 /*                   handler.postDelayed(this,3000);
                         }
                     } ;
-                    handler.postDelayed(runnable,0);
+                    handler.postDelayed(runnable,0);*/
 
 
                 } catch (Exception e) {
@@ -229,27 +255,27 @@ public class MyFragmentToolsPage extends Fragment {
                 Toast.makeText(getContext(), "授权失败", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(getContext(), "授权成功", Toast.LENGTH_SHORT).show();
-                getActivity().startService(new Intent(getActivity(), FloatingService.class));
+                getActivity().startService(new Intent(getActivity(), FloatingWindowNetWorkSpeedService.class));
             }
         }
     }
     private void handleNetSpeedTest(final Context context){
 
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        int networkInfo = SimTools.getNowActiveNetWorkType(context);
         String msg = "网速测试功能<br/>测试大约需要10秒";
 
 
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("网速测试");
-        if (networkInfo==null) {
+        if (networkInfo==-1000) {
             msg = "当前未连接网络";
         } else {
 
-            if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+            if (networkInfo == ConnectivityManager.TYPE_WIFI) {
                 msg += "<br/>当前网络为<i><font color='#DB7093'>Wifi</font></i>网络";
-            }else if (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE){
+            }else if (networkInfo == ConnectivityManager.TYPE_MOBILE){
                 msg += "<br/>当前网络为<i><font color='#7B68EE'>移动</font></i>网络,需消耗网络流量";
             }
             builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {

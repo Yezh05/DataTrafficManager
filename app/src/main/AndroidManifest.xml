@@ -58,7 +58,8 @@
                 <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
             </intent-filter>
         </receiver>-->
-        <service android:name=".tools.floatWindowTools.FloatingService"/>
+        <service android:name=".tools.floatWindowTools.FloatingWindowAppMonitorService"/>
+        <service android:name=".tools.floatWindowTools.FloatingWindowNetWorkSpeedService"/>
         <receiver android:name=".tools.widget.DesktopWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>

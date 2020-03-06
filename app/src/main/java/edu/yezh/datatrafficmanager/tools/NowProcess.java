@@ -72,7 +72,7 @@ public  class NowProcess {
                 packageName = lastMoveToFGEvent.getPackageName();
             }
         //}
-        System.out.println(packageName);
+        //System.out.println(packageName);
         return packageName;
     }
 

@@ -18,7 +18,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 
         db.execSQL("create table tb_apppreference (uid varchar(100) primary key ,sim1IgnoreFlag integer,sim2IgnoreFlag integer,warningLimit integer)");
 
-        db.execSQL("create table tb_apptransrecord (uid varchar(100) primary key ,mobileTX integer,mobileRX integer,wifiTX integer,wifiRX integer)");
+        db.execSQL("create table tb_apptransrecord (_id INTEGER PRIMARY KEY AUTOINCREMENT,uid varchar(100)  ,mobileTX integer,mobileRX integer,wifiTX integer,wifiRX integer,timeStamp integer)");
 
         db.execSQL("create table tb_datatrafficregulate (subscriberID varchar(100) primary key ,value integer,settime integer)");
     }

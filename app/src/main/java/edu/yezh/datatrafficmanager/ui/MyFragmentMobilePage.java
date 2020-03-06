@@ -170,6 +170,7 @@ public class MyFragmentMobilePage extends Fragment {
     /*获取并显示流量使用情况*/
     public void setTrafficDataView(View view, final String subscriberID) {
         try {
+            //System.out.println("IMSI:"+subscriberID);
             SharedPreferences sp = getActivity().getSharedPreferences("TrafficManager", MODE_PRIVATE);
             final Context context = this.getContext();
             BucketDao bucketDao = new BucketDaoImpl();

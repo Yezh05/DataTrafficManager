@@ -2,14 +2,23 @@ package edu.yezh.datatrafficmanager.model.tb;
 
 public class Tb_AppTransRecord {
     private String uid;
-   private long mobileTX,mobileRX,wifiTX,wifiRX;
+   private long mobileTX,mobileRX,wifiTX,wifiRX,timeStamp;
 
-    public Tb_AppTransRecord(String uid, long mobileTX, long mobileRX, long wifiTX, long wifiRX) {
+    public Tb_AppTransRecord(String uid, long mobileTX, long mobileRX, long wifiTX, long wifiRX,long timeStamp) {
         this.uid = uid;
         this.mobileTX = mobileTX;
         this.mobileRX = mobileRX;
         this.wifiTX = wifiTX;
         this.wifiRX = wifiRX;
+        this.timeStamp = timeStamp;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
     }
 
     public String getUid() {

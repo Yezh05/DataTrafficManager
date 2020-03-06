@@ -19,15 +19,15 @@ public class AppTransRecordDao {
     }
 
     public void add(Tb_AppTransRecord tb_appTransRecord){
-        db.execSQL("insert into tb_apptransrecord(uid,mobileTX,mobileRX,wifiTX,wifiRX) values(?,?,?,?,?)",
-                new Object[]{tb_appTransRecord.getUid(),tb_appTransRecord.getMobileTX(),tb_appTransRecord.getMobileRX(),tb_appTransRecord.getWifiTX(),tb_appTransRecord.getWifiRX()});
+        db.execSQL("insert into tb_apptransrecord(uid,mobileTX,mobileRX,wifiTX,wifiRX,timeStamp) values(?,?,?,?,?,?)",
+                new Object[]{tb_appTransRecord.getUid(),tb_appTransRecord.getMobileTX(),tb_appTransRecord.getMobileRX(),tb_appTransRecord.getWifiTX(),tb_appTransRecord.getWifiRX(),tb_appTransRecord.getTimeStamp()});
     }
     public void update(Tb_AppTransRecord tb_appTransRecord){
-        db.execSQL("update tb_apptransrecord set mobileTX=?,mobileRX=?,wifiTX=?,wifiRX=? where uid = ? ",
-                new Object[]{tb_appTransRecord.getMobileTX(),tb_appTransRecord.getMobileRX(),tb_appTransRecord.getWifiTX(),tb_appTransRecord.getWifiRX(),tb_appTransRecord.getUid()});
+        db.execSQL("update tb_apptransrecord set mobileTX=?,mobileRX=?,wifiTX=?,wifiRX=?,timeStamp=? where uid = ? ",
+                new Object[]{tb_appTransRecord.getMobileTX(),tb_appTransRecord.getMobileRX(),tb_appTransRecord.getWifiTX(),tb_appTransRecord.getWifiRX(),tb_appTransRecord.getTimeStamp(),tb_appTransRecord.getUid()});
     }
-    public Tb_AppTransRecord find(String uid){
-        Cursor cursor = db.rawQuery("select * from tb_apptransrecord where uid= ?"
+    public Tb_AppTransRecord findLast(String uid){
+        Cursor cursor = db.rawQuery("select * from tb_apptransrecord where uid= ? ORDER BY timeStamp DESC"
                 ,new String[]{uid});
         if (cursor.moveToNext()){
             return new Tb_AppTransRecord(
@@ -35,14 +35,15 @@ public class AppTransRecordDao {
                         cursor.getLong(cursor.getColumnIndex("mobileTX")),
                         cursor.getLong(cursor.getColumnIndex("mobileRX")),
                         cursor.getLong(cursor.getColumnIndex("wifiTX")),
-                        cursor.getLong(cursor.getColumnIndex("wifiRX"))
+                        cursor.getLong(cursor.getColumnIndex("wifiRX")),
+                        cursor.getLong(cursor.getColumnIndex("timeStamp"))
                         );
         }
         cursor.close();
         return null;
     }
-    public List<Tb_AppTransRecord> find(){
-        Cursor cursor = db.rawQuery("select * from tb_apptransrecord",null);
+    public List<Tb_AppTransRecord> find(String uid){
+        Cursor cursor = db.rawQuery("select * from tb_apptransrecord where uid = ? ORDER BY timeStamp DESC",new String[]{uid});
         List<Tb_AppTransRecord> tb_appTransRecordList = new ArrayList<>();
         if (cursor.moveToFirst()){
             while (!cursor.isAfterLast()){
@@ -51,7 +52,8 @@ public class AppTransRecordDao {
                         cursor.getLong(cursor.getColumnIndex("mobileRX")),
                         cursor.getLong(cursor.getColumnIndex("mobileTX")),
                         cursor.getLong(cursor.getColumnIndex("wifiRX")),
-                        cursor.getLong(cursor.getColumnIndex("wifiTX"))
+                        cursor.getLong(cursor.getColumnIndex("wifiTX")),
+                        cursor.getLong(cursor.getColumnIndex("timeStamp"))
                 ));
                 cursor.moveToNext();
             }
@@ -70,8 +72,8 @@ public class AppTransRecordDao {
             db.execSQL("delete from tb_apptransrecord where uid in ("+sb+")",(Object[]) uids);
         }
     }
-    public int count(){
-        Cursor cursor = db.rawQuery("select count(uid) from tb_apptransrecord",null);
+    public int count(String uid){
+        Cursor cursor = db.rawQuery("select count(uid) from tb_apptransrecord where uid = ?",new String[]{uid});
         if (cursor.moveToNext()){
             return cursor.getInt(0);
         }

@@ -23,17 +23,12 @@ import edu.yezh.datatrafficmanager.R;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 
-public class FloatingService extends Service {
+public class FloatingWindowNetWorkSpeedService extends Service {
     public static boolean isStarted = false;
-
     private WindowManager windowManager;
     private WindowManager.LayoutParams layoutParams;
     TextView textView;
     private Button button;
-
-    public TextView getTextView() {
-        return textView;
-    }
 
     @Override
     public void onCreate() {

@@ -1,5 +1,6 @@
 package edu.yezh.datatrafficmanager.tools;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -8,6 +9,13 @@ import java.util.List;
 import java.util.Map;
 
 public class DateTools {
+
+    public static String longToDate(long lo){
+        Date date = new Date(lo);
+        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sd.format(date);
+    }
+
     public long getTimesTodayMorning(){
         Calendar dayCal = Calendar.getInstance();
         dayCal.set(Calendar.HOUR_OF_DAY, 00);

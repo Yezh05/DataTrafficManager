@@ -42,8 +42,8 @@ public class AppTransRecordDao {
         cursor.close();
         return null;
     }
-    public List<Tb_AppTransRecord> find(String uid){
-        Cursor cursor = db.rawQuery("select * from tb_apptransrecord where uid = ? ORDER BY timeStamp DESC",new String[]{uid});
+    public  List<Tb_AppTransRecord> find(String uid,long startTimeStamp,long endTimeStamp ){
+        Cursor cursor = db.rawQuery("select * from tb_apptransrecord where uid = ? and ? <= timeStamp  and timeStamp <= ?  ORDER BY timeStamp ASC",new String[]{uid,String.valueOf(startTimeStamp),String.valueOf(endTimeStamp)});
         List<Tb_AppTransRecord> tb_appTransRecordList = new ArrayList<>();
         if (cursor.moveToFirst()){
             while (!cursor.isAfterLast()){

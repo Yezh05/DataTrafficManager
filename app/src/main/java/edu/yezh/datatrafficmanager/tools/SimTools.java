@@ -62,7 +62,7 @@ public class SimTools {
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for Activity#requestPermissions for more details.
-            return null;
+            ActivityCompat.requestPermissions((Activity)context, new String[]{"android.permission.READ_PHONE_STATE"}, 1);
         }
         List<SimInfo> list = new ArrayList<>();
         List<SubscriptionInfo> subscriptionInfolist = SubscriptionManager.from(context).getActiveSubscriptionInfoList();
@@ -100,7 +100,8 @@ public class SimTools {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //Log.e("Q_M", "IMSI--" + imsi);
+        System.out.println( "IMSI--" + imsi);
+
         return imsi;
     }
     public int getCount(Context context){

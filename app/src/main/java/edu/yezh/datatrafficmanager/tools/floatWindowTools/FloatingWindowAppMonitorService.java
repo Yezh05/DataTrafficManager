@@ -1,28 +1,36 @@
 package edu.yezh.datatrafficmanager.tools.floatWindowTools;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.StrictMode;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -31,8 +39,19 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.google.android.material.snackbar.Snackbar;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import edu.yezh.datatrafficmanager.R;
@@ -46,6 +65,7 @@ import edu.yezh.datatrafficmanager.model.tb.Tb_AppTransRecord;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.InstalledAppsInfoTools;
+import edu.yezh.datatrafficmanager.tools.PoiTools;
 import edu.yezh.datatrafficmanager.tools.SimTools;
 import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 
@@ -71,6 +91,8 @@ public class FloatingWindowAppMonitorService extends Service {
     //private List<Tb_AppTransRecord> transRecordList;
     private TransInfo startData;
     private LineChart lineChart;
+    private long endTime;
+    private long total;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -170,6 +192,7 @@ public class FloatingWindowAppMonitorService extends Service {
                     appIcon = allInstalledAppsInfo.get(position).getAppIcon();
                     ImageViewMonitorAppIcon.setImageDrawable(appIcon);
                     uid = allInstalledAppsInfo.get(position).getUid();
+                    name = allInstalledAppsInfo.get(position).getName();
                     transRecord = null;
                     try {
                         NETWORK_TYPE = SimTools.getNowActiveNetWorkType(getApplicationContext());
@@ -241,13 +264,64 @@ public class FloatingWindowAppMonitorService extends Service {
                     lineChart.notifyDataSetChanged();
                     lineChart.moveViewToX(sec);
                     lineChart.setVisibleXRangeMaximum(15);
-                    OutputTrafficData total = bytesFormatter.getPrintSizeByModel(nowData.getTotal()-startData.getTotal());
+                    total = nowData.getTotal()-startData.getTotal();
+                    OutputTrafficData OPtotal = bytesFormatter.getPrintSizeByModel(total);
                     //System.out.println(total);
-                    TextViewMonitorAppTotal.setText("传输总量:"+total.getValueWithTwoDecimalPoint()+total.getType());
+                    TextViewMonitorAppTotal.setText("传输总量:"+OPtotal.getValueWithTwoDecimalPoint()+OPtotal.getType());
                     transHandle.postDelayed(this,timeStep*1000L);
                 }
             };
+            final LinearLayout LinearLayoutOutputMonitorData = view.findViewById(R.id.LinearLayoutOutputMonitorData);
+            LinearLayoutOutputMonitorData.setVisibility(View.GONE);
+            Button ButtonOutputMonitorDataCancel = view.findViewById(R.id.ButtonOutputMonitorDataCancel);
+            ButtonOutputMonitorDataCancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    lineChart.setVisibility(View.VISIBLE);
+                    LinearLayoutOutputMonitorData.setVisibility(View.GONE);
+                }
+            });
+            final Button ButtonOutputMonitorDataOK = view.findViewById(R.id.ButtonOutputMonitorDataOK);
+            ButtonOutputMonitorDataOK.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
+
+
+                        final String pathString = outputDataToFile(getApplicationContext(), total, appTransRecordDao.find(uid, startTime, endTime));
+
+                        TextView TextViewOutputFile = view.findViewById(R.id.TextViewOutputFile);
+                        TextViewOutputFile.setText("导出成功");
+                        ButtonOutputMonitorDataOK.setText("打开文件");
+                        ButtonOutputMonitorDataOK.setOnClickListener(null);
+                        ButtonOutputMonitorDataOK.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                try {
+                                    Intent intent = new Intent();
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    intent.setAction(Intent.ACTION_VIEW);
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+                                        StrictMode.setVmPolicy(builder.build());
+                                    }
+                                    intent.setDataAndType(Uri.fromFile(new File(pathString)), "application/vnd.ms-excel");
+                                    getApplicationContext().startActivity(intent);
+                                    Intent.createChooser(intent, "请选择软件打开");
+
+                                    //lineChart.setVisibility(View.VISIBLE);
+                                    //LinearLayoutOutputMonitorData.setVisibility(View.GONE);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+
+
+
+
+                }
+            });
             Switch switchInMonitor = view.findViewById(R.id.SwitchInMonitor);
             switchInMonitor.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -259,13 +333,24 @@ public class FloatingWindowAppMonitorService extends Service {
                         spinner.setEnabled(false);
                         startTime = System.currentTimeMillis();
                         round[0] = 0;
+                        total = 0;
                         lineChart.moveViewToX(0);
                         transHandle.postDelayed(transRunnable,0);
+
+                        lineChart.setVisibility(View.VISIBLE);
+                        LinearLayoutOutputMonitorData.setVisibility(View.GONE);
+                        TextView TextViewOutputFile = view.findViewById(R.id.TextViewOutputFile);
+                        TextViewOutputFile.setText("导出监测数据");
+                        Button ButtonOutputMonitorDataOK = view.findViewById(R.id.ButtonOutputMonitorDataOK);
+                        ButtonOutputMonitorDataOK.setText("导出");
                     }else {
+                        endTime = System.currentTimeMillis();
                         TextViewMonitorStatus.setText("停止监测");
                         TextViewMonitorStatus.setTextColor(Color.parseColor("#4169E1"));
                         spinner.setEnabled(true);
                         transHandle.removeCallbacks(transRunnable);
+                        lineChart.setVisibility(View.GONE);
+                        LinearLayoutOutputMonitorData.setVisibility(View.VISIBLE);
                     }
                 }
             });
@@ -274,7 +359,49 @@ public class FloatingWindowAppMonitorService extends Service {
             System.out.println("错误！");
         }
     }
+    private String outputDataToFile( final Context context,long ToTal,List<Tb_AppTransRecord> transRecordList) {
 
+        Date date = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        String nowTime = formatter.format(date);
+
+        String pathString = context.getExternalFilesDir("").getAbsolutePath() + "/APP监测数据_" + nowTime + ".xls";
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Path path = Paths.get(pathString);
+            //创建文件
+            if (!Files.exists(path)) {
+                try {
+                    System.out.println("创建文件");
+                    Files.createFile(path);
+                } catch (Exception e) {
+                    Log.e("严重错误", e.toString());
+                }
+            }
+        }else {
+            File file=new File(pathString);
+            if(file.exists()){
+                try {
+                    System.out.println("创建文件");
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                System.out.println("文件不存在");
+            }
+        }
+        try {
+            FileOutputStream fos = new FileOutputStream(pathString, false);
+            final HSSFWorkbook wb = PoiTools.initialAppMonitorbook(null, context,name,startTime,endTime,NETWORK_TYPE,ToTal,transRecordList);
+            wb.write(fos);
+            fos.flush();
+            fos.close();
+            final  String fPathString =pathString;
+        } catch (Exception e) {
+            Log.e("严重错误", e.toString());
+        }
+return pathString;
+    }
     private class FloatingOnTouchListener implements View.OnTouchListener {
         private int x;
         private int y;

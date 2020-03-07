@@ -48,6 +48,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -101,7 +102,7 @@ public class MyFragmentToolsPage extends Fragment {
         }
 
         Button buttonSetAppsUnusualTrafficDataAmount = view.findViewById(R.id.ButtonSetAppsUnusualTrafficDataAmount);
-        buttonSetAppsUnusualTrafficDataAmount.append(Html.fromHtml("<br><i><font color='#AAAAAA'>设置一个全局的应用流量使用量告警阀值</i>"));
+        addButtonComment(buttonSetAppsUnusualTrafficDataAmount,"<br><i><font color='#AAAAAA'>设置一个全局的应用流量使用量告警阀值</i>");
         buttonSetAppsUnusualTrafficDataAmount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,7 +111,7 @@ public class MyFragmentToolsPage extends Fragment {
         });
 
         Button buttonOutputDataToFile = view.findViewById(R.id.ButtonOutputDataToFile);
-        buttonOutputDataToFile.append(Html.fromHtml("<br><i><font color='#AAAAAA'>将流量统计为Excel文件并保存在手机</i>"));
+        addButtonComment(buttonOutputDataToFile,("<br><i><font color='#AAAAAA'>将流量统计为Excel文件并保存在手机</i>"));
         buttonOutputDataToFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -119,7 +120,7 @@ public class MyFragmentToolsPage extends Fragment {
         });
 
         Button ButtonOutputDataToFTP = view.findViewById(R.id.ButtonOutputDataToFTP);
-        ButtonOutputDataToFTP.append(Html.fromHtml("<br><i><font color='#AAAAAA'>将流量统计为Excel文件并上传到FTP服务器</i>"));
+        addButtonComment(ButtonOutputDataToFTP,("<br><i><font color='#AAAAAA'>将流量统计为Excel文件并上传到FTP服务器</i>"));
         ButtonOutputDataToFTP.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -134,7 +135,7 @@ public class MyFragmentToolsPage extends Fragment {
         });
 
         Button ButtonCustomQuery = view.findViewById(R.id.ButtonCustomQuery);
-        ButtonCustomQuery.append(Html.fromHtml("<br><i><font color='#AAAAAA'>查询一个时间段内全局或应用的流量使用量</i>"));
+        addButtonComment(ButtonCustomQuery,("<br><i><font color='#AAAAAA'>查询一个时间段内全局或应用的流量使用量</i>"));
         ButtonCustomQuery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -143,7 +144,7 @@ public class MyFragmentToolsPage extends Fragment {
         });
 
         Button ButtonResetTrafficDataRegulate = view.findViewById(R.id.ButtonResetTrafficDataRegulate);
-        ButtonResetTrafficDataRegulate.append(Html.fromHtml("<br><i><font color='#AAAAAA'>重置流量校正,恢复为本机统计数据</i>"));
+        addButtonComment(ButtonResetTrafficDataRegulate,("<br><i><font color='#AAAAAA'>重置流量校正,恢复为本机统计数据</i>"));
         ButtonResetTrafficDataRegulate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -187,7 +188,7 @@ public class MyFragmentToolsPage extends Fragment {
         });
 
         Button ButtonNetworkSpeedTest = view.findViewById(R.id.ButtonNetworkSpeedTest);
-        ButtonNetworkSpeedTest.append(Html.fromHtml("<br><i><font color='#AAAAAA'>测试当前网络的下载速度</i>"));
+        addButtonComment(ButtonNetworkSpeedTest,("<br><i><font color='#AAAAAA'>测试当前网络的下载速度</i>"));
         ButtonNetworkSpeedTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -234,9 +235,9 @@ public class MyFragmentToolsPage extends Fragment {
             public void onClick(View v) {
                 AppTransRecordDao appTransRecordDao = new AppTransRecordDao(context);
                 appTransRecordDao.deteleAll();
+                System.out.println("已全部清除");
             }
         });
-
 
 
         return view;
@@ -347,12 +348,13 @@ public class MyFragmentToolsPage extends Fragment {
     }
 
     private void outputDataToFile(View view, final Context context) {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+
             Date date = new Date();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
             String nowTime = formatter.format(date);
 
             String pathString = context.getExternalFilesDir("").getAbsolutePath() + "/TrafficData_" + nowTime + ".xls";
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Path path = Paths.get(pathString);
             //创建文件
             if (!Files.exists(path)) {
@@ -362,6 +364,18 @@ public class MyFragmentToolsPage extends Fragment {
                     Log.e("严重错误", e.toString());
                 }
             }
+        }else {
+            File file=new File(pathString);
+            if(file.exists()){
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                System.out.println("文件不存在");
+            }
+        }
             try {
                 FileOutputStream fos = new FileOutputStream(pathString, false);
                 final HSSFWorkbook wb = PoiTools.getHSSFWorkbook(null, context);
@@ -393,7 +407,7 @@ public class MyFragmentToolsPage extends Fragment {
             } catch (Exception e) {
                 Log.e("严重错误", e.toString());
             }
-        }
+
     }
 
     private void outputDataToFTP(View view, Context context) {
@@ -424,5 +438,13 @@ public class MyFragmentToolsPage extends Fragment {
     private void handleCustomQuery( Context context) {
         Intent intent = new Intent(context, CustomQueryActivity.class);
         startActivity(intent);
+    }
+    private void addButtonComment(Button button,String msg){
+        try {
+            button.append(Html.fromHtml(msg));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 }

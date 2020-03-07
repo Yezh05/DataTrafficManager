@@ -112,8 +112,9 @@ public class MyFragmentMobilePage extends Fragment {
             // for Activity#requestPermissions for more details.
             ActivityCompat.requestPermissions(this.getActivity(), new String[]{"android.permission.READ_PHONE_STATE"}, 1);
         }
-        final List<SimInfo> simInfoList = simTools.getSubscriptionInfoList(context);
-
+        final List<SimInfo> simInfoList = simTools.getSubscriptionInfoList(context.getApplicationContext());
+        System.out.println(simInfoList.size());
+        System.out.println(simInfoList);
         showRealTimeNetSpeed(view);
 
         final Button button_SIM1 = view.findViewById(R.id.Button_SIM1);
@@ -515,7 +516,6 @@ public class MyFragmentMobilePage extends Fragment {
                     textViewRealTimeRxSpeed.setText(dataRealTimeRxSpeed.getValueWithNoDecimalPoint() + dataRealTimeRxSpeed.getType() + "/s");
                     RXOld[0] = overTxTraffic;
                     RXOld[1] = overRxTraffic;
-
                 } else {
                     long overTxTraffic = TrafficStats.getTotalTxBytes();
                     long overRxTraffic = TrafficStats.getTotalRxBytes();

@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -33,6 +34,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -46,12 +53,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import edu.yezh.datatrafficmanager.R;
 import edu.yezh.datatrafficmanager.dao.BucketDao;
 import edu.yezh.datatrafficmanager.dao.BucketDaoImpl;
+import edu.yezh.datatrafficmanager.dao.db.AppTransRecordDao;
 import edu.yezh.datatrafficmanager.dao.db.DataTrafficRegulateDao;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
@@ -61,6 +70,8 @@ import edu.yezh.datatrafficmanager.tools.NetWorkSpeedTestTools;
 import edu.yezh.datatrafficmanager.tools.NowProcess;
 import edu.yezh.datatrafficmanager.tools.PoiTools;
 import edu.yezh.datatrafficmanager.tools.SimTools;
+import edu.yezh.datatrafficmanager.tools.chartTools.CustomMarkerView;
+import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 import edu.yezh.datatrafficmanager.tools.floatWindowTools.FloatingWindowAppMonitorService;
 import edu.yezh.datatrafficmanager.tools.floatWindowTools.FloatingWindowNetWorkSpeedService;
 
@@ -183,36 +194,18 @@ public class MyFragmentToolsPage extends Fragment {
                 handleNetSpeedTest(context);
             }
         });
+
         final Intent serviceIntend2 = new Intent(getActivity(), FloatingWindowAppMonitorService.class);
         Button ButtonT = view.findViewById(R.id.ButtonT);
         ButtonT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-           final      DateTools dateTools = new DateTools();
-                //long bfRX = TrafficStats.getUidRxBytes(10162);
                 try {
-                   /*final TransInfo transInfo1 = bucketDao.getAppTrafficData(context,"460002911566405", ConnectivityManager.TYPE_WIFI,
-                            0,dateTools.getTimesTodayEnd(),10162);
-                    System.out.println("前："+ (transInfo1));*/
-
-                   /* final Handler handler = new Handler();
-                    Runnable runnable = new Runnable() {
-                        @Override
-                        public void run() {*/
-
-                            /*TransInfo transInfo2 = bucketDao.getAppTrafficData(context,"460002911566405", ConnectivityManager.TYPE_WIFI,
-                                    0,dateTools.getTimesTodayEnd(),10162);
-                            System.out.println("后："+ (transInfo2));
-                            System.out.println("前后："+ (transInfo2.getTotal()-transInfo1.getTotal()));*/
-                           //System.out.println( NowProcess.getForegroundApp(context));
-
-                            NowProcess.hdddd(context);
-System.out.println(NowProcess.getForegroundApp(context));
                     if (FloatingWindowAppMonitorService.isStarted) {
                         try {
 
                             getActivity().stopService(serviceIntend2);
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                         return;
@@ -228,21 +221,23 @@ System.out.println(NowProcess.getForegroundApp(context));
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-
                     }
-                            //System.out.println(NowProcess.hdddd(context));
-                 /*                   handler.postDelayed(this,3000);
-                        }
-                    } ;
-                    handler.postDelayed(runnable,0);*/
-
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
             }
         });
+        Button ButtonCleanTransRecord = view.findViewById(R.id.ButtonCleanTransRecord);
+        ButtonCleanTransRecord.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppTransRecordDao appTransRecordDao = new AppTransRecordDao(context);
+                appTransRecordDao.deteleAll();
+            }
+        });
+
+
 
         return view;
     }
@@ -259,20 +254,15 @@ System.out.println(NowProcess.getForegroundApp(context));
             }
         }
     }
+
     private void handleNetSpeedTest(final Context context){
-
-
         int networkInfo = SimTools.getNowActiveNetWorkType(context);
         String msg = "网速测试功能<br/>测试大约需要10秒";
-
-
-
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("网速测试");
         if (networkInfo==-1000) {
             msg = "当前未连接网络";
         } else {
-
             if (networkInfo == ConnectivityManager.TYPE_WIFI) {
                 msg += "<br/>当前网络为<i><font color='#DB7093'>Wifi</font></i>网络";
             }else if (networkInfo == ConnectivityManager.TYPE_MOBILE){
@@ -313,6 +303,7 @@ System.out.println(NowProcess.getForegroundApp(context));
         builder.setNegativeButton("取消",null);
         builder.show();
     }
+
     private void openEditViewAlert(View view) {
         final Context context = view.getContext();
         final View viewCustomerDialogDataInput = LayoutInflater.from(context).inflate(R.layout.view_customer_dialog_data_input,null);
@@ -356,7 +347,6 @@ System.out.println(NowProcess.getForegroundApp(context));
     }
 
     private void outputDataToFile(View view, final Context context) {
-
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Date date = new Date();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -431,11 +421,8 @@ System.out.println(NowProcess.getForegroundApp(context));
         }
     }
 
-
     private void handleCustomQuery( Context context) {
         Intent intent = new Intent(context, CustomQueryActivity.class);
         startActivity(intent);
     }
-
-
 }

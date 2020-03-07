@@ -24,6 +24,15 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.yezh.datatrafficmanager.R;
@@ -38,6 +47,7 @@ import edu.yezh.datatrafficmanager.tools.BytesFormatter;
 import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.InstalledAppsInfoTools;
 import edu.yezh.datatrafficmanager.tools.SimTools;
+import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 
 public class FloatingWindowAppMonitorService extends Service {
     @Nullable
@@ -58,8 +68,9 @@ public class FloatingWindowAppMonitorService extends Service {
     private  Tb_AppTransRecord transRecord;
     private String SUBSCRIBER_ID;
     private int NETWORK_TYPE;
-    private List<Tb_AppTransRecord> transRecordList;
+    //private List<Tb_AppTransRecord> transRecordList;
     private TransInfo startData;
+    private LineChart lineChart;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -78,7 +89,6 @@ public class FloatingWindowAppMonitorService extends Service {
         layoutParams.height = 540;
         layoutParams.x = 100;
         layoutParams.y = 100;
-        //layoutParams.alpha = 0.7f;
         System.out.println("创建Service");
     }
 
@@ -99,6 +109,42 @@ public class FloatingWindowAppMonitorService extends Service {
             view = View.inflate(getApplicationContext(), R.layout.view_app_traffic_monitor,null);
             windowManager.addView(view,layoutParams);
             view.setOnTouchListener(new FloatingOnTouchListener());
+            lineChart = view.findViewById(R.id.LineChartMonitorAppChart);
+
+            final ArrayList<Entry> values = new ArrayList<>();
+            values.add(new Entry(0, 0));
+            final LineDataSet lineDataSet = new LineDataSet(values, "数据");
+            ArrayList<ILineDataSet> dataSets = new ArrayList<>();
+            lineDataSet.setMode(LineDataSet.Mode.LINEAR);
+            lineDataSet.setDrawFilled(true);
+            lineDataSet.setColor(Color.parseColor("#008080"));
+            lineDataSet.setFillColor(Color.parseColor("#20B2AA"));
+            lineDataSet.setValueFormatter(new MyLineValueFormatter());
+            lineDataSet.setValueTextSize(13);
+            lineDataSet.setLineWidth(2);
+            lineDataSet.setCircleColor(Color.parseColor("#2F4F4F"));
+            lineDataSet.setDrawCircleHole(true);
+            lineDataSet.setCircleColorHole(Color.parseColor("#FFFFFF"));
+            lineDataSet.setDrawHighlightIndicators(false);
+            dataSets.add(lineDataSet);
+
+            LineData data1 = new LineData(dataSets);
+            lineChart.setData(data1);
+            lineChart.getLegend().setEnabled(false);
+
+            lineChart.getXAxis().setGranularity(3);
+            lineChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+            lineChart.getXAxis().setDrawGridLines(false);
+
+            lineChart.getAxisRight().setEnabled(false);
+            lineChart.getAxisLeft().setDrawGridLines(true);
+            lineChart.getAxisLeft().setDrawLabels(false);
+            lineChart.getAxisLeft().setDrawAxisLine(false);
+            lineChart.getAxis(YAxis.AxisDependency.LEFT).setStartAtZero(true);
+            lineChart.setVisibleXRangeMaximum(15);
+            lineChart.getDescription().setEnabled(false);
+            lineChart.invalidate();
+
             System.out.println("开始绘制！");
 
             final BucketDao bucketDao = new BucketDaoImpl();
@@ -142,23 +188,7 @@ public class FloatingWindowAppMonitorService extends Service {
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {}
             });
-
-            final Handler timerHandler = new Handler();
-            final Runnable timerRunnable = new Runnable() {
-                @Override
-                public void run() {
-                  String timeString;
-                  long sec = (System.currentTimeMillis()-startTime)/1000;
-                  if (sec<=60){
-                      timeString = sec +"秒";
-                  }else {
-                      timeString = sec/60L+"分"+ sec%60L +"秒";
-                  }
-
-                    TextViewMonitorAppTime.setText("监测时间:"+ timeString);
-                    timerHandler.postDelayed(this,1000L);
-                }
-            };
+            final int timeStep = 3;
             final int[] round = new int[1];
             final BytesFormatter bytesFormatter = new BytesFormatter();
             final DateTools dateTools = new DateTools();
@@ -166,37 +196,55 @@ public class FloatingWindowAppMonitorService extends Service {
             final Runnable transRunnable = new Runnable() {
                 @Override
                 public void run() {
+                    LineData data = lineChart.getData();
+                    String timeString;
+                    long sec = (System.currentTimeMillis()-startTime)/1000;
+                    if (sec<=60){
+                        timeString = sec +"秒";
+                    }else {
+                        timeString = sec/60L+"分"+ sec%60L +"秒";
+                    }
+                    TextViewMonitorAppTime.setText("监测时间:"+ timeString);
                     transRecord = appTransRecordDao.findLast(uid);
                     TransInfo nowData = bucketDao.getAppTrafficData(getApplicationContext(),SUBSCRIBER_ID,NETWORK_TYPE,dateTools.getTimesTodayMorning(),dateTools.getTimesTodayEnd(), Integer.parseInt(uid));
+                    int randomDataSetIndex = (int) (Math.random() * data.getDataSetCount());
                     if (round[0] == 0 ){
                         startData = nowData;
-                        System.out.println("startData:"+startData);
+                        //System.out.println("startData:"+startData);
+                        values.clear();
+                        data.addEntry(new Entry(0,0),randomDataSetIndex);
                         round[0] = 1;
+                    }else {
+                        //System.out.println("sec"+sec);
+                        data.addEntry(new Entry(sec,(nowData.getRx()-transRecord.getWifiRX())/timeStep),randomDataSetIndex);
                     }
-                    System.out.println(transRecord);
-                    System.out.println("nowData:"+nowData);
+                    //System.out.println(transRecord);
+                    //System.out.println("nowData:"+nowData);
                     OutputTrafficData RXSpeed,TXSpeed;
                     if (NETWORK_TYPE== ConnectivityManager.TYPE_WIFI){
                         System.out.println(nowData.getTotal()-transRecord.getWifiRX()-transRecord.getWifiTX());
-                        RXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getRx()-transRecord.getWifiRX())/3);
-                        TXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getTx()-transRecord.getWifiTX())/3);
+                        RXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getRx()-transRecord.getWifiRX())/timeStep);
+                        TXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getTx()-transRecord.getWifiTX())/timeStep);
                         TextViewMonitorAppTX.setText("上传:"+ TXSpeed.getValueWithTwoDecimalPoint()+TXSpeed.getType()+"/s");
                         TextViewMonitorAppRX.setText("下载:"+ RXSpeed.getValueWithTwoDecimalPoint()+RXSpeed.getType()+"/s");
                         transRecord = new Tb_AppTransRecord(uid,transRecord.getMobileTX(),transRecord.getMobileRX(),nowData.getTx(),nowData.getRx(),System.currentTimeMillis());
                         appTransRecordDao.add(transRecord);
                     }else if (NETWORK_TYPE==ConnectivityManager.TYPE_MOBILE){
-                        System.out.println(nowData.getTotal()-transRecord.getMobileRX()-transRecord.getMobileTX());
-                        RXSpeed = bytesFormatter.getPrintSizeByModel(nowData.getRx()-transRecord.getMobileRX());
-                        TXSpeed = bytesFormatter.getPrintSizeByModel(nowData.getTx()-transRecord.getMobileTX());
+                        //System.out.println(nowData.getTotal()-transRecord.getMobileRX()-transRecord.getMobileTX());
+                        RXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getRx()-transRecord.getMobileRX())/timeStep);
+                        TXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getTx()-transRecord.getMobileTX())/timeStep);
                         TextViewMonitorAppTX.setText("上传:"+ TXSpeed.getValueWithTwoDecimalPoint()+TXSpeed.getType()+"/s");
                         TextViewMonitorAppRX.setText("下载:"+ RXSpeed.getValueWithTwoDecimalPoint()+RXSpeed.getType()+"/s");
                         transRecord = new Tb_AppTransRecord(uid,nowData.getTx(),nowData.getRx(),transRecord.getWifiTX(),transRecord.getWifiRX(),System.currentTimeMillis());
                         appTransRecordDao.add(transRecord);
                     }
+                    lineChart.notifyDataSetChanged();
+                    lineChart.moveViewToX(sec);
+                    lineChart.setVisibleXRangeMaximum(15);
                     OutputTrafficData total = bytesFormatter.getPrintSizeByModel(nowData.getTotal()-startData.getTotal());
-                    System.out.println(total);
+                    //System.out.println(total);
                     TextViewMonitorAppTotal.setText("传输总量:"+total.getValueWithTwoDecimalPoint()+total.getType());
-                    transHandle.postDelayed(this,3000L);
+                    transHandle.postDelayed(this,timeStep*1000L);
                 }
             };
 
@@ -211,24 +259,22 @@ public class FloatingWindowAppMonitorService extends Service {
                         spinner.setEnabled(false);
                         startTime = System.currentTimeMillis();
                         round[0] = 0;
-                        timerHandler.postDelayed(timerRunnable,1000L);
-                        transHandle.postDelayed(transRunnable,3000L);
+                        lineChart.moveViewToX(0);
+                        transHandle.postDelayed(transRunnable,0);
                     }else {
                         TextViewMonitorStatus.setText("停止监测");
                         TextViewMonitorStatus.setTextColor(Color.parseColor("#4169E1"));
                         spinner.setEnabled(true);
-                        timerHandler.removeCallbacks(timerRunnable);
                         transHandle.removeCallbacks(transRunnable);
                     }
                 }
             });
 
-
-
         }else {
             System.out.println("错误！");
         }
     }
+
     private class FloatingOnTouchListener implements View.OnTouchListener {
         private int x;
         private int y;

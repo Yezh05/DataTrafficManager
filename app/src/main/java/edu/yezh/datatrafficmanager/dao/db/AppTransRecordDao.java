@@ -72,6 +72,9 @@ public class AppTransRecordDao {
             db.execSQL("delete from tb_apptransrecord where uid in ("+sb+")",(Object[]) uids);
         }
     }
+    public void deteleAll(){
+        db.execSQL("Delete from tb_apptransrecord where 1=1");
+    }
     public int count(String uid){
         Cursor cursor = db.rawQuery("select count(uid) from tb_apptransrecord where uid = ?",new String[]{uid});
         if (cursor.moveToNext()){

@@ -1,36 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content">
-
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:gravity="center"
         android:orientation="vertical">
-
-        <!--<TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="工具"
-            android:textSize="50dp" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:background="#009688" />-->
-        <!--<Button
-            android:id="@+id/ButtonSHowAppsTrafficData"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="查看应用流量使用情况"
-            />-->
         <Button
             android:id="@+id/ButtonCustomQuery"
             android:layout_width="match_parent"
@@ -89,11 +69,6 @@
             android:layout_marginRight="5dp"
             android:background="#009688" />
 
-        <!--<Button
-            android:id="@+id/ButtonCloseFloatWindow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="close float window" />-->
         <Button
             android:id="@+id/ButtonNetworkSpeedTest"
             android:layout_width="match_parent"
@@ -144,5 +119,13 @@
             android:layout_margin="5dp"
             android:gravity="left"
             android:text="TA" />
-    </LinearLayout>
+        <Button
+            android:id="@+id/ButtonCleanTransRecord"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_shape2"
+            android:layout_margin="5dp"
+            android:gravity="left"
+            android:text="清除APP监测窗缓存" />
+    </LinearLayout></ScrollView>
 </RelativeLayout>

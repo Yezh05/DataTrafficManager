@@ -51,8 +51,10 @@ public class AppBaseInfoDao {
                 cursor.moveToNext();
             }
         }else {
+            cursor.close();
             return null;
         }
+        cursor.close();
         return  tb_appBaseInfoList;
     }
     public void delete(String... uids){
@@ -72,5 +74,8 @@ public class AppBaseInfoDao {
         }
         cursor.close();
         return 0;
+    }
+    public void close(){
+        db.close();
     }
 }

@@ -52,4 +52,7 @@ public class DataTrafficRegulateDao {
         return 0;
     }
 
+    public void close(){
+        db.close();
+    }
 }

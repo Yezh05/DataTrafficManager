@@ -342,6 +342,5 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
 }

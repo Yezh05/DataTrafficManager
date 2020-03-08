@@ -52,8 +52,10 @@ public class AppPreferenceDao {
                 cursor.moveToNext();
             }
         }else {
+            cursor.close();
             return null;
         }
+        cursor.close();
         return tbAppPreferenceList;
     }
     public void detele(String... uids){
@@ -74,5 +76,8 @@ public class AppPreferenceDao {
         }
         cursor.close();
         return 0;
+    }
+    public void close(){
+        db.close();
     }
 }

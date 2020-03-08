@@ -151,6 +151,7 @@ public class MyFragmentToolsPage extends Fragment {
             public void onClick(View v) {
                 DataTrafficRegulateDao dataTrafficRegulateDao = new DataTrafficRegulateDao(context);
                 dataTrafficRegulateDao.deteleAll();
+
                 Snackbar.make(view, "已重置", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }

@@ -58,8 +58,10 @@ public class AppTransRecordDao {
                 cursor.moveToNext();
             }
         }else {
+            cursor.close();
             return null;
         }
+        cursor.close();
         return  tb_appTransRecordList;
     }
     public void delete(String... uids){
@@ -82,5 +84,8 @@ public class AppTransRecordDao {
         }
         cursor.close();
         return 0;
+    }
+    public void close(){
+        db.close();
     }
 }

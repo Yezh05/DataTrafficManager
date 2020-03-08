@@ -685,7 +685,6 @@ public class MyFragmentMobilePage extends Fragment {
                                         tb_dataTrafficRegulate.setValue(systemUse-realAmount);
                                         tb_dataTrafficRegulate.setSettime(System.currentTimeMillis());
                                         dataTrafficRegulateDao.update(tb_dataTrafficRegulate);
-
                                         Toast.makeText(context, "确定校正", Toast.LENGTH_SHORT).show();
                                         context.unregisterReceiver(receiver);
                                         refresh();
@@ -774,7 +773,6 @@ public class MyFragmentMobilePage extends Fragment {
                                                 tb_dataTrafficRegulate.setValue(systemUse-inputUse);
                                                 tb_dataTrafficRegulate.setSettime(System.currentTimeMillis());
                                                 dataTrafficRegulateDao.update(tb_dataTrafficRegulate);
-
                                                 Toast.makeText(context,"数据：已使用"
                                                         +editText.getText()+""+spinnerDataType.getSelectedItem().toString(),Toast.LENGTH_LONG).show();
                                                 alertDialog.dismiss();

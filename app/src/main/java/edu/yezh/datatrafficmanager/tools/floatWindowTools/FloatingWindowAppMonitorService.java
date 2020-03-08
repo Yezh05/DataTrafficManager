@@ -119,6 +119,7 @@ public class FloatingWindowAppMonitorService extends Service {
         super.onDestroy();
         windowManager.removeView(view);
         isStarted = false;
+        System.out.println("销毁完成");
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

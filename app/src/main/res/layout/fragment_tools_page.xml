@@ -111,14 +111,27 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:background="#009688" />
-        <Button
-            android:id="@+id/ButtonT"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/btn_shape2"
             android:layout_margin="5dp"
-            android:gravity="left"
-            android:text="TA" />
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/TextViewOpenAppMonitorInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="APP使用监测窗"
+                android:textColor="#000000"/>
+
+            <Switch
+                android:id="@+id/SwitchOpenAppMonitorInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/textViewFloatWindow"
+                android:layout_marginLeft="20dp"/>
+        </LinearLayout>
+
         <Button
             android:id="@+id/ButtonCleanTransRecord"
             android:layout_width="match_parent"
@@ -127,5 +140,25 @@
             android:layout_margin="5dp"
             android:gravity="left"
             android:text="清除APP监测窗缓存" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="#009688" />
+        <Button
+            android:id="@+id/ButtonOpenOutputFileFolder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_shape2"
+            android:layout_margin="5dp"
+            android:gravity="left"
+            android:text="打开文件保存文件夹" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="#009688" />
     </LinearLayout></ScrollView>
 </RelativeLayout>

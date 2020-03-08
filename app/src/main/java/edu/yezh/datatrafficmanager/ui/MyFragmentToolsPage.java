@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.StrictMode;
+import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.text.Html;
 import android.util.Log;
@@ -197,18 +198,43 @@ public class MyFragmentToolsPage extends Fragment {
         });
 
         final Intent serviceIntend2 = new Intent(getActivity(), FloatingWindowAppMonitorService.class);
-        Button ButtonT = view.findViewById(R.id.ButtonT);
-        ButtonT.setOnClickListener(new View.OnClickListener() {
+        Button ButtonOpenOutputFileFolder = view.findViewById(R.id.ButtonOpenOutputFileFolder);
+        addButtonComment(ButtonOpenOutputFileFolder,"<br><i><font color='#AAAAAA'>使用文件管理器打开文件保存路径</i>");
+        ButtonOpenOutputFileFolder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    if (FloatingWindowAppMonitorService.isStarted) {
-                        try {
+                Uri selectedUri = Uri.parse(context.getExternalFilesDir("").getAbsolutePath()+"/" );
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(selectedUri, "resource/folder");
+                if (intent.resolveActivityInfo(context.getPackageManager(), 0) != null)
+                {
+                    startActivity(intent);
+                }
+                else
+                {
+                    Snackbar.make(view,"没有合适的文件管理器",Snackbar.LENGTH_LONG).show();
+                }
+            }
+        });
 
-                            getActivity().stopService(serviceIntend2);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+        Button ButtonCleanTransRecord = view.findViewById(R.id.ButtonCleanTransRecord);
+        ButtonCleanTransRecord.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppTransRecordDao appTransRecordDao = new AppTransRecordDao(context);
+                appTransRecordDao.deteleAll();
+                System.out.println("已全部清除");
+            }
+        });
+
+        TextView TextViewOpenAppMonitorInfo = view.findViewById(R.id.TextViewOpenAppMonitorInfo);
+        TextViewOpenAppMonitorInfo.setText(Html.fromHtml("APP使用监测窗<br/><i><font color='#AAAAAA'>开关一个用于监控APP流量的悬浮窗</i>"));
+        Switch SwitchOpenAppMonitorInfo = view.findViewById(R.id.SwitchOpenAppMonitorInfo);
+        SwitchOpenAppMonitorInfo.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
+                    if (FloatingWindowAppMonitorService.isStarted) {
                         return;
                     }
                     if (!Settings.canDrawOverlays(context)) {
@@ -223,23 +249,19 @@ public class MyFragmentToolsPage extends Fragment {
                             e.printStackTrace();
                         }
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                }else {
+                    if (FloatingWindowAppMonitorService.isStarted) {
+                        try {
+
+                            getActivity().stopService(serviceIntend2);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        return;
+                    }
                 }
-
             }
         });
-        Button ButtonCleanTransRecord = view.findViewById(R.id.ButtonCleanTransRecord);
-        ButtonCleanTransRecord.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AppTransRecordDao appTransRecordDao = new AppTransRecordDao(context);
-                appTransRecordDao.deteleAll();
-                System.out.println("已全部清除");
-            }
-        });
-
-
         return view;
     }
 

@@ -206,19 +206,25 @@ public class MyFragmentToolsPage extends Fragment {
             public void onClick(View v) {
                 Uri selectedUri = Uri.parse(context.getExternalFilesDir("").getAbsolutePath()+"/" );
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(selectedUri, "resource/folder");
-                if (intent.resolveActivityInfo(context.getPackageManager(), 0) != null)
+                intent.setDataAndType(selectedUri, "*/*");
+                /*if (intent.resolveActivityInfo(context.getPackageManager(), 0) != null)
                 {
                     startActivity(intent);
                 }
                 else
                 {
                     Snackbar.make(view,"没有合适的文件管理器",Snackbar.LENGTH_LONG).show();
-                }
+                }*/
+                //Intent intent = new Intent();
+                //intent.setAction(Intent.ACTION_VIEW);
+                //Uri myUri = Uri.parse(context.getExternalFilesDir("").getAbsolutePath()+"/");
+                //intent.setDataAndType(myUri, "*/*");
+                startActivity(  Intent.createChooser(intent, "选择一个文件管理器"));
             }
         });
 
         Button ButtonCleanTransRecord = view.findViewById(R.id.ButtonCleanTransRecord);
+        addButtonComment(ButtonCleanTransRecord,"<br><i><font color='#AAAAAA'>清除全部APP监测数据</i>");
         ButtonCleanTransRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -263,6 +269,9 @@ public class MyFragmentToolsPage extends Fragment {
                 }
             }
         });
+
+     TextView TextViewAbout =   view.findViewById(R.id.TextViewAbout);
+        TextViewAbout.setText(Html.fromHtml("关于<br/><i><font color='#AAAAAA'>计科16404-叶重涵</i>"));
         return view;
     }
 

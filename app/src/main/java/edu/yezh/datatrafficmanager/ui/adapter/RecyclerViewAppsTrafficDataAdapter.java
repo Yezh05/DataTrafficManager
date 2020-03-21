@@ -3,6 +3,7 @@ package edu.yezh.datatrafficmanager.ui.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,7 +60,12 @@ public class RecyclerViewAppsTrafficDataAdapter extends RecyclerView.Adapter<Rec
             holder.TextViewColAppRX.setText(dataAppRX.getValueWithTwoDecimalPoint() + dataAppRX.getType());
             OutputTrafficData dataAppTX = bytesFormatter.getPrintSizeByModel(OneInstalledAppsTrafficData.getTrans().getTx());
             holder.TextViewColAppTX.setText(dataAppTX.getValueWithTwoDecimalPoint() + dataAppTX.getType());
-            holder.ImageViewColAppIcon.setImageDrawable(OneInstalledAppsTrafficData.getAppIcon());
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    holder.ImageViewColAppIcon.setImageDrawable(OneInstalledAppsTrafficData.getAppIcon());
+                }
+            },200L);
             OutputTrafficData dataAppTotal = bytesFormatter.getPrintSizeByModel(OneInstalledAppsTrafficData.getTrans().getTotal());
             holder.TextViewColAppTotal.setText(dataAppTotal.getValueWithTwoDecimalPoint() + dataAppTotal.getType());
             holder.itemView.setOnClickListener(new View.OnClickListener() {

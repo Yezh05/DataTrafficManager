@@ -169,14 +169,14 @@ public class MyFragmentMobilePage extends Fragment {
     }
 
     /*获取并显示流量使用情况*/
-    public void setTrafficDataView(View view, final String subscriberID) {
+    public void setTrafficDataView(final View view, final String subscriberID) {
         try {
             //System.out.println("IMSI:"+subscriberID);
             SharedPreferences sp = getActivity().getSharedPreferences("TrafficManager", MODE_PRIVATE);
             final Context context = this.getContext();
-            BucketDao bucketDao = new BucketDaoImpl();
+            final BucketDao bucketDao = new BucketDaoImpl();
             BytesFormatter bytesFormatter = new BytesFormatter();
-            DateTools dateTools = new DateTools();
+            final DateTools dateTools = new DateTools();
 
             long dataPlanLong = showTextViewDataPlan(view, subscriberID);
             long ThisMonthData = bucketDao.getTrafficDataOfThisMonth(context, subscriberID, networkType).getTotal();
@@ -216,7 +216,7 @@ public class MyFragmentMobilePage extends Fragment {
 
             float DataUseStatus = (float) ((double) realTotalBytesStartDayToToday / (double)dataPlanLong) * 100F;
             //System.out.println("realTotalBytesStartDayToToday="+realTotalBytesStartDayToToday+"\ndataPlanLong:"+dataPlanLong+"\n比例："+DataUseStatus);
-            int PercentDataUseStatus = Math.round(DataUseStatus);
+            final int PercentDataUseStatus = Math.round(DataUseStatus);
             String TextDataUseStatus = "";
             if (PercentDataUseStatus < 0) {
                 TextDataUseStatus = "请设置\n流量限额";
@@ -237,7 +237,7 @@ public class MyFragmentMobilePage extends Fragment {
             TextView TextViewDataUseStatus =  view.findViewById(R.id.TextViewDataUseStatus);
             TextViewDataUseStatus.setText((PercentDataUseStatus) + "%\n" + TextDataUseStatus);
 
-            List<TransInfo> lastThirtyDaysTrafficData = bucketDao.getTrafficDataOfLastThirtyDays(context, subscriberID, networkType);
+            final List<TransInfo> lastThirtyDaysTrafficData = bucketDao.getTrafficDataOfLastThirtyDays(context, subscriberID, networkType);
             OutputTrafficData todayUsage = bytesFormatter.getPrintSizeByModel(lastThirtyDaysTrafficData.get(0).getTotal() - ignoreTrafficDataToday);
 
             TextView TextViewData4GToday = view.findViewById(R.id.TextViewData4GToday);
@@ -256,10 +256,16 @@ public class MyFragmentMobilePage extends Fragment {
                     + "剩余" + restTrafficDataAmount.getValueWithNoDecimalPoint() + restTrafficDataAmount.getType() + " "
                     + "总量" + dataPlan.getValueWithNoDecimalPoint() + dataPlan.getType(),TextDataUseStatus.replaceAll("\r|\n", " "));
 
-            List<Long> DaysNoList = dateTools.getLastThirtyDaysMap().get("No");
+            final List<Long> DaysNoList = dateTools.getLastThirtyDaysMap().get("No");
             Collections.reverse(lastThirtyDaysTrafficData);
             Collections.reverse(DaysNoList);
-            showChart(view, PercentDataUseStatus, lastThirtyDaysTrafficData, DaysNoList);
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    showChart(view, PercentDataUseStatus, lastThirtyDaysTrafficData, DaysNoList);
+                }
+            },500L);
 
             RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(
                     bucketDao.getAllInstalledAppsTrafficData(context, subscriberID, networkType, dateTools.getTimesStartDayMorning(dataPlanStartDay),
@@ -272,7 +278,12 @@ public class MyFragmentMobilePage extends Fragment {
             RecyclerViewAppsTrafficData.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
             RecyclerViewAppsTrafficData.setLayoutManager(layoutManager);
 
-            showAppTrafficDataWarning(context, view, subscriberID);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    showAppTrafficDataWarning(context, view, subscriberID);
+                }
+            },200L);
 
             FloatingActionButton fab = view.findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {
@@ -488,7 +499,6 @@ public class MyFragmentMobilePage extends Fragment {
         CustomMarkerView mv = new CustomMarkerView(getContext(),
                 R.layout.view_customer_marker);
         lineChart.setMarkerView(mv);
-
         lineChart.invalidate();
     }
 
@@ -552,7 +562,7 @@ public class MyFragmentMobilePage extends Fragment {
                 AppsInfo i = installedAppsTodayTrafficDataList.get(k);
                 String name = i.getName();
                 long allBytes = i.getTrans().getTotal();
-                System.out.println("App使用："+name+":"+allBytes);
+                //System.out.println("App使用："+name+":"+allBytes);
                 //RecyclerViewAppTrafficDataWarning
                 AppBaseInfoDao appBaseInfoDao = new AppBaseInfoDao(view.getContext());
                 Tb_AppBaseInfo appBaseInfo = appBaseInfoDao.find(i.getUid());

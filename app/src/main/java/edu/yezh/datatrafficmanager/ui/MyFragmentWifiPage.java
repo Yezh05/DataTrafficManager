@@ -51,9 +51,6 @@ public class MyFragmentWifiPage extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_wifi_page, container, false);
         Log.e("Fragment", "WLAN页面");
         final Context context = this.getContext();
-
-
-
         final Handler handlerRefresh = new Handler();
         Runnable runnable = new Runnable() {
             @Override
@@ -71,12 +68,12 @@ public class MyFragmentWifiPage extends Fragment {
         return view;
     }
 
-    private void initialPage(View view, final Context context){
+    private void initialPage(final View view, final Context context){
         final int dataPlanStartDay = 1;
         final String subscriberID = "";
         BytesFormatter bytesFormatter = new BytesFormatter();
-        BucketDao bucketDao = new BucketDaoImpl();
-        DateTools dateTools = new DateTools();
+        final BucketDao bucketDao = new BucketDaoImpl();
+        final DateTools dateTools = new DateTools();
 
         try {
             TransInfo ThisMonthUsageData = bucketDao.getTrafficDataOfThisMonth(context,subscriberID,networkType);
@@ -120,11 +117,17 @@ public class MyFragmentWifiPage extends Fragment {
         RecyclerViewAppsTrafficData.addItemDecoration(new DividerItemDecoration(context,DividerItemDecoration.VERTICAL));
         RecyclerViewAppsTrafficData.setLayoutManager(layoutManager);
 
-        List<TransInfo> lastSevenDaysTrafficData = bucketDao.getTrafficDataOfLastThirtyDays(context, subscriberID, networkType);
-        List<Long> DaysNoList = dateTools.getLastThirtyDaysMap().get("No");
+        final List<TransInfo> lastSevenDaysTrafficData = bucketDao.getTrafficDataOfLastThirtyDays(context, subscriberID, networkType);
+        final List<Long> DaysNoList = dateTools.getLastThirtyDaysMap().get("No");
         Collections.reverse(lastSevenDaysTrafficData);
         Collections.reverse(DaysNoList);
-        showChart(view, lastSevenDaysTrafficData,DaysNoList);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                showChart(view, lastSevenDaysTrafficData,DaysNoList);
+            }
+        },1000L);
 
         Button buttonShowLastSixMonthTrafficData =  view.findViewById(R.id.ButtonShowLastSixMonthTrafficData);
         buttonShowLastSixMonthTrafficData.setOnClickListener(new View.OnClickListener() {

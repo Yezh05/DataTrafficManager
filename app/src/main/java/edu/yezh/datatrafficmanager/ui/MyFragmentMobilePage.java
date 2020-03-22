@@ -269,7 +269,7 @@ public class MyFragmentMobilePage extends Fragment {
 
             RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(
                     bucketDao.getAllInstalledAppsTrafficData(context, subscriberID, networkType, dateTools.getTimesStartDayMorning(dataPlanStartDay),
-                            System.currentTimeMillis()), context, subscriberID, networkType);
+                            dateTools.getTimesTodayEnd()), context, subscriberID, networkType);
 
             RecyclerView RecyclerViewAppsTrafficData = view.findViewById(R.id.RecyclerViewAppsTrafficData);
             RecyclerViewAppsTrafficData.setAdapter(recyclerViewAppsTrafficDataAdapter);

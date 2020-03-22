@@ -180,6 +180,20 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:background="#009688" />
+        <Button
+            android:id="@+id/ButtonToAppDetailsSetting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_shape2"
+            android:layout_margin="5dp"
+            android:gravity="left"
+            android:text="进入应用详细设置" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="#009688" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

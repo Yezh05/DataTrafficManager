@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -30,6 +32,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,12 +85,34 @@ public class ShowAppDetailsActivity extends AppCompatActivity {
         System.out.println("name="+name+",uid="+uid);
         init(view,uid,name,packageName,subscriberID,networkType);
     }
-    private void init(View view,int uid,String name,String packageName,String subscriberID,int networkType){
+    private void init(final View view, int uid, String name, final String packageName, String subscriberID, int networkType){
         Drawable appIcon = new InstalledAppsInfoTools().getAppIconByPackageName(this,packageName);
         TextView appDetailsName =  findViewById(R.id.AppDetailsName);
         appDetailsName.setText(name);
         /*TextView appDetailsPackageName =  findViewById(R.id.AppDetailsPackageName);
         appDetailsPackageName.setText(packageName);*/
+
+        Button ButtonToAppDetailsSetting = view.findViewById(R.id.ButtonToAppDetailsSetting);
+        ButtonToAppDetailsSetting.append(Html.fromHtml("<font color='#AAAAAA'><br><i>在</font><font color='#DC143C'>流量使用情况</font><font color='#AAAAAA'>控制网络连接</font></i>"));
+        ButtonToAppDetailsSetting.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    final String SCHEME = "package";
+                    Intent intent = new Intent();
+                    intent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
+                    //intent.setAction(Settings.ACTION_DATA_USAGE_SETTINGS);
+                    //intent.setAction("com.android.settings.Settings$DataUsageSummaryActivity");
+                    Uri uri = Uri.fromParts(SCHEME, packageName, null);
+                    intent.setData(uri);
+                    //intent.setData(Uri.parse("package:" + "tv.danmaku.bili"));
+                    startActivity(intent);
+                }catch (Exception e){
+                    System.out.println(e.toString());
+                    Snackbar.make(view,"出现错误",Snackbar.LENGTH_LONG).show();
+                }
+            }
+        });
         ImageView ImageViewDetailAppIcon = findViewById(R.id.ImageViewDetailAppIcon);
         ImageViewDetailAppIcon.setImageDrawable(appIcon);
 

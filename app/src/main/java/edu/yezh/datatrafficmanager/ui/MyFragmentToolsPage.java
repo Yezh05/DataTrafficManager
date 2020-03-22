@@ -2,6 +2,7 @@ package edu.yezh.datatrafficmanager.ui;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -269,6 +270,28 @@ public class MyFragmentToolsPage extends Fragment {
                 }
             }
         });
+
+        /*Button BT = view.findViewById(R.id.BT);
+        BT.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                     final String SCHEME = "package";
+                    Intent intent = new Intent();
+                    intent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
+                    //intent.setAction(Settings.ACTION_DATA_USAGE_SETTINGS);
+                    //intent.setAction("com.android.settings.Settings$DataUsageSummaryActivity");
+                    Uri uri = Uri.fromParts(SCHEME, "tv.danmaku.bili", null);
+                    intent.setData(uri);
+                    //intent.setData(Uri.parse("package:" + "tv.danmaku.bili"));
+                    startActivity(intent);
+
+                }catch (Exception e){
+                    System.out.println(e.toString());
+                }
+            }
+        });*/
+
 
      TextView TextViewAbout =   view.findViewById(R.id.TextViewAbout);
         TextViewAbout.setText(Html.fromHtml("关于<br/><i><font color='#AAAAAA'>计科16404-叶重涵</i>"));

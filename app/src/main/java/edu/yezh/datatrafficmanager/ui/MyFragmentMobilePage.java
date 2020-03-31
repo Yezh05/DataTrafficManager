@@ -243,7 +243,11 @@ public class MyFragmentMobilePage extends Fragment {
             TextView TextViewData4GToday = view.findViewById(R.id.TextViewData4GToday);
             TextViewData4GToday.setText(todayUsage.getValueWithTwoDecimalPoint()+ todayUsage.getType());
 
-            OutputTrafficData restTrafficDataAmount = bytesFormatter.getPrintSizeByModel(dataPlanLong - realTotalBytesStartDayToToday);
+            OutputTrafficData restTrafficDataAmount;
+            if( (dataPlanLong - realTotalBytesStartDayToToday)>0){
+                restTrafficDataAmount= bytesFormatter.getPrintSizeByModel(dataPlanLong - realTotalBytesStartDayToToday);}else {
+                restTrafficDataAmount= bytesFormatter.getPrintSizeByModel(0);
+            }
             OutputTrafficData dataPlan = bytesFormatter.getPrintSizeByModel(dataPlanLong);
 
             NotificationTools.setNotification(context,

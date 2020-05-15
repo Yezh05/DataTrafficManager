@@ -114,7 +114,7 @@ public class MyFragmentMobilePage extends Fragment {
         }
         final List<SimInfo> simInfoList = simTools.getSubscriptionInfoList(context.getApplicationContext());
         System.out.println(simInfoList.size());
-        System.out.println("simInfoList:"+simInfoList);
+        //System.out.println("simInfoList:"+simInfoList);
         showRealTimeNetSpeed(view);
 
         final Button button_SIM1 = view.findViewById(R.id.Button_SIM1);
@@ -209,7 +209,6 @@ public class MyFragmentMobilePage extends Fragment {
                 System.out.println("数据错误"+e.toString());
             }
 
-
             OutputTrafficData readableDataStartDayToToday = bytesFormatter.getPrintSizeByModel(realTotalBytesStartDayToToday);
             TextView TextViewData4GStartDayToToday = view.findViewById(R.id.TextViewData4GStartDayToToday);
             TextViewData4GStartDayToToday.setText(readableDataStartDayToToday.getValueWithTwoDecimalPoint() + readableDataStartDayToToday.getType());
@@ -255,6 +254,14 @@ public class MyFragmentMobilePage extends Fragment {
                             + "剩余 " + restTrafficDataAmount.getValueWithNoDecimalPoint() + restTrafficDataAmount.getType() + "   "
                             + "总量 " + dataPlan.getValueWithNoDecimalPoint() + dataPlan.getType()
                     , TextDataUseStatus,true,1000);
+
+            int monthWarningFlag = sp.getInt("monthWarningFlag",80);
+            System.out.println("月流量限额百分比:"+monthWarningFlag);
+            if(PercentDataUseStatus>=monthWarningFlag){
+                NotificationTools.setNotification(context,"流量告警","流量使用已超过"+monthWarningFlag+"%\n" +
+                                "剩余 " + restTrafficDataAmount.getValueWithNoDecimalPoint() + restTrafficDataAmount.getType()
+                        ,false,5000);
+            }
 
             DesktopWidget.updateAppWidget(context,"今日" + todayUsage.getValueWithNoDecimalPoint() + todayUsage.getType() + " "
                     + "剩余" + restTrafficDataAmount.getValueWithNoDecimalPoint() + restTrafficDataAmount.getType() + " "

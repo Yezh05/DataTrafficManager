@@ -12,7 +12,7 @@ public class NetworkPlanDao {
     final static String SP_NAME="TrafficManager";
     Context context;
     String subscriberID;
-    SharedPreferences.Editor editor ;
+    SharedPreferences.Editor editor;
     SharedPreferences sp;
     public NetworkPlanDao(Context context,String subscriberID) {
         this.context = context;

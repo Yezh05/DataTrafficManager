@@ -3,46 +3,30 @@ package edu.yezh.datatrafficmanager.ui;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.StrictMode;
-import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.Switch;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -74,6 +58,8 @@ import edu.yezh.datatrafficmanager.tools.PoiTools;
 import edu.yezh.datatrafficmanager.tools.SimTools;
 import edu.yezh.datatrafficmanager.tools.floatWindowTools.FloatingWindowAppMonitorService;
 import edu.yezh.datatrafficmanager.tools.floatWindowTools.FloatingWindowNetWorkSpeedService;
+
+import static android.content.Context.MODE_PRIVATE;
 
 
 public class MyFragmentToolsPage extends Fragment {
@@ -297,10 +283,34 @@ public class MyFragmentToolsPage extends Fragment {
                 }
             }
         });*/
+        TextView TextViewSetMonthWarningFlagNumber = view.findViewById(R.id.TextViewSetMonthWarningFlagNumber);
+        TextView TextViewSetMonthWarningFlagInfo =view.findViewById(R.id.TextViewSetMonthWarningFlagInfo);
+        TextViewSetMonthWarningFlagInfo.setText(Html.fromHtml("月已用流量提醒<br/><i><font color='#AAAAAA'>当月流量消耗达到限定值时提醒</i>"));
+        SharedPreferences sp = getActivity().getSharedPreferences("TrafficManager", MODE_PRIVATE);
+        int monthWarningFlag = sp.getInt("monthWarningFlag",80);
+        TextViewSetMonthWarningFlagNumber.setText(monthWarningFlag+"%");
+        SeekBar SeekBarSetMonthWarningFlag =view.findViewById(R.id.SeekBarSetMonthWarningFlag);
+        SeekBarSetMonthWarningFlag.setProgress(monthWarningFlag);
+        SeekBarSetMonthWarningFlag.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                TextViewSetMonthWarningFlagNumber.setText(progress+"%");
+                SharedPreferences.Editor editor=context.getSharedPreferences("TrafficManager", Context.MODE_PRIVATE).edit();
+                editor.putInt("monthWarningFlag",progress).apply();
+            }
 
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
 
+            }
 
-     TextView TextViewAbout =   view.findViewById(R.id.TextViewAbout);
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        TextView TextViewAbout =   view.findViewById(R.id.TextViewAbout);
         TextViewAbout.setText(Html.fromHtml("关于<br/><i><font color='#AAAAAA'>计科16404-叶重涵</i>"));
         return view;
     }

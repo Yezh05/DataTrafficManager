@@ -1,71 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="edu.yezh.datatrafficmanager">
+          xmlns:tools="http://schemas.android.com/tools"
+          package="edu.yezh.datatrafficmanager">
     <!-- <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> -->
     <!--
 <uses-permission android:name="android.permission.MODIFY_PHONE_STATE"
         tools:ignore="ProtectedPermissions" />
     -->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"></uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.RECEIVE_SMS"/>
-    <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.SEND_SMS" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission
-        android:name="android.permission.READ_NETWORK_USAGE_HISTORY"
-        tools:ignore="ProtectedPermissions" />
+            android:name="android.permission.READ_NETWORK_USAGE_HISTORY"
+            tools:ignore="ProtectedPermissions"/>
     <uses-permission
-        android:name="android.permission.PACKAGE_USAGE_STATS"
-        tools:ignore="ProtectedPermissions" />
+            android:name="android.permission.PACKAGE_USAGE_STATS"
+            tools:ignore="ProtectedPermissions"/>
 
     <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:fullBackupContent="@xml/backup_descriptor"
-        android:usesCleartextTraffic="true"
-        >
-        <activity android:name=".ui.CustomQueryActivity"
-            android:label="@string/title_activity_custom_query"
-            android:theme="@style/AppTheme.NoActionBar"/>
-        <activity
-            android:name=".ui.ShowDataListActivity"
-            android:label="@string/title_activity_show_data_list"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.ShowAppDetailsActivity"
-            android:label="@string/title_activity_show_app_details"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.MainActivity"
+            android:allowBackup="true"
+            android:fullBackupContent="@xml/backup_descriptor"
+            android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:supportsRtl="true"
+            android:theme="@style/AppTheme"
+            android:usesCleartextTraffic="true">
+        <activity
+                android:name=".ui.ShowWifiInfoActivity"
+                android:label="@string/title_activity_show_wifi_info"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+                android:name=".ui.CustomQueryActivity"
+                android:label="@string/title_activity_custom_query"
+                android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+                android:name=".ui.ShowDataListActivity"
+                android:label="@string/title_activity_show_data_list"
+                android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+                android:name=".ui.ShowAppDetailsActivity"
+                android:label="@string/title_activity_show_app_details"
+                android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+                android:name=".ui.MainActivity"
+                android:label="@string/app_name"
+                android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.VIEW"/>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <!--<receiver android:name=".tools.sms.SmsReceiver">
+        <!--
+<receiver android:name=".tools.sms.SmsReceiver">
             <intent-filter android:priority="100"> &lt;!&ndash;优先级：-1000~1000，系统短信优先级为-1&ndash;&gt;
                 &lt;!&ndash;订阅广播事件类型&ndash;&gt;
                 <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
             </intent-filter>
-        </receiver>-->
+        </receiver>
+        -->
         <service android:name=".tools.floatWindowTools.FloatingWindowAppMonitorService"/>
         <service android:name=".tools.floatWindowTools.FloatingWindowNetWorkSpeedService"/>
+
         <receiver android:name=".tools.widget.DesktopWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
-            <meta-data android:name="android.appwidget.provider"
-                android:resource="@xml/widget_template">
+
+            <meta-data
+                    android:name="android.appwidget.provider"
+                    android:resource="@xml/widget_template">
             </meta-data>
         </receiver>
     </application>

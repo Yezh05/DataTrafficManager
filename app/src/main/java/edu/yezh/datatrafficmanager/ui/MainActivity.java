@@ -140,7 +140,10 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         System.out.println("获取其他权限");
         String PERMISSION_STORAGE_MSG = "请授予权限，否则影响部分使用功能";
         int PERMISSION_STORAGE_CODE = 10001;
-        String[] PERMS = {Manifest.permission.READ_PHONE_STATE,Manifest.permission.INTERNET,Manifest.permission.SEND_SMS,Manifest.permission.READ_SMS,Manifest.permission.RECEIVE_SMS};
+        String[] PERMS = {
+                Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_WIFI_STATE,
+                Manifest.permission.READ_PHONE_STATE,Manifest.permission.INTERNET,
+                Manifest.permission.SEND_SMS,Manifest.permission.READ_SMS,Manifest.permission.RECEIVE_SMS};
         if (EasyPermissions.hasPermissions(this, PERMS)) {
             // 已经申请过权限
             initial();

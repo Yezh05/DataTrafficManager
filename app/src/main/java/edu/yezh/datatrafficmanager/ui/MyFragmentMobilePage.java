@@ -114,7 +114,7 @@ public class MyFragmentMobilePage extends Fragment {
         }
         final List<SimInfo> simInfoList = simTools.getSubscriptionInfoList(context.getApplicationContext());
         System.out.println(simInfoList.size());
-        System.out.println(simInfoList);
+        System.out.println("simInfoList:"+simInfoList);
         showRealTimeNetSpeed(view);
 
         final Button button_SIM1 = view.findViewById(R.id.Button_SIM1);
@@ -254,7 +254,7 @@ public class MyFragmentMobilePage extends Fragment {
                     "今日 " + todayUsage.getValueWithNoDecimalPoint() + todayUsage.getType() + "   "
                             + "剩余 " + restTrafficDataAmount.getValueWithNoDecimalPoint() + restTrafficDataAmount.getType() + "   "
                             + "总量 " + dataPlan.getValueWithNoDecimalPoint() + dataPlan.getType()
-                    , TextDataUseStatus);
+                    , TextDataUseStatus,true,1000);
 
             DesktopWidget.updateAppWidget(context,"今日" + todayUsage.getValueWithNoDecimalPoint() + todayUsage.getType() + " "
                     + "剩余" + restTrafficDataAmount.getValueWithNoDecimalPoint() + restTrafficDataAmount.getType() + " "
@@ -625,6 +625,9 @@ public class MyFragmentMobilePage extends Fragment {
                 TextViewAppTrafficDataWarning.setText(textViewString);
             }else {
             TextViewAppTrafficDataWarning.setVisibility(View.GONE);
+                NotificationTools.setNotification(context,"APP使用警告","有"+flag+"个APP超过了本日使用限额",false,1001);
+
+
             }
         } else {
             TextViewAppTrafficDataWarning.setText(textViewString);

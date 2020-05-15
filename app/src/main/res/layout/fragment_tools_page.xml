@@ -12,11 +12,10 @@
         android:gravity="center"
         android:orientation="vertical">
         <!--<Button
-            android:id="@+id/BT"
+            android:id="@+id/BT1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="T"/>
-        -->
+            android:text="T"/>-->
         <Button
             android:id="@+id/ButtonCustomQuery"
             android:layout_width="match_parent"
@@ -74,6 +73,15 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:background="#009688" />
+
+        <Button
+                android:id="@+id/ButtonWifiSignalTest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/btn_shape2"
+                android:layout_margin="5dp"
+                android:gravity="left"
+                android:text="Wifi信号测试\n" />
 
         <Button
             android:id="@+id/ButtonNetworkSpeedTest"

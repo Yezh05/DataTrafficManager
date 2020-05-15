@@ -2,6 +2,7 @@ package edu.yezh.datatrafficmanager.ui;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -67,14 +68,10 @@ import edu.yezh.datatrafficmanager.dao.db.AppTransRecordDao;
 import edu.yezh.datatrafficmanager.dao.db.DataTrafficRegulateDao;
 import edu.yezh.datatrafficmanager.model.OutputTrafficData;
 import edu.yezh.datatrafficmanager.tools.BytesFormatter;
-import edu.yezh.datatrafficmanager.tools.DateTools;
 import edu.yezh.datatrafficmanager.tools.FtpFileTool;
 import edu.yezh.datatrafficmanager.tools.NetWorkSpeedTestTools;
-import edu.yezh.datatrafficmanager.tools.NowProcess;
 import edu.yezh.datatrafficmanager.tools.PoiTools;
 import edu.yezh.datatrafficmanager.tools.SimTools;
-import edu.yezh.datatrafficmanager.tools.chartTools.CustomMarkerView;
-import edu.yezh.datatrafficmanager.tools.chartTools.MyLineValueFormatter;
 import edu.yezh.datatrafficmanager.tools.floatWindowTools.FloatingWindowAppMonitorService;
 import edu.yezh.datatrafficmanager.tools.floatWindowTools.FloatingWindowNetWorkSpeedService;
 
@@ -189,6 +186,16 @@ public class MyFragmentToolsPage extends Fragment {
                 }
             }
         });
+        Button ButtonWifiSignalTest = view.findViewById(R.id.ButtonWifiSignalTest);
+        ButtonWifiSignalTest.setText(Html.fromHtml("Wifi连接信息<br><i><font color='#AAAAAA'>查看Wifi连接信息</i>"));
+        ButtonWifiSignalTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("查看Wifi连接情况与信号情况");
+                Intent goWifiInfoIntent = new Intent(context,ShowWifiInfoActivity.class);
+                context.startActivity(goWifiInfoIntent);
+            }
+        });
 
         Button ButtonNetworkSpeedTest = view.findViewById(R.id.ButtonNetworkSpeedTest);
         addButtonComment(ButtonNetworkSpeedTest,("<br><i><font color='#AAAAAA'>测试当前网络的下载速度</i>"));
@@ -271,26 +278,26 @@ public class MyFragmentToolsPage extends Fragment {
             }
         });
 
-        /*Button BT = view.findViewById(R.id.BT);
+        /*Button BT = view.findViewById(R.id.BT1);
         BT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
-                     final String SCHEME = "package";
-                    Intent intent = new Intent();
-                    intent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
-                    //intent.setAction(Settings.ACTION_DATA_USAGE_SETTINGS);
-                    //intent.setAction("com.android.settings.Settings$DataUsageSummaryActivity");
-                    Uri uri = Uri.fromParts(SCHEME, "tv.danmaku.bili", null);
-                    intent.setData(uri);
-                    //intent.setData(Uri.parse("package:" + "tv.danmaku.bili"));
-                    startActivity(intent);
+                  final   ProgressDialog dialog = ProgressDialog.show(context, "提示", "正在登陆中…", true, false, null);
+                    dialog.show();
+                  new Handler().postDelayed(new Runnable() {
+                        public void run() {
+                            // do something
+                            dialog.dismiss();
+                        }
+                    }, 9 * 1000);
 
                 }catch (Exception e){
                     System.out.println(e.toString());
                 }
             }
         });*/
+
 
 
      TextView TextViewAbout =   view.findViewById(R.id.TextViewAbout);
@@ -327,6 +334,15 @@ public class MyFragmentToolsPage extends Fragment {
             builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+
+                    final   ProgressDialog progressDialog = ProgressDialog.show(context, "提示", "正在登陆中…", true, false, null);
+                    progressDialog.show();
+                    new Handler().postDelayed(new Runnable() {
+                        public void run() {
+                            progressDialog.dismiss();
+                        }
+                    }, 9990);
+
                     new Thread(new Runnable() {
                         @Override
                         public void run() {

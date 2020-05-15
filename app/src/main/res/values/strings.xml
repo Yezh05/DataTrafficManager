@@ -18,4 +18,5 @@
 
     <string name="china_uni_SMS_number">10010</string>
     <string name="china_uni_SMS_text">CXLL</string>
+    <string name="title_activity_show_wifi_info">Wifi信息</string>
 </resources>

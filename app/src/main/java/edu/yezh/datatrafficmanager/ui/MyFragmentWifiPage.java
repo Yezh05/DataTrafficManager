@@ -108,6 +108,7 @@ public class MyFragmentWifiPage extends Fragment {
 
         MyFragmentMobilePage myFragmentMobilePage = new MyFragmentMobilePage();
         myFragmentMobilePage.showRealTimeNetSpeed(view);
+        myFragmentMobilePage.showMoreAppsTrafficInfo(view,subscriberID,networkType);
 
         RecyclerViewAppsTrafficDataAdapter recyclerViewAppsTrafficDataAdapter = new RecyclerViewAppsTrafficDataAdapter(bucketDao.getAllInstalledAppsTrafficData(context,subscriberID,networkType,dateTools.getTimesStartDayMorning(dataPlanStartDay),System.currentTimeMillis()),context,subscriberID,networkType);
         RecyclerView RecyclerViewAppsTrafficData = view.findViewById(R.id.RecyclerViewAppsTrafficData);

@@ -41,6 +41,18 @@ public class DateTools {
         //System.out.println("本月开始时间："+cal.getTime()+"毫秒："+cal.getTimeInMillis());
         return time;
     }
+    public  Long getTimesWeekMorning() {
+
+            Calendar cal = Calendar.getInstance();
+            cal.setFirstDayOfWeek(Calendar.SUNDAY);
+            cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+            cal.set(Calendar.HOUR_OF_DAY,0);
+        cal.set(Calendar.MINUTE,0);
+        cal.set(Calendar.SECOND,0);
+        cal.set(Calendar.MILLISECOND,0);
+        System.out.println("本周开始时间："+cal.getTimeInMillis());
+        return cal.getTimeInMillis();
+    }
 
     public  long getTimesStartDayMorning(int startDay){
 

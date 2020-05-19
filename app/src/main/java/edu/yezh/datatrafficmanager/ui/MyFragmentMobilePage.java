@@ -103,20 +103,14 @@ public class MyFragmentMobilePage extends Fragment {
         final Context context = this.getContext();
         SimTools simTools = new SimTools();
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            //  Consider calling
-            //    Activity#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for Activity#requestPermissions for more details.
             ActivityCompat.requestPermissions(this.getActivity(), new String[]{"android.permission.READ_PHONE_STATE"}, 1);
         }
         final List<SimInfo> simInfoList = simTools.getSubscriptionInfoList(context.getApplicationContext());
-        System.out.println(simInfoList.size());
+        System.out.println("SIM卡数量："+simInfoList.size());
         //System.out.println("simInfoList:"+simInfoList);
         showRealTimeNetSpeed(view);
 
+        String nowActiveSubscriberId = SimTools.getNowActiveSubscriberId(context,0000);
         final Button button_SIM1 = view.findViewById(R.id.Button_SIM1);
         final Button button_SIM2 = view.findViewById(R.id.Button_SIM2);
         button_SIM1.setText("SIM卡1:" + simInfoList.get(0).getSubscriptionInfo().getCarrierName());
@@ -145,8 +139,17 @@ public class MyFragmentMobilePage extends Fragment {
         } else {
             button_SIM2.setVisibility(View.GONE);
         }
-        button_SIM1.performClick();
-        handleToolBarItem(context,   simInfoList );
+        if (nowActiveSubscriberId.equals(simInfoList.get(0).getSubscriberId())){
+            System.out.println("Sim1相等");
+            button_SIM1.performClick();
+        }else if (nowActiveSubscriberId.equals(simInfoList.get(1).getSubscriberId())){
+            System.out.println("Sim2相等");
+            button_SIM2.performClick();
+        }else {
+            System.out.println("都不相等");
+        }
+
+        handleToolBarItem(context,simInfoList);
         //System.out.println("网络类型："+networkType);
 
         final Handler handlerRefresh = new Handler();
@@ -316,7 +319,7 @@ public class MyFragmentMobilePage extends Fragment {
                     startActivity(intent);
                 }
             });
-
+            showMoreAppsTrafficInfo(view,subscriberID,networkType);
         } catch (Exception e) {
             Log.e("出现错误", "错误：" + e.toString());
             e.printStackTrace();
@@ -416,6 +419,43 @@ public class MyFragmentMobilePage extends Fragment {
         TextView TextViewDataPlanStartDay = view.findViewById(R.id.TextViewDataPlanStartDay);
         TextViewDataPlanStartDay.setText("每月" + dataPlanStartDay + "日");
         return dataPlanLong;
+    }
+
+    public void showMoreAppsTrafficInfo(View view,String subscriberID,int networkType){
+        TextView TextViewMoreAppsTrafficInfo = view.findViewById(R.id.TextViewMoreAppsTrafficInfo);
+        TextViewMoreAppsTrafficInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final String[] timeLimit = new String[]{"今日","本周","本月"};
+                AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+                builder.setTitle("选择时间段").setItems(timeLimit, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //Toast.makeText(view.getContext(),timeLimit[which],Toast.LENGTH_LONG).show();
+
+                        DateTools dateTools = new DateTools();
+                        long endTime = dateTools.getTimesTodayEnd();
+                        long startTime = 0;
+                        switch (which){
+                            case 0: startTime=dateTools.getTimesTodayMorning(); break;
+                            case 1: startTime=dateTools.getTimesWeekMorning();  break;
+                            case 2: startTime=dateTools.getTimesMonthMorning();break;
+
+                        }
+                        Intent intent = new Intent(view.getContext(), CustomQueryActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putString("subscriberID",subscriberID);
+                        bundle.putInt("networkType",networkType);
+                        bundle.putInt("startCode",900);
+                        bundle.putLong("startTime", startTime);
+                        bundle.putLong("endTime", endTime);
+                        intent.putExtras(bundle);
+                        view.getContext().startActivity(intent);
+                    }
+                }).create();
+                builder.show();
+            }
+        });
     }
 
     private void showChart(View view, int PercentDataUseStatus, List<TransInfo> valueDataList, List<Long> DaysNoList) {

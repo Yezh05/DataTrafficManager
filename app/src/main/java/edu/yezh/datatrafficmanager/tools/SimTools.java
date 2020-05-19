@@ -30,20 +30,13 @@ public class SimTools {
         }
         return networkInfo.getType();
     }
-    public static String getNowActiveSubscriberId(Context context) {
+    public static String getNowActiveSubscriberId(Context context,int TypeCode) {
         TelephonyManager mTelephonyMgr = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         if (context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    Activity#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for Activity#requestPermissions for more details.
             ActivityCompat.requestPermissions((Activity)context, new String[]{"android.permission.READ_PHONE_STATE"}, 1);
         }
         String imsi = mTelephonyMgr.getSubscriberId();
-        if (getNowActiveNetWorkType(context)==ConnectivityManager.TYPE_WIFI){
+        if (getNowActiveNetWorkType(context)==ConnectivityManager.TYPE_WIFI&&TypeCode==1000){
             return "";
         }
         return  imsi;
@@ -53,30 +46,17 @@ public class SimTools {
      * 获取Sim信息列表
      */
     public List<SimInfo> getSubscriptionInfoList(Context context){
-        //SubscriptionManager sub = (SubscriptionManager) context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    Activity#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for Activity#requestPermissions for more details.
             ActivityCompat.requestPermissions((Activity)context, new String[]{"android.permission.READ_PHONE_STATE"}, 1);
         }
         List<SimInfo> list = new ArrayList<>();
         List<SubscriptionInfo> subscriptionInfolist = SubscriptionManager.from(context).getActiveSubscriptionInfoList();
         for (SubscriptionInfo info : subscriptionInfolist) {
-                /*Log.d("Q_M", "ICCID-->" + info.getIccId());
-                Log.d("Q_M", "subId-->" + info.getSubscriptionId());
-                Log.d("Q_M", "DisplayName-->" + info.getDisplayName());
-                Log.d("Q_M", "CarrierName-->" + info.getCarrierName());
-                Log.d("Q_M", "---------------------------------");*/
+
             String subscriberId = getSubscriberId(context,info.getSubscriptionId());
             SimInfo simInfo = new SimInfo(info,subscriberId);
             list.add(simInfo);
         }
-        //Log.d("Sim卡信息","Sim卡数量:"+subscriptionInfolist.size());
         return list;
     }
 
@@ -84,7 +64,7 @@ public class SimTools {
      * 通过SimId获取IMSI
      */
     public String getSubscriberId(Context context,int subId) {
-        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);// 取得相关系统服务
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);// 取得系统服务
         Class<?> telephonyManagerClass = null;
         String imsi = null;
         try {

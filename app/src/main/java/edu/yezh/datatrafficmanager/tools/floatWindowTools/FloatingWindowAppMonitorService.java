@@ -197,7 +197,7 @@ public class FloatingWindowAppMonitorService extends Service {
                     transRecord = null;
                     try {
                         NETWORK_TYPE = SimTools.getNowActiveNetWorkType(getApplicationContext());
-                        SUBSCRIBER_ID = SimTools.getNowActiveSubscriberId(getApplicationContext());
+                        SUBSCRIBER_ID = SimTools.getNowActiveSubscriberId(getApplicationContext(),1000);
                         System.out.println("SUBSCRIBER_ID:"+ SUBSCRIBER_ID);
                         transRecord =  appTransRecordDao.findLast(uid);
                         if (transRecord==null){

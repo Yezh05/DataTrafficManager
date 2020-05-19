@@ -345,7 +345,7 @@ public class MyFragmentToolsPage extends Fragment {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
 
-                    final   ProgressDialog progressDialog = ProgressDialog.show(context, "提示", "正在登陆中…", true, false, null);
+                    final   ProgressDialog progressDialog = ProgressDialog.show(context, "网速测试", "正在测试中…", true, false, null);
                     progressDialog.show();
                     new Handler().postDelayed(new Runnable() {
                         public void run() {

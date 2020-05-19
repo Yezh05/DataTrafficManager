@@ -17,28 +17,35 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </com.google.android.material.appbar.AppBarLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-        <ListView
-            android:id="@+id/ListViewData"
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/LineChartShowDataList"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />
+            android:layout_height="200dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp" />
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_margin="5dp"
+                android:background="#009688" />
+        <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/RecyclerViewShowMonthsDataList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                        />
 
-        <!--<include layout="@layout/content_show_data_list" />-->
 
-        <!--<com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@android:drawable/ic_dialog_email" />-->
+
+
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

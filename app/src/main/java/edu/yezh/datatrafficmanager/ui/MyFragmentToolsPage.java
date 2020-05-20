@@ -1,12 +1,10 @@
 package edu.yezh.datatrafficmanager.ui;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -264,20 +262,21 @@ public class MyFragmentToolsPage extends Fragment {
             }
         });
 
-        /*Button BT = view.findViewById(R.id.BT1);
+        /*Button BT = view.findViewById(R.id.BT11);
         BT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
-                  final   ProgressDialog dialog = ProgressDialog.show(context, "提示", "正在登陆中…", true, false, null);
-                    dialog.show();
-                  new Handler().postDelayed(new Runnable() {
-                        public void run() {
-                            // do something
-                            dialog.dismiss();
-                        }
-                    }, 9 * 1000);
+                    //ContentProviderRecord{6396e5a u0 com.huawei.systemmanager/.netassistant.db.traffic.TrafficDBProvider} launchingApp=null caller pid= 9130
+                    //com.huawei.netassistant.ui.NetAssistantMainActivity
+                    //05-20 15:05:25.791  2292 32751 W ActivityManagerWrapperEx: getTaskThumbnailEx HwWindowManager snapshot =TaskSnapshot{ mTopActivityComponent=com.huawei.systemmanager/com.huawei.netassistant.ui.NetAssistantMainActivity
 
+                    Intent intent = new Intent();
+                    ComponentName componentName = new ComponentName("com.huawei.systemmanager","com.huawei.systemmanager.netassistant.traffic.appdetail.AppDetailActivity");
+                    intent.setData(Uri.parse("package:" + "edu.yezh.datatrafficmanager"));
+                    intent.setComponent(componentName);
+
+                    context.startActivity(intent);
                 }catch (Exception e){
                     System.out.println(e.toString());
                 }

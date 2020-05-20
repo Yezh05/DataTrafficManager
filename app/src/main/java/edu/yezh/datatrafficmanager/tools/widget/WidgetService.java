@@ -24,9 +24,7 @@ public class WidgetService extends Service implements Runnable {
     @Override
     public void run() {
         /*while (!Thread.interrupted()){
-
         }*/
-
         //DesktopWidget.updateAppWidget(this,usageString,nowSpeedString);
     }
 }

@@ -81,11 +81,10 @@ public class FloatingWindowAppMonitorService extends Service {
     private WindowManager.LayoutParams layoutParams;
     private View view;
     private String uid;
-    private String packageName;
     private String name;
     private Drawable appIcon;
     private long startTime;
-    private  Tb_AppTransRecord transRecord;
+    private Tb_AppTransRecord transRecord;
     private String SUBSCRIBER_ID;
     private int NETWORK_TYPE;
     //private List<Tb_AppTransRecord> transRecordList;
@@ -93,6 +92,7 @@ public class FloatingWindowAppMonitorService extends Service {
     private LineChart lineChart;
     private long endTime;
     private long total;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -108,7 +108,7 @@ public class FloatingWindowAppMonitorService extends Service {
         layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
         layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         layoutParams.width = 720;
-        layoutParams.height = 540;
+        layoutParams.height = 600;
         layoutParams.x = 100;
         layoutParams.y = 100;
         System.out.println("创建Service");
@@ -121,6 +121,7 @@ public class FloatingWindowAppMonitorService extends Service {
         isStarted = false;
         System.out.println("销毁完成");
     }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         showFloatingWindow();
@@ -129,8 +130,8 @@ public class FloatingWindowAppMonitorService extends Service {
 
     private void showFloatingWindow() {
         if (Settings.canDrawOverlays(this)) {
-            view = View.inflate(getApplicationContext(), R.layout.view_app_traffic_monitor,null);
-            windowManager.addView(view,layoutParams);
+            view = View.inflate(getApplicationContext(), R.layout.view_app_traffic_monitor, null);
+            windowManager.addView(view, layoutParams);
             view.setOnTouchListener(new FloatingOnTouchListener());
             lineChart = view.findViewById(R.id.LineChartMonitorAppChart);
 
@@ -172,19 +173,19 @@ public class FloatingWindowAppMonitorService extends Service {
 
             final BucketDao bucketDao = new BucketDaoImpl();
             final AppTransRecordDao appTransRecordDao = new AppTransRecordDao(getApplicationContext());
-            final TextView   TextViewMonitorAppTX = view.findViewById(R.id.TextViewMonitorAppTX);
-            final TextView   TextViewMonitorAppRX= view.findViewById(R.id.TextViewMonitorAppRX);
-            final TextView   TextViewMonitorAppTime= view.findViewById(R.id.TextViewMonitorAppTime);
-            final TextView  TextViewMonitorAppTotal= view.findViewById(R.id.TextViewMonitorAppTotal);
+            final TextView TextViewMonitorAppTX = view.findViewById(R.id.TextViewMonitorAppTX);
+            final TextView TextViewMonitorAppRX = view.findViewById(R.id.TextViewMonitorAppRX);
+            final TextView TextViewMonitorAppTime = view.findViewById(R.id.TextViewMonitorAppTime);
+            final TextView TextViewMonitorAppTotal = view.findViewById(R.id.TextViewMonitorAppTotal);
 
             final ImageView ImageViewMonitorAppIcon = view.findViewById(R.id.ImageViewMonitorAppIcon);
             final Spinner spinner = view.findViewById(R.id.SpinnerMonitorChooseApp);
             final List<AppsInfo> allInstalledAppsInfo = new InstalledAppsInfoTools().getAllInstalledAppsInfo(getApplicationContext());
             String[] mItems = new String[allInstalledAppsInfo.size()];
-            for (int i=0;i<allInstalledAppsInfo.size();i++){
+            for (int i = 0; i < allInstalledAppsInfo.size(); i++) {
                 mItems[i] = allInstalledAppsInfo.get(i).getName();
             }
-            ArrayAdapter<String> adapter= new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,mItems);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, mItems);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner.setAdapter(adapter);
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -197,20 +198,22 @@ public class FloatingWindowAppMonitorService extends Service {
                     transRecord = null;
                     try {
                         NETWORK_TYPE = SimTools.getNowActiveNetWorkType(getApplicationContext());
-                        SUBSCRIBER_ID = SimTools.getNowActiveSubscriberId(getApplicationContext(),1000);
-                        System.out.println("SUBSCRIBER_ID:"+ SUBSCRIBER_ID);
-                        transRecord =  appTransRecordDao.findLast(uid);
-                        if (transRecord==null){
-                            transRecord = new Tb_AppTransRecord(uid,0,0,0,0,System.currentTimeMillis());
+                        SUBSCRIBER_ID = SimTools.getNowActiveSubscriberId(getApplicationContext(), 1000);
+                        System.out.println("SUBSCRIBER_ID:" + SUBSCRIBER_ID);
+                        transRecord = appTransRecordDao.findLast(uid);
+                        if (transRecord == null) {
+                            transRecord = new Tb_AppTransRecord(uid, 0, 0, 0, 0, System.currentTimeMillis());
                             appTransRecordDao.add(transRecord);
                         }
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
                 }
+
                 @Override
-                public void onNothingSelected(AdapterView<?> parent) {}
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
             });
             final int timeStep = 3;
             final int[] round = new int[1];
@@ -222,54 +225,55 @@ public class FloatingWindowAppMonitorService extends Service {
                 public void run() {
                     LineData data = lineChart.getData();
                     String timeString;
-                    long sec = (System.currentTimeMillis()-startTime)/1000;
-                    if (sec<=60){
-                        timeString = sec +"秒";
-                    }else {
-                        timeString = sec/60L+"分"+ sec%60L +"秒";
+                    long sec = (System.currentTimeMillis() - startTime) / 1000;
+                    if (sec <= 60) {
+                        timeString = sec + "秒";
+                    } else {
+                        timeString = sec / 60L + "分" + sec % 60L + "秒";
                     }
-                    TextViewMonitorAppTime.setText("监测时间:"+ timeString);
+                    TextViewMonitorAppTime.setText("监测时间:" + timeString);
                     transRecord = appTransRecordDao.findLast(uid);
-                    TransInfo nowData = bucketDao.getAppTrafficData(getApplicationContext(),SUBSCRIBER_ID,NETWORK_TYPE,dateTools.getTimesTodayMorning(),dateTools.getTimesTodayEnd(), Integer.parseInt(uid));
+                    TransInfo nowData = bucketDao.getAppTrafficData(getApplicationContext(), SUBSCRIBER_ID, NETWORK_TYPE, dateTools.getTimesTodayMorning(), dateTools.getTimesTodayEnd(), Integer.parseInt(uid));
                     int randomDataSetIndex = (int) (Math.random() * data.getDataSetCount());
-                    if (round[0] == 0 ){
+                    if (round[0] == 0) {
                         startData = nowData;
                         //System.out.println("startData:"+startData);
                         values.clear();
-                        data.addEntry(new Entry(0,0),randomDataSetIndex);
+                        data.addEntry(new Entry(0, 0), randomDataSetIndex);
                         round[0] = 1;
-                    }else {
+                    } else {
                         //System.out.println("sec"+sec);
-                        data.addEntry(new Entry(sec,(nowData.getRx()-transRecord.getWifiRX())/timeStep),randomDataSetIndex);
+                        data.addEntry(new Entry(sec, (nowData.getRx() - transRecord.getWifiRX()) / timeStep), randomDataSetIndex);
                     }
                     //System.out.println(transRecord);
                     //System.out.println("nowData:"+nowData);
-                    OutputTrafficData RXSpeed,TXSpeed;
-                    if (NETWORK_TYPE== ConnectivityManager.TYPE_WIFI){
-                        System.out.println(nowData.getTotal()-transRecord.getWifiRX()-transRecord.getWifiTX());
-                        RXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getRx()-transRecord.getWifiRX())/timeStep);
-                        TXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getTx()-transRecord.getWifiTX())/timeStep);
-                        TextViewMonitorAppTX.setText("上传:"+ TXSpeed.getValueWithTwoDecimalPoint()+TXSpeed.getType()+"/s");
-                        TextViewMonitorAppRX.setText("下载:"+ RXSpeed.getValueWithTwoDecimalPoint()+RXSpeed.getType()+"/s");
-                        transRecord = new Tb_AppTransRecord(uid,transRecord.getMobileTX(),transRecord.getMobileRX(),nowData.getTx(),nowData.getRx(),System.currentTimeMillis());
+
+                    OutputTrafficData RXSpeed, TXSpeed;
+                    if (NETWORK_TYPE == ConnectivityManager.TYPE_WIFI) {
+                        //System.out.println(nowData.getTotal() - transRecord.getWifiRX() - transRecord.getWifiTX());
+                        RXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getRx() - transRecord.getWifiRX()) / timeStep);
+                        TXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getTx() - transRecord.getWifiTX()) / timeStep);
+                        TextViewMonitorAppTX.setText("上传:" + TXSpeed.getValueWithTwoDecimalPoint() + TXSpeed.getType() + "/s");
+                        TextViewMonitorAppRX.setText("下载:" + RXSpeed.getValueWithTwoDecimalPoint() + RXSpeed.getType() + "/s");
+                        transRecord = new Tb_AppTransRecord(uid, transRecord.getMobileTX(), transRecord.getMobileRX(), nowData.getTx(), nowData.getRx(), System.currentTimeMillis());
                         appTransRecordDao.add(transRecord);
-                    }else if (NETWORK_TYPE==ConnectivityManager.TYPE_MOBILE){
+                    } else if (NETWORK_TYPE == ConnectivityManager.TYPE_MOBILE) {
                         //System.out.println(nowData.getTotal()-transRecord.getMobileRX()-transRecord.getMobileTX());
-                        RXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getRx()-transRecord.getMobileRX())/timeStep);
-                        TXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getTx()-transRecord.getMobileTX())/timeStep);
-                        TextViewMonitorAppTX.setText("上传:"+ TXSpeed.getValueWithTwoDecimalPoint()+TXSpeed.getType()+"/s");
-                        TextViewMonitorAppRX.setText("下载:"+ RXSpeed.getValueWithTwoDecimalPoint()+RXSpeed.getType()+"/s");
-                        transRecord = new Tb_AppTransRecord(uid,nowData.getTx(),nowData.getRx(),transRecord.getWifiTX(),transRecord.getWifiRX(),System.currentTimeMillis());
+                        RXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getRx() - transRecord.getMobileRX()) / timeStep);
+                        TXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getTx() - transRecord.getMobileTX()) / timeStep);
+                        TextViewMonitorAppTX.setText("上传:" + TXSpeed.getValueWithTwoDecimalPoint() + TXSpeed.getType() + "/s");
+                        TextViewMonitorAppRX.setText("下载:" + RXSpeed.getValueWithTwoDecimalPoint() + RXSpeed.getType() + "/s");
+                        transRecord = new Tb_AppTransRecord(uid, nowData.getTx(), nowData.getRx(), transRecord.getWifiTX(), transRecord.getWifiRX(), System.currentTimeMillis());
                         appTransRecordDao.add(transRecord);
                     }
                     lineChart.notifyDataSetChanged();
                     lineChart.moveViewToX(sec);
                     lineChart.setVisibleXRangeMaximum(15);
-                    total = nowData.getTotal()-startData.getTotal();
+                    total = nowData.getTotal() - startData.getTotal();
                     OutputTrafficData OPtotal = bytesFormatter.getPrintSizeByModel(total);
                     //System.out.println(total);
-                    TextViewMonitorAppTotal.setText("传输总量:"+OPtotal.getValueWithTwoDecimalPoint()+OPtotal.getType());
-                    transHandle.postDelayed(this,timeStep*1000L);
+                    TextViewMonitorAppTotal.setText("传输总量:" + OPtotal.getValueWithTwoDecimalPoint() + OPtotal.getType());
+                    transHandle.postDelayed(this, timeStep * 1000L);
                 }
             };
             final LinearLayout LinearLayoutOutputMonitorData = view.findViewById(R.id.LinearLayoutOutputMonitorData);
@@ -288,37 +292,31 @@ public class FloatingWindowAppMonitorService extends Service {
                 public void onClick(View v) {
 
 
+                    final String pathString = outputDataToFile(getApplicationContext(), total, appTransRecordDao.find(uid, startTime, endTime));
 
-                        final String pathString = outputDataToFile(getApplicationContext(), total, appTransRecordDao.find(uid, startTime, endTime));
-
-                        TextView TextViewOutputFile = view.findViewById(R.id.TextViewOutputFile);
-                        TextViewOutputFile.setText("导出成功");
-                        ButtonOutputMonitorDataOK.setText("打开文件");
-                        ButtonOutputMonitorDataOK.setOnClickListener(null);
-                        ButtonOutputMonitorDataOK.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                try {
-                                    Intent intent = new Intent();
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    intent.setAction(Intent.ACTION_VIEW);
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-                                        StrictMode.setVmPolicy(builder.build());
-                                    }
-                                    intent.setDataAndType(Uri.fromFile(new File(pathString)), "application/vnd.ms-excel");
-                                    getApplicationContext().startActivity(intent);
-                                    Intent.createChooser(intent, "请选择软件打开");
-
-                                    //lineChart.setVisibility(View.VISIBLE);
-                                    //LinearLayoutOutputMonitorData.setVisibility(View.GONE);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+                    TextView TextViewOutputFile = view.findViewById(R.id.TextViewOutputFile);
+                    TextViewOutputFile.setText("导出成功");
+                    ButtonOutputMonitorDataOK.setText("打开文件");
+                    ButtonOutputMonitorDataOK.setOnClickListener(null);
+                    ButtonOutputMonitorDataOK.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            try {
+                                Intent intent = new Intent();
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.setAction(Intent.ACTION_VIEW);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                    StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+                                    StrictMode.setVmPolicy(builder.build());
                                 }
+                                intent.setDataAndType(Uri.fromFile(new File(pathString)), "application/vnd.ms-excel");
+                                getApplicationContext().startActivity(intent);
+                                Intent.createChooser(intent, "请选择软件打开");
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
-                        });
-
-
+                        }
+                    });
 
 
                 }
@@ -328,7 +326,7 @@ public class FloatingWindowAppMonitorService extends Service {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     TextView TextViewMonitorStatus = view.findViewById(R.id.TextViewMonitorStatus);
-                    if (isChecked){
+                    if (isChecked) {
                         TextViewMonitorStatus.setText("监测中");
                         TextViewMonitorStatus.setTextColor(Color.parseColor("#DC143C"));
                         spinner.setEnabled(false);
@@ -336,7 +334,7 @@ public class FloatingWindowAppMonitorService extends Service {
                         round[0] = 0;
                         total = 0;
                         lineChart.moveViewToX(0);
-                        transHandle.postDelayed(transRunnable,0);
+                        transHandle.postDelayed(transRunnable, 0);
 
                         lineChart.setVisibility(View.VISIBLE);
                         LinearLayoutOutputMonitorData.setVisibility(View.GONE);
@@ -344,7 +342,7 @@ public class FloatingWindowAppMonitorService extends Service {
                         TextViewOutputFile.setText("导出监测数据");
                         Button ButtonOutputMonitorDataOK = view.findViewById(R.id.ButtonOutputMonitorDataOK);
                         ButtonOutputMonitorDataOK.setText("导出");
-                    }else {
+                    } else {
                         endTime = System.currentTimeMillis();
                         TextViewMonitorStatus.setText("停止监测");
                         TextViewMonitorStatus.setTextColor(Color.parseColor("#4169E1"));
@@ -355,12 +353,24 @@ public class FloatingWindowAppMonitorService extends Service {
                     }
                 }
             });
+            Button ButtonAppMonitorChangeSize = view.findViewById(R.id.ButtonAppMonitorChangeSize);
+            ButtonAppMonitorChangeSize.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    LinearLayout LinearLayoutMonitorMainFun = view.findViewById(R.id.LinearLayoutMonitorMainFun);
+                    switch (LinearLayoutMonitorMainFun.getVisibility()){
+                        case View.VISIBLE : LinearLayoutMonitorMainFun.setVisibility(View.GONE); layoutParams.height=200; windowManager.updateViewLayout(view,layoutParams); break;
+                        case View.GONE: LinearLayoutMonitorMainFun.setVisibility(View.VISIBLE); layoutParams.height=600; windowManager.updateViewLayout(view,layoutParams);break;
+                    }
 
-        }else {
+                }
+            });
+        } else {
             System.out.println("错误！");
         }
     }
-    private String outputDataToFile( final Context context,long ToTal,List<Tb_AppTransRecord> transRecordList) {
+
+    private String outputDataToFile(final Context context, long ToTal, List<Tb_AppTransRecord> transRecordList) {
 
         Date date = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -378,31 +388,32 @@ public class FloatingWindowAppMonitorService extends Service {
                     Log.e("严重错误", e.toString());
                 }
             }
-        }else {
-            File file=new File(pathString);
-            if(file.exists()){
+        } else {
+            File file = new File(pathString);
+            if (file.exists()) {
                 try {
                     System.out.println("创建文件");
                     file.createNewFile();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }else {
+            } else {
                 System.out.println("文件不存在");
             }
         }
         try {
             FileOutputStream fos = new FileOutputStream(pathString, false);
-            final HSSFWorkbook wb = PoiTools.initialAppMonitorbook(null, context,name,startTime,endTime,NETWORK_TYPE,ToTal,transRecordList);
+            final HSSFWorkbook wb = PoiTools.initialAppMonitorbook(null, context, name, startTime, endTime, NETWORK_TYPE, ToTal, transRecordList);
             wb.write(fos);
             fos.flush();
             fos.close();
-            final  String fPathString =pathString;
+            final String fPathString = pathString;
         } catch (Exception e) {
             Log.e("严重错误", e.toString());
         }
-return pathString;
+        return pathString;
     }
+
     private class FloatingOnTouchListener implements View.OnTouchListener {
         private int x;
         private int y;

@@ -240,7 +240,6 @@ public class FloatingWindowAppMonitorService extends Service {
                         //System.out.println("startData:"+startData);
                         values.clear();
                         data.addEntry(new Entry(0, 0), randomDataSetIndex);
-                        round[0] = 1;
                     } else {
                         //System.out.println("sec"+sec);
                         data.addEntry(new Entry(sec, (nowData.getRx() - transRecord.getWifiRX()) / timeStep), randomDataSetIndex);
@@ -253,6 +252,10 @@ public class FloatingWindowAppMonitorService extends Service {
                         //System.out.println(nowData.getTotal() - transRecord.getWifiRX() - transRecord.getWifiTX());
                         RXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getRx() - transRecord.getWifiRX()) / timeStep);
                         TXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getTx() - transRecord.getWifiTX()) / timeStep);
+                        if (round[0]==0){
+                            RXSpeed = new OutputTrafficData(0+"","");
+                            TXSpeed = new OutputTrafficData(0+"","");
+                        }
                         TextViewMonitorAppTX.setText("上传:" + TXSpeed.getValueWithTwoDecimalPoint() + TXSpeed.getType() + "/s");
                         TextViewMonitorAppRX.setText("下载:" + RXSpeed.getValueWithTwoDecimalPoint() + RXSpeed.getType() + "/s");
                         transRecord = new Tb_AppTransRecord(uid, transRecord.getMobileTX(), transRecord.getMobileRX(), nowData.getTx(), nowData.getRx(), System.currentTimeMillis());
@@ -261,6 +264,10 @@ public class FloatingWindowAppMonitorService extends Service {
                         //System.out.println(nowData.getTotal()-transRecord.getMobileRX()-transRecord.getMobileTX());
                         RXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getRx() - transRecord.getMobileRX()) / timeStep);
                         TXSpeed = bytesFormatter.getPrintSizeByModel((nowData.getTx() - transRecord.getMobileTX()) / timeStep);
+                        if (round[0]==0){
+                            RXSpeed = new OutputTrafficData(0+"","");
+                            TXSpeed = new OutputTrafficData(0+"","");
+                        }
                         TextViewMonitorAppTX.setText("上传:" + TXSpeed.getValueWithTwoDecimalPoint() + TXSpeed.getType() + "/s");
                         TextViewMonitorAppRX.setText("下载:" + RXSpeed.getValueWithTwoDecimalPoint() + RXSpeed.getType() + "/s");
                         transRecord = new Tb_AppTransRecord(uid, nowData.getTx(), nowData.getRx(), transRecord.getWifiTX(), transRecord.getWifiRX(), System.currentTimeMillis());
@@ -272,7 +279,11 @@ public class FloatingWindowAppMonitorService extends Service {
                     total = nowData.getTotal() - startData.getTotal();
                     OutputTrafficData OPtotal = bytesFormatter.getPrintSizeByModel(total);
                     //System.out.println(total);
+                    if (round[0]==0){
+                        OPtotal = new OutputTrafficData(0+"","");
+                    }
                     TextViewMonitorAppTotal.setText("传输总量:" + OPtotal.getValueWithTwoDecimalPoint() + OPtotal.getType());
+                    round[0]++;
                     transHandle.postDelayed(this, timeStep * 1000L);
                 }
             };

@@ -101,9 +101,9 @@ public class FloatingWindowNetWorkSpeedService extends Service {
                         int firstTimeShow = 0;
                         @Override
                         public void run() {
+                            long overTxTraffic = TrafficStats.getTotalTxBytes();
+                            long overRxTraffic = TrafficStats.getTotalRxBytes();
                             if (firstTimeShow != 0) {
-                                long overTxTraffic = TrafficStats.getTotalTxBytes();
-                                long overRxTraffic = TrafficStats.getTotalRxBytes();
                                 long currentTxDataRate = overTxTraffic - RXOld[0];
                                 long currentRxDataRate = overRxTraffic - RXOld[1];
                                 OutputTrafficData dataRealTimeTxSpeed = bytesFormatter.getPrintSizeByModel(currentTxDataRate);
@@ -114,8 +114,6 @@ public class FloatingWindowNetWorkSpeedService extends Service {
                                 RXOld[1] = overRxTraffic;
 
                             } else {
-                                long overTxTraffic = TrafficStats.getTotalTxBytes();
-                                long overRxTraffic = TrafficStats.getTotalRxBytes();
                                 RXOld[0] = overTxTraffic;
                                 RXOld[1] = overRxTraffic;
                                 firstTimeShow = 1;
